@@ -4,10 +4,10 @@
 
 #include "optional.h"
 
-typedef Ptr_Optional (*cu_Allocator_AllocFunc)(void *self, size_t size,
-                                               size_t alignment);
-typedef Ptr_Optional (*cu_Allocator_ReszizeFunc)(void *self, void *ptr,
-                                                 size_t size, size_t alignment);
+typedef Ptr_Optional (*cu_Allocator_AllocFunc)(
+    void *self, size_t size, size_t alignment);
+typedef Ptr_Optional (*cu_Allocator_ReszizeFunc)(
+    void *self, void *ptr, size_t size, size_t alignment);
 typedef void (*cu_Allocator_FreeFunc)(void *self, void *ptr);
 
 typedef struct {
@@ -17,14 +17,13 @@ typedef struct {
   cu_Allocator_FreeFunc freeFn;
 } cu_Allocator;
 
-static inline Ptr_Optional cu_Allocator_Alloc(cu_Allocator *allocator,
-                                              size_t size, size_t alignment) {
+static inline Ptr_Optional cu_Allocator_Alloc(
+    cu_Allocator *allocator, size_t size, size_t alignment) {
   return allocator->allocFn(allocator->self, size, alignment);
 }
 
-static inline Ptr_Optional cu_Allocator_Resize(cu_Allocator *allocator,
-                                               void *ptr, size_t size,
-                                               size_t alignment) {
+static inline Ptr_Optional cu_Allocator_Resize(
+    cu_Allocator *allocator, void *ptr, size_t size, size_t alignment) {
   return allocator->resizeFn(allocator->self, ptr, size, alignment);
 }
 
