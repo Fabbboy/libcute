@@ -30,3 +30,5 @@ static inline Ptr_Optional cu_Allocator_Resize(
 static inline void cu_Allocator_Free(cu_Allocator *allocator, void *ptr) {
   allocator->freeFn(allocator->self, ptr);
 }
+
+cu_Allocator cu_Allocator_Default(void);
