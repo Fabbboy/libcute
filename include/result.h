@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+
 #include "macro.h"
 
 #define CU_RESULT_HEADER(NAME, T, E)               \
@@ -50,4 +51,3 @@
     }                                                                    \
     return result->error;                                                \
   }
-
