@@ -20,7 +20,7 @@ static inline Ptr_Optional cu_Allocator_CResize(
 
 static inline void cu_Allocator_CFree(void *_, void *ptr) { free(ptr); }
 
-cu_Allocator cu_Allocator_CAlloc(void) {
+cu_Allocator cu_Allocator_CAllocator(void) {
   cu_Allocator allocator;
   allocator.self = NULL;
   allocator.allocFn = cu_Allocator_CAlloc;

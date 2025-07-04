@@ -31,4 +31,4 @@ static inline void cu_Allocator_Free(cu_Allocator *allocator, void *ptr) {
   allocator->freeFn(allocator->self, ptr);
 }
 
-cu_Allocator cu_Allocator_CAlloc(void);
+cu_Allocator cu_Allocator_CAllocator(void);
