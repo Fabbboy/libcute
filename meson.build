@@ -6,8 +6,10 @@ project('libcute', 'c',
 includes = include_directories('include')
  
 sources = [
+  'lib/slice.c',
   'lib/optional.c',
   'lib/memory/allocator.c',
+  'lib/memory/page.c',
 ]
 
 cute_lib = library(
