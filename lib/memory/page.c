@@ -1,6 +1,6 @@
 #include "memory/page.h"
 #include "macro.h"
-#include "slice.h"
+#include "object/slice.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>

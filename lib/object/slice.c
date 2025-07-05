@@ -1,5 +1,5 @@
-#include "slice.h"
-#include "optional.h"
+#include "object/slice.h"
+#include "object/optional.h"
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {
   cu_Slice slice;

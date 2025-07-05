@@ -13,11 +13,11 @@ macro-features:
  - [X] IF_NULL
  - [X] IF_NOT_NULL
  - [X] DIE 
- - [X] UNUSED
- - [X] ALIGN_UP
- - [ ] BIT 
- - [ ] PLAT_X (platform macros)
- - [ ] ARRAY_LEN
+- [X] UNUSED
+- [X] ALIGN_UP
+- [X] BIT
+- [X] PLAT_X (platform macros)
+- [X] ARRAY_LEN
 
 object-features:
  - [X] generic optional
