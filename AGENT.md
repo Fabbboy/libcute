@@ -53,3 +53,6 @@ Avoid excessive commenting.
 Only add comments where they are genuinely helpful or clarify non-obvious logic.  
 Use [Doxygen](https://www.doxygen.nl/manual/docblocks.html)-style comments where appropriate to support documentation generation.
 
+## Changelog
+
+Take a look at changelog to find out what and how it has been done. Document your own changes here 

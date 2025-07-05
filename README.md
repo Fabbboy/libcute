@@ -68,3 +68,34 @@ Files that can be implemented in C should **not** use header-based implementatio
 
 If additional types are required for implementation or if you come up with something useful, add it to the list above.
 
+## Commit Style
+
+This project does **not** enforce conventional commits, but commits should follow a minimal style that helps generate meaningful changelogs.
+
+### 🧱 Format Guidelines
+
+- Start with the general area or subsystem being modified (e.g., `allocator`, `macro`, `vector`)
+- Be short but descriptive
+- Use lowercase only for prefixes
+- Avoid "Update", "Changes", or generic nonsense
+
+#### ✅ Good examples
+```
+allocator: implement aligned page allocator
+macro: add CU_ARRAY_LEN
+slice: refactor to support zero-length spans
+hashmap: stub file with header structure
+simd: add platform dispatch detection
+```
+
+#### ❌ Bad examples
+```
+update stuff
+misc fixes
+more work
+final version
+```
+
+This style is compatible with the changelog generator (`git-cliff.toml`) and ensures readable release notes.
+
+
