@@ -32,7 +32,7 @@ object-features:
  string-features:
  - [ ] string buffer
  - [ ] string views
- - [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
+- [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
 
 collection-features:
  - [ ] vector
@@ -43,7 +43,6 @@ collection-features:
 
  method-features:
  - [X] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
- - [X] utf8 utility methods
 
 ## Allocators
 All methods or datastructures that need an allocator should accept the generic allocator interface in a zig style 
