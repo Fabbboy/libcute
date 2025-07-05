@@ -1,6 +1,6 @@
 #include "memory/allocator.h"
 #include "macro.h"
-#include "slice.h"
+#include "object/slice.h"
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>

@@ -3,3 +3,5 @@ compile_commands.json
 .vscode/
 build/
 out/
+meson-1.8.2/
+meson-1.8.2.tar.gz
