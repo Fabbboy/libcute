@@ -14,14 +14,14 @@ cu_String cu_String_init(cu_Allocator allocator) {
 }
 
 static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
-  Slice_Optional mem;
+  cu_Slice_Optional mem;
   if (str->data == NULL) {
     mem = cu_Allocator_Alloc(str->allocator, cap + 1, 1);
   } else {
     mem = cu_Allocator_Resize(str->allocator,
         cu_Slice_create(str->data, str->capacity + 1), cap + 1, 1);
   }
-  if (Slice_is_none(&mem)) {
+  if (cu_Slice_is_none(&mem)) {
     return CU_STRING_ERROR_OOM;
   }
   str->data = mem.value.ptr;

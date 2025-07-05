@@ -30,3 +30,19 @@ example_exe = executable(
    sources: ['example.c'],
    dependencies: [cute_dep],
 )
+
+doxygen = find_program('doxygen', required : false)
+if doxygen.found()
+  conf = configuration_data()
+  conf.set('PROJECT_VERSION', meson.project_version())
+  config_h = configure_file(output : 'config.h', configuration : conf)
+
+  doxy_conf = configuration_data()
+  doxy_conf.set('PROJECT_VERSION', meson.project_version())
+  doxy_conf.set('CONFIG_H', 'config.h')
+  doxyfile = configure_file(input : 'docs/Doxyfile.in',
+    output : 'Doxyfile',
+    configuration : doxy_conf)
+
+  run_target('docs', command : [doxygen, doxyfile])
+endif

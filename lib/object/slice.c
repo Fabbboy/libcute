@@ -8,4 +8,4 @@ cu_Slice cu_Slice_create(void *ptr, size_t length) {
   return slice;
 }
 
-CU_OPTIONAL_IMPL(Slice, cu_Slice)
+CU_OPTIONAL_IMPL(cu_Slice, cu_Slice)

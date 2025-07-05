@@ -4,9 +4,9 @@
 
 #include "object/slice.h"
 
-typedef Slice_Optional (*cu_Allocator_AllocFunc)(
+typedef cu_Slice_Optional (*cu_Allocator_AllocFunc)(
     void *self, size_t size, size_t alignment);
-typedef Slice_Optional (*cu_Allocator_ReszizeFunc)(
+typedef cu_Slice_Optional (*cu_Allocator_ReszizeFunc)(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
 
@@ -17,12 +17,12 @@ typedef struct {
   cu_Allocator_FreeFunc freeFn;
 } cu_Allocator;
 
-static inline Slice_Optional cu_Allocator_Alloc(
+static inline cu_Slice_Optional cu_Allocator_Alloc(
     cu_Allocator allocator, size_t size, size_t alignment) {
   return allocator.allocFn(allocator.self, size, alignment);
 }
 
-static inline Slice_Optional cu_Allocator_Resize(
+static inline cu_Slice_Optional cu_Allocator_Resize(
     cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
   return allocator.resizeFn(allocator.self, mem, size, alignment);
 }

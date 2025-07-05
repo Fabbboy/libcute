@@ -24,7 +24,7 @@ macro-features:
 object-features:
  - [X] generic optional
  - [X] generic result
- - [X] slice
+ - [X] slice (non-owning view of memory)
  - [ ] configurable passable (non global) logger 
  - [ ] string builder
  - [ ] generic error interface
