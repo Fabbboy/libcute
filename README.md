@@ -59,7 +59,7 @@ All headers must be included in the `cute.h` umbrella header.
 
 Utility types and methods that do not belong to any specific subsystem can be placed in the root directory.
 
-Files that can be implemented in C should **not** use header-based implementations (i.e., avoid `static inline` unless necessary).
+Files that can be implemented in C should **not** use header-based implementations (i.e., avoid `static inline` unless necessary or otherways useless).
 
 If additional types are required for implementation or if you come up with something useful, add it to the list above.
 
