@@ -18,17 +18,18 @@ typedef struct {
 } cu_Allocator;
 
 static inline Slice_Optional cu_Allocator_Alloc(
-    cu_Allocator *allocator, size_t size, size_t alignment) {
-  return allocator->allocFn(allocator->self, size, alignment);
+    cu_Allocator allocator, size_t size, size_t alignment) {
+  return allocator.allocFn(allocator.self, size, alignment);
 }
 
 static inline Slice_Optional cu_Allocator_Resize(
-    cu_Allocator *allocator, cu_Slice mem, size_t size, size_t alignment) {
-  return allocator->resizeFn(allocator->self, mem, size, alignment);
+    cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
+  return allocator.resizeFn(allocator.self, mem, size, alignment);
 }
 
-static inline void cu_Allocator_Free(cu_Allocator *allocator, cu_Slice mem) {
-  allocator->freeFn(allocator->self, mem);
+static inline void cu_Allocator_Free(cu_Allocator allocator, cu_Slice mem) {
+  allocator.freeFn(allocator.self, mem);
 }
 
 cu_Allocator cu_Allocator_CAllocator(void);
+

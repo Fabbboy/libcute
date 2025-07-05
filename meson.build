@@ -22,3 +22,9 @@ cute_dep = declare_dependency(
   include_directories : includes,
   link_with : cute_lib,
 )
+
+example_exe = executable(
+  'cute_test',
+   sources: ['example.c'],
+   dependencies: cute_dep,
+)
