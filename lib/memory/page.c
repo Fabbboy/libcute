@@ -106,3 +106,4 @@ cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
   alloc.freeFn = cu_PageAllocator_Free;
   return alloc;
 }
+
