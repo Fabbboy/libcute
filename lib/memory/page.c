@@ -2,8 +2,8 @@
 #include "macro.h"
 #include "slice.h"
 #include <stddef.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
@@ -24,16 +24,17 @@ static Slice_Optional cu_PageAllocator_Alloc(
   }
 
   if (alignment == 0 || (alignment & (alignment - 1)) != 0) {
-    return Slice_none();  
-  } 
-
+    return Slice_none();
+  }
 
   const size_t page_size = allocator->pageSize;
   const size_t aligned_len = CU_ALIGN_UP(size, page_size);
-  const size_t max_drop_len = alignment - (alignment < page_size ? alignment : page_size);
-  const size_t overalloc_len = (max_drop_len <= aligned_len - size)
-      ? aligned_len
-      : CU_ALIGN_UP(aligned_len + max_drop_len, page_size);
+  const size_t max_drop_len =
+      alignment - (alignment < page_size ? alignment : page_size);
+  const size_t overalloc_len =
+      (max_drop_len <= aligned_len - size)
+          ? aligned_len
+          : CU_ALIGN_UP(aligned_len + max_drop_len, page_size);
 
   void *base_ptr = NULL;
 #if defined(__linux__) || defined(__APPLE__)
@@ -43,7 +44,8 @@ static Slice_Optional cu_PageAllocator_Alloc(
     return Slice_none();
   }
 #elif defined(_WIN32)
-  base_ptr = VirtualAlloc(NULL, overalloc_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+  base_ptr = VirtualAlloc(
+      NULL, overalloc_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (base_ptr == NULL) {
     return Slice_none();
   }
@@ -66,7 +68,8 @@ static Slice_Optional cu_PageAllocator_Alloc(
     VirtualFree((void *)base_addr, prefix_size, MEM_DECOMMIT);
   }
   if (suffix_size > 0) {
-    VirtualFree((void *)(aligned_addr + aligned_len), suffix_size, MEM_DECOMMIT);
+    VirtualFree(
+        (void *)(aligned_addr + aligned_len), suffix_size, MEM_DECOMMIT);
   }
 #endif
 

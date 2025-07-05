@@ -32,4 +32,3 @@ static inline void cu_Allocator_Free(cu_Allocator allocator, cu_Slice mem) {
 }
 
 cu_Allocator cu_Allocator_CAllocator(void);
-
