@@ -13,11 +13,11 @@ macro-features:
  - [X] IF_NULL
  - [X] IF_NOT_NULL
  - [X] DIE 
-- [X] UNUSED
-- [X] ALIGN_UP
-- [X] BIT
-- [X] PLAT_X (platform macros)
-- [X] ARRAY_LEN
+ - [X] UNUSED
+ - [X] ALIGN_UP
+ - [X] BIT
+ - [X] PLAT_X (platform macros)
+ - [X] ARRAY_LEN
 
 object-features:
  - [X] generic optional
@@ -40,8 +40,8 @@ collection-features:
  - [ ] ring buffer 
 
  method-features:
- - [ ] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
-- [ ] utf8 utility methods
+ - [X] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
+ - [X] utf8 utility methods
 
 ## Allocators
 All methods or datastructures that need an allocator should accept the generic allocator interface in a zig style 
@@ -52,7 +52,7 @@ Code must be written and formatted in a `clang-format`-friendly way.
 All methods and structs that do not represent standard library types (e.g. `Int_Optional`) must be prefixed with `cu_`. This prefix is followed by the category (e.g. `Allocator`) and finally the actual type or function name.
 
 Example:
-- `PageAllocator` → `cu_Allocator_PageAllocator`
+ - `PageAllocator` → `cu_Allocator_PageAllocator`
 
 The same naming convention applies to functions.
 

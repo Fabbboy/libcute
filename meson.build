@@ -10,6 +10,8 @@ sources = [
   'lib/object/optional.c',
   'lib/memory/allocator.c',
   'lib/memory/page.c',
+  'lib/string/utf8.c',
+  'lib/hash/hash.c',
 ]
 
 cute_lib = library(
