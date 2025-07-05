@@ -17,6 +17,8 @@ static void cu_PageAllocator_Free(void *self, cu_Slice mem);
 
 static Slice_Optional cu_PageAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
+  CU_UNUSED(alignment);
+
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
   if (size == 0) {
     return Slice_none();
@@ -46,7 +48,7 @@ static Slice_Optional cu_PageAllocator_Alloc(
 
 static Slice_Optional cu_PageAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
-  cu_PageAllocator *allocator = (cu_PageAllocator *)self;
+  CU_UNUSED(alignment);
 
   if (size == 0) {
     cu_PageAllocator_Free(self, mem);

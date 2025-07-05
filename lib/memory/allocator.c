@@ -5,10 +5,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-static inline void cu_CAllocator_Free(void *_, cu_Slice mem) { free(mem.ptr); }
+static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {
+  CU_UNUSED(self);
+  free(mem.ptr);
+}
 
 static Slice_Optional cu_CAllocator_Alloc(
-    void *_, size_t size, size_t alignment) {
+    void *self, size_t size, size_t alignment) {
+  CU_UNUSED(self);
+
   if (size == 0) {
     return Slice_none();
   }
@@ -23,7 +28,8 @@ static Slice_Optional cu_CAllocator_Alloc(
 }
 
 static Slice_Optional cu_CAllocator_Resize(
-    void *_, cu_Slice mem, size_t size, size_t alignment) {
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  CU_UNUSED(self);
 
   if (size == 0) {
     cu_CAllocator_Free(NULL, mem);
