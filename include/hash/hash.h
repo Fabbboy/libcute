@@ -1,5 +1,7 @@
 #pragma once
 
+/** @file hash.h Hashing utilities. */
+
 #include <stddef.h>
 #include <stdint.h>
 

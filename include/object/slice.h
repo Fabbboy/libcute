@@ -1,12 +1,14 @@
 #pragma once
 
+/** @file slice.h Non-owning memory slices. */
+
 #include "object/optional.h"
 #include <stddef.h>
 
-/** Non-owning memory view */
+/** Non-owning memory view. */
 typedef struct {
-  void *ptr;
-  size_t length;
+  void *ptr;     /**< pointer to first element */
+  size_t length; /**< number of bytes */
 } cu_Slice;
 
 /** Create a slice from a pointer and length without allocating. */
