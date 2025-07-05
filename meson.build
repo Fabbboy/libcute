@@ -2,7 +2,6 @@ project('libcute', 'c',
   version : '0.1',
   default_options : ['warning_level=3', 'c_std=c11', 'default_library=static'])
 
-utf8proc_dep = dependency('libutf8proc', required: true)
 
 includes = include_directories('include')
  
@@ -18,7 +17,6 @@ cute_lib = library(
   'cute',
   sources,
   include_directories : includes,
-  dependencies: [utf8proc_dep]
 )
 
 cute_dep = declare_dependency(
@@ -29,5 +27,5 @@ cute_dep = declare_dependency(
 example_exe = executable(
   'cute_test',
    sources: ['example.c'],
-   dependencies: [cute_dep, utf8proc_dep],
+   dependencies: [cute_dep],
 )
