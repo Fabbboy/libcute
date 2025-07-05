@@ -3,6 +3,7 @@
 #include "slice.h"
 #include <stddef.h>
 #include <string.h>
+#include <stdint.h>
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
@@ -17,39 +18,63 @@ static void cu_PageAllocator_Free(void *self, cu_Slice mem);
 
 static Slice_Optional cu_PageAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
-  CU_UNUSED(alignment);
-
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
   if (size == 0) {
     return Slice_none();
   }
 
-  size_t alignedSize = CU_ALIGN_UP(size, allocator->pageSize);
+  if (alignment == 0 || (alignment & (alignment - 1)) != 0) {
+    return Slice_none();  
+  } 
 
-  void *ptr = NULL;
+
+  const size_t page_size = allocator->pageSize;
+  const size_t aligned_len = CU_ALIGN_UP(size, page_size);
+  const size_t max_drop_len = alignment - (alignment < page_size ? alignment : page_size);
+  const size_t overalloc_len = (max_drop_len <= aligned_len - size)
+      ? aligned_len
+      : CU_ALIGN_UP(aligned_len + max_drop_len, page_size);
+
+  void *base_ptr = NULL;
 #if defined(__linux__) || defined(__APPLE__)
-  ptr = mmap(NULL, alignedSize, PROT_READ | PROT_WRITE,
+  base_ptr = mmap(NULL, overalloc_len, PROT_READ | PROT_WRITE,
       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-  if (ptr == MAP_FAILED) {
-    ptr = NULL;
+  if (base_ptr == MAP_FAILED) {
+    return Slice_none();
   }
 #elif defined(_WIN32)
-  ptr =
-      VirtualAlloc(NULL, alignedSize, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-#else
-#error "Unsupported platform for page allocator"
+  base_ptr = VirtualAlloc(NULL, overalloc_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+  if (base_ptr == NULL) {
+    return Slice_none();
+  }
 #endif
 
-  CU_IF_NULL(ptr) { return Slice_none(); }
+  uintptr_t base_addr = (uintptr_t)base_ptr;
+  uintptr_t aligned_addr = CU_ALIGN_UP(base_addr, alignment);
+  size_t prefix_size = aligned_addr - base_addr;
+  size_t suffix_size = overalloc_len - prefix_size - aligned_len;
 
-  cu_Slice slice = cu_Slice_create(ptr, alignedSize);
-  return Slice_some(slice);
+#if defined(__linux__) || defined(__APPLE__)
+  if (prefix_size > 0) {
+    munmap((void *)base_addr, prefix_size);
+  }
+  if (suffix_size > 0) {
+    munmap((void *)(aligned_addr + aligned_len), suffix_size);
+  }
+#elif defined(_WIN32)
+  if (prefix_size > 0) {
+    VirtualFree((void *)base_addr, prefix_size, MEM_DECOMMIT);
+  }
+  if (suffix_size > 0) {
+    VirtualFree((void *)(aligned_addr + aligned_len), suffix_size, MEM_DECOMMIT);
+  }
+#endif
+
+  return Slice_some(cu_Slice_create((void *)aligned_addr, aligned_len));
 }
 
 static Slice_Optional cu_PageAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
-  CU_UNUSED(alignment);
-
   if (size == 0) {
     cu_PageAllocator_Free(self, mem);
     return Slice_none();
@@ -59,15 +84,15 @@ static Slice_Optional cu_PageAllocator_Resize(
     return Slice_some(mem);
   }
 
-  Slice_Optional newMem = cu_PageAllocator_Alloc(self, size, alignment);
-  if (Slice_is_none(&newMem)) {
+  Slice_Optional new_mem = cu_PageAllocator_Alloc(self, size, alignment);
+  if (Slice_is_none(&new_mem)) {
     return Slice_none();
   }
 
-  size_t copySize = mem.length < size ? mem.length : size;
-  memmove(newMem.value.ptr, mem.ptr, copySize);
+  size_t copy_size = (mem.length < size) ? mem.length : size;
+  memmove(new_mem.value.ptr, mem.ptr, copy_size);
   cu_PageAllocator_Free(self, mem);
-  return newMem;
+  return new_mem;
 }
 
 static void cu_PageAllocator_Free(void *self, cu_Slice mem) {
@@ -76,28 +101,24 @@ static void cu_PageAllocator_Free(void *self, cu_Slice mem) {
   }
 #if defined(__linux__) || defined(__APPLE__)
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
-  size_t alignedSize = CU_ALIGN_UP(mem.length, allocator->pageSize);
-  munmap(mem.ptr, alignedSize);
+  size_t aligned_size = CU_ALIGN_UP(mem.length, allocator->pageSize);
+  munmap(mem.ptr, aligned_size);
 #elif defined(_WIN32)
   VirtualFree(mem.ptr, 0, MEM_RELEASE);
-#else
-#error "Unsupported platform for page allocator"
 #endif
 }
 
 cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
-  size_t pageSize = 0;
+  size_t page_size = 0;
 #if defined(__linux__) || defined(__APPLE__)
-  pageSize = sysconf(_SC_PAGESIZE);
+  page_size = sysconf(_SC_PAGESIZE);
 #elif defined(_WIN32)
   SYSTEM_INFO info;
   GetSystemInfo(&info);
-  pageSize = info.dwPageSize;
-#else
-#error "Unsupported platform for page allocator"
+  page_size = info.dwPageSize;
 #endif
 
-  allocator->pageSize = pageSize;
+  allocator->pageSize = page_size;
 
   cu_Allocator alloc;
   alloc.self = allocator;
@@ -106,4 +127,3 @@ cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
   alloc.freeFn = cu_PageAllocator_Free;
   return alloc;
 }
-
