@@ -8,6 +8,10 @@ All notable changes to this project will be documented in this file.
 
 - interduced slices
 
+### Documentation
+
+- add doxygen comments for public headers and enable graphviz support
+
 ### Macros
 
 - Merge pull request #2 from Fabbboy/codex/implement-task-from-markdown

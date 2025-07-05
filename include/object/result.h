@@ -1,9 +1,12 @@
 #pragma once
 
+/** @file result.h Generic result helper macros. */
+
 #include <stdbool.h>
 
 #include "macro.h"
 
+/** Declare result helper functions for a given type. */
 #define CU_RESULT_HEADER(NAME, T, E)                                           \
   NAME##_Result NAME##_result_ok(T value);                                     \
   NAME##_Result NAME##_result_error(E error);                                  \
@@ -11,6 +14,7 @@
   T NAME##_result_unwrap(NAME##_Result *result);                               \
   E NAME##_result_unwrap_error(NAME##_Result *result);
 
+/** Declare the typed result struct and its helpers. */
 #define CU_RESULT_DECL(NAME, T, E)                                             \
   typedef struct {                                                             \
     union {                                                                    \
@@ -21,6 +25,7 @@
   } NAME##_Result;                                                             \
   CU_RESULT_HEADER(NAME, T, E)
 
+/** Implement the typed result helpers. */
 #define CU_RESULT_IMPL(NAME, T, E)                                             \
   NAME##_Result NAME##_result_ok(T value) {                                    \
     NAME##_Result result;                                                      \

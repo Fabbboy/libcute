@@ -1,9 +1,12 @@
 #pragma once
 
+/** @file optional.h Generic optional helper macros. */
+
 #include <stdbool.h>
 
 #include "macro.h"
 
+/** Declare optional helper functions for a given type. */
 #define CU_OPTIONAL_HEADER(NAME, T)                                            \
   NAME##_Optional NAME##_some(T value);                                        \
   NAME##_Optional NAME##_none(void);                                           \
@@ -11,6 +14,7 @@
   bool NAME##_is_none(NAME##_Optional *opt);                                   \
   T NAME##_unwrap(NAME##_Optional *opt);
 
+/** Declare the optional struct and associated functions. */
 #define CU_OPTIONAL_DECL(NAME, T)                                              \
   typedef struct {                                                             \
     T value;                                                                   \
@@ -18,6 +22,7 @@
   } NAME##_Optional;                                                           \
   CU_OPTIONAL_HEADER(NAME, T)
 
+/** Define the implementation of the optional helpers. */
 #define CU_OPTIONAL_IMPL(NAME, T)                                              \
   NAME##_Optional NAME##_some(T value) {                                       \
     NAME##_Optional opt;                                                       \

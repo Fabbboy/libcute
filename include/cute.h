@@ -1,5 +1,7 @@
 #pragma once
 
+/** @file cute.h Umbrella header including all of libcute. */
+
 #include "memory/allocator.h"
 #include "memory/page.h"
 
