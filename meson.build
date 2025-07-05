@@ -11,6 +11,7 @@ sources = [
   'lib/memory/allocator.c',
   'lib/memory/page.c',
   'lib/hash/hash.c',
+  'lib/string/string.c',
 ]
 
 cute_lib = library(
