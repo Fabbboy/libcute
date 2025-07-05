@@ -30,7 +30,7 @@ object-features:
  string-features:
  - [ ] string buffer
  - [ ] string views
- - [ ] string utility methods (maybe powered by simd)
+ - [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
  - [ ] utf8 utility methods
 
 collection-features:
