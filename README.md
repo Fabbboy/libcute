@@ -18,6 +18,8 @@ macro-features:
  - [X] BIT
  - [X] PLAT_X (platform macros)
  - [X] ARRAY_LEN
+ - [ ] UNREACHABLE(msg) (with line and file)
+ - [ ] TODO(msg) (with line and file)
 
 object-features:
  - [X] generic optional

@@ -82,16 +82,3 @@ size_t cu_utf8_codepoint_count(const unsigned char *s, size_t len) {
   }
   return count;
 }
-
-/** Classify a codepoint for switch cases. */
-uint8_t cu_utf8_case(uint32_t codepoint) {
-  if (CU_UTF8_IS_DIGIT(codepoint))
-    return CU_UTF8_CASE_DIGIT;
-  if (CU_UTF8_IS_UPPER(codepoint))
-    return CU_UTF8_CASE_UPPER;
-  if (CU_UTF8_IS_LOWER(codepoint))
-    return CU_UTF8_CASE_LOWER;
-  if (CU_UTF8_IS_SPACE(codepoint))
-    return CU_UTF8_CASE_SPACE;
-  return CU_UTF8_CASE_OTHER;
-}

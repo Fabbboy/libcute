@@ -21,25 +21,11 @@ int main(void) {
   fprintf(stderr, "allocation successful!\n");
   cu_Allocator_Free(page_allocator, allocation.value);
 
-  const char *text = "hello";
+  const char *text = "hello👍";
   bool valid = cu_utf8_validate((const unsigned char *)text, 5);
   uint64_t hash = cu_Hash_FNV1a64(text, 5);
   uint32_t cp = 0;
   cu_utf8_decode((const unsigned char *)text, 5, &cp);
-  switch (cu_utf8_case(cp)) {
-  case CU_UTF8_CASE_DIGIT:
-    fprintf(stderr, "first char is digit\n");
-    break;
-  case CU_UTF8_CASE_UPPER:
-    fprintf(stderr, "first char is upper\n");
-    break;
-  case CU_UTF8_CASE_LOWER:
-    fprintf(stderr, "first char is lower\n");
-    break;
-  default:
-    fprintf(stderr, "first char other\n");
-    break;
-  }
   fprintf(stderr, "utf8 valid: %s, hash: %llu\n", valid ? "yes" : "no",
       (unsigned long long)hash);
 
