@@ -1,6 +1,6 @@
 #include "memory/allocator.h"
 #include "memory/page.h"
-#include "slice.h"
+#include "object/slice.h"
 #include <stdalign.h>
 #include <stdio.h>
 #include <stdlib.h>

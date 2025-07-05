@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 
-#include "slice.h"
+#include "object/slice.h"
 
 typedef Slice_Optional (*cu_Allocator_AllocFunc)(
     void *self, size_t size, size_t alignment);

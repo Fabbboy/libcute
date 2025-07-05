@@ -22,6 +22,7 @@ macro-features:
 object-features:
  - [X] generic optional
  - [X] generic result
+ - [X] slice
  - [ ] configurable passable (non global) logger 
  - [ ] string builder
  - [ ] generic error interface
@@ -40,7 +41,7 @@ collection-features:
  - [ ] ring buffer 
 
  method-features:
- - [ ] hashing methods FNV-1A, Murmur3, SipHash
+ - [ ] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
  
 
 
