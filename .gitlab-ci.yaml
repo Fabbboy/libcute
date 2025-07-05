@@ -1,0 +1,14 @@
+image: debian:stable
+
+pages:
+  stage: deploy
+  script:
+    - apt-get update && apt-get install -y doxygen graphviz meson ninja-build
+    - meson setup build
+    - ninja -C build docs
+    - mv build/docs/html public
+  artifacts:
+    paths:
+      - public
+  only:
+    - main

@@ -97,4 +97,15 @@ final version
 
 This style is compatible with the changelog generator (`git-cliff.toml`) and ensures readable release notes.
 
+## Documentation
+
+Documentation is generated with Doxygen. When changes are pushed to the `main`
+branch, GitHub Actions and GitLab CI build the docs and publish them through
+GitHub Pages and GitLab Pages. Locally you can run:
+
+```sh
+meson setup build
+ninja -C build docs
+```
+
 
