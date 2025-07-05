@@ -11,6 +11,8 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - add doxygen comments for public headers and enable graphviz support
+- setup GitHub and GitLab Pages deployment
+- fix GitHub Actions workflow trigger configuration
 
 ### Macros
 
