@@ -42,6 +42,9 @@ collection-features:
 
  method-features:
  - [ ] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
+
+## Allocators
+All methods or datastructures that need an allocator should accept the generic allocator interface in a zig style 
  
 ## Coding standards
 Code must be written and formatted in a `clang-format`-friendly way.
