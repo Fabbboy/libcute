@@ -36,7 +36,7 @@
     return result;                                                             \
   }                                                                            \
                                                                                \
-  bool NAME##_result_is_ok(NAME##_Result result) { return result.isOk; }       \
+  bool NAME##_result_is_ok(NAME##_Result *result) { return result->isOk; }     \
                                                                                \
   T NAME##_result_unwrap(NAME##_Result *result) {                              \
     if (!result->isOk) {                                                       \

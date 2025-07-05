@@ -1,24 +1,21 @@
-#include "hash/hash.h"
 #include "memory/allocator.h"
-#include "memory/page.h"
-#include "object/slice.h"
-#include <stdalign.h>
+#include "string/string.h"
 #include <stdio.h>
 #include <stdlib.h>
 
 int main(void) {
-  cu_PageAllocator allocator = {0};
-  cu_Allocator page_allocator = cu_Allocator_PageAllocator(&allocator);
+  cu_Allocator alloc = cu_Allocator_CAllocator();
 
-  Slice_Optional allocation =
-      cu_Allocator_Alloc(page_allocator, 400, alignof(int));
-  if (Slice_is_none(&allocation)) {
-    fprintf(stderr, "allocation failed!\n");
-    exit(EXIT_FAILURE);
+  cu_String_Result res = cu_String_from_cstr(alloc, "hello");
+  if (!cu_String_result_is_ok(&res)) {
+    fprintf(stderr, "string allocation failed\n");
+    return EXIT_FAILURE;
   }
+  cu_String hello = res.value;
 
-  fprintf(stderr, "allocation successful!\n");
-  cu_Allocator_Free(page_allocator, allocation.value);
+  cu_String_append_cstr(&hello, ", world");
+  printf("%s\n", hello.data);
 
-  exit(EXIT_SUCCESS);
+  cu_String_destroy(&hello);
+  return EXIT_SUCCESS;
 }

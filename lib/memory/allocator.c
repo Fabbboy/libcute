@@ -10,39 +10,39 @@ static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {
   free(mem.ptr);
 }
 
-static Slice_Optional cu_CAllocator_Alloc(
+static cu_Slice_Optional cu_CAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
   CU_UNUSED(self);
 
   if (size == 0) {
-    return Slice_none();
+    return cu_Slice_none();
   }
 
   size_t alignedSize = CU_ALIGN_UP(size, alignment);
   void *ptr = malloc(alignedSize);
 
-  CU_IF_NULL(ptr) { return Slice_none(); }
+  CU_IF_NULL(ptr) { return cu_Slice_none(); }
 
   cu_Slice slice = cu_Slice_create(ptr, size);
-  return Slice_some(slice);
+  return cu_Slice_some(slice);
 }
 
-static Slice_Optional cu_CAllocator_Resize(
+static cu_Slice_Optional cu_CAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_UNUSED(self);
 
   if (size == 0) {
     cu_CAllocator_Free(NULL, mem);
-    return Slice_none();
+    return cu_Slice_none();
   }
 
   if (mem.length == size) {
-    return Slice_some(mem);
+    return cu_Slice_some(mem);
   }
 
-  Slice_Optional newSlice = cu_CAllocator_Alloc(NULL, size, alignment);
-  if (Slice_is_none(&newSlice)) {
-    return Slice_none();
+  cu_Slice_Optional newSlice = cu_CAllocator_Alloc(NULL, size, alignment);
+  if (cu_Slice_is_none(&newSlice)) {
+    return cu_Slice_none();
   }
 
   void *newPtr = newSlice.value.ptr;
