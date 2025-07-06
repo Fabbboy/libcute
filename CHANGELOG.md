@@ -34,6 +34,7 @@ All notable changes to this project will be documented in this file. See [conven
 - correcting branch name - ([80af898](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/80af8989a30e0886d746ea887464de4ee60b733a)) - Fabrice
 - changed template and moved file name - ([ac615b9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ac615b92133f8500b4ea82457d101c8014feb4d7)) - Fabrice
 - changed changelog format again - ([87b6f41](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/87b6f416f96f7d5fe2afc5b649d8648c626b41a9)) - Fabrice
+- formats the codebase, splits tests into individual tests, fixes bitset warnings - ([2009a07](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2009a07316e9a08f24c40d0e720dfb3772b7aa45)) - Fabrice
 
 ### Tests
 

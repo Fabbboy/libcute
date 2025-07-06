@@ -25,18 +25,19 @@ static size_t cu_gpa_calc_slot_count(cu_GPAllocator *gpa, size_t obj_size) {
   return count > bit_cap ? bit_cap : count;
 }
 
-static cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
+static struct cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
     cu_GPAllocator *gpa, size_t obj_size) {
   size_t slot_count = cu_gpa_calc_slot_count(gpa, obj_size);
-  size_t total = sizeof(cu_GPAllocator_BucketHeader) + slot_count * obj_size;
+  size_t total =
+      sizeof(struct cu_GPAllocator_BucketHeader) + slot_count * obj_size;
   cu_Slice_Optional mem =
       cu_Allocator_Alloc(gpa->backingAllocator, total, obj_size);
   if (cu_Slice_is_none(&mem)) {
     return NULL;
   }
 
-  cu_GPAllocator_BucketHeader *bucket =
-      (cu_GPAllocator_BucketHeader *)mem.value.ptr;
+  struct cu_GPAllocator_BucketHeader *bucket =
+      (struct cu_GPAllocator_BucketHeader *)mem.value.ptr;
   bucket->prev = NULL;
   bucket->next = NULL;
   cu_GPAllocator_UsedBits_clear_all(&bucket->objects.used);
@@ -58,10 +59,10 @@ static int cu_gpa_index_from_size(size_t size) {
   return (idx < CU_GPA_NUM_SMALL_BUCKETS) ? idx : -1;
 }
 
-static cu_GPAllocator_BucketHeader *cu_gpa_find_bucket(
+static struct cu_GPAllocator_BucketHeader *cu_gpa_find_bucket(
     cu_GPAllocator *gpa, void *ptr, size_t *slot_out) {
   for (int i = 0; i < CU_GPA_NUM_SMALL_BUCKETS; ++i) {
-    cu_GPAllocator_BucketHeader *b = gpa->smallBuckets[i];
+    struct cu_GPAllocator_BucketHeader *b = gpa->smallBuckets[i];
     while (b) {
       uintptr_t start = (uintptr_t)b->objects.data;
       uintptr_t end = start + b->objects.objectSize * b->objects.slotCount;
@@ -77,8 +78,9 @@ static cu_GPAllocator_BucketHeader *cu_gpa_find_bucket(
   return NULL;
 }
 
-static cu_GPALargeAlloc *cu_gpa_find_large(cu_GPAllocator *gpa, void *ptr) {
-  cu_GPALargeAlloc *cur = gpa->largeAllocs;
+static struct cu_GPAllocator_LargeAlloc *cu_gpa_find_large(
+    cu_GPAllocator *gpa, void *ptr) {
+  struct cu_GPAllocator_LargeAlloc *cur = gpa->largeAllocs;
   while (cur) {
     if (cur->slice.ptr == ptr) {
       return cur;
@@ -94,7 +96,7 @@ static cu_GPALargeAlloc *cu_gpa_find_large(cu_GPAllocator *gpa, void *ptr) {
 
 static cu_Slice_Optional cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
     size_t alignment, size_t obj_size, int idx) {
-  cu_GPAllocator_BucketHeader *bucket = gpa->smallBuckets[idx];
+  struct cu_GPAllocator_BucketHeader *bucket = gpa->smallBuckets[idx];
   while (bucket && bucket->objects.usedCount == bucket->objects.slotCount) {
     bucket = bucket->next;
   }
@@ -134,13 +136,14 @@ static cu_Slice_Optional cu_gpa_alloc_large(
   if (cu_Slice_is_none(&mem)) {
     return cu_Slice_none();
   }
-  cu_Slice_Optional meta_mem = cu_Allocator_Alloc(
-      gpa->backingAllocator, sizeof(cu_GPALargeAlloc), sizeof(void *));
+  cu_Slice_Optional meta_mem = cu_Allocator_Alloc(gpa->backingAllocator,
+      sizeof(struct cu_GPAllocator_LargeAlloc), sizeof(void *));
   if (cu_Slice_is_none(&meta_mem)) {
     cu_Allocator_Free(gpa->backingAllocator, mem.value);
     return cu_Slice_none();
   }
-  cu_GPALargeAlloc *meta = (cu_GPALargeAlloc *)meta_mem.value.ptr;
+  struct cu_GPAllocator_LargeAlloc *meta =
+      (struct cu_GPAllocator_LargeAlloc *)meta_mem.value.ptr;
   meta->slice = mem.value;
   meta->prev = NULL;
   meta->next = gpa->largeAllocs;
@@ -187,9 +190,10 @@ static cu_Slice_Optional cu_gpa_resize(
   }
 
   size_t slot;
-  cu_GPAllocator_BucketHeader *bucket = cu_gpa_find_bucket(gpa, mem.ptr, &slot);
+  struct cu_GPAllocator_BucketHeader *bucket =
+      cu_gpa_find_bucket(gpa, mem.ptr, &slot);
   if (!bucket) {
-    cu_GPALargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
+    struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
     if (!meta) {
       return cu_Slice_none();
     }
@@ -217,8 +221,8 @@ static cu_Slice_Optional cu_gpa_resize(
   return new_mem;
 }
 
-static void cu_gpa_free_small(
-    cu_GPAllocator *gpa, cu_GPAllocator_BucketHeader *bucket, size_t slot) {
+static void cu_gpa_free_small(cu_GPAllocator *gpa,
+    struct cu_GPAllocator_BucketHeader *bucket, size_t slot) {
   cu_GPAllocator_UsedBits_clear(&bucket->objects.used, slot);
   if (bucket->objects.usedCount > 0) {
     bucket->objects.usedCount--;
@@ -226,7 +230,8 @@ static void cu_gpa_free_small(
   CU_UNUSED(gpa);
 }
 
-static void cu_gpa_free_large(cu_GPAllocator *gpa, cu_GPALargeAlloc *meta) {
+static void cu_gpa_free_large(
+    cu_GPAllocator *gpa, struct cu_GPAllocator_LargeAlloc *meta) {
   if (meta->prev) {
     meta->prev->next = meta->next;
   } else {
@@ -236,8 +241,8 @@ static void cu_gpa_free_large(cu_GPAllocator *gpa, cu_GPALargeAlloc *meta) {
     meta->next->prev = meta->prev;
   }
   cu_Allocator_Free(gpa->backingAllocator, meta->slice);
-  cu_Allocator_Free(
-      gpa->backingAllocator, cu_Slice_create(meta, sizeof(cu_GPALargeAlloc)));
+  cu_Allocator_Free(gpa->backingAllocator,
+      cu_Slice_create(meta, sizeof(struct cu_GPAllocator_LargeAlloc)));
 }
 
 static void cu_gpa_free(void *self, cu_Slice mem) {
@@ -246,12 +251,13 @@ static void cu_gpa_free(void *self, cu_Slice mem) {
     return;
   }
   size_t slot;
-  cu_GPAllocator_BucketHeader *bucket = cu_gpa_find_bucket(gpa, mem.ptr, &slot);
+  struct cu_GPAllocator_BucketHeader *bucket =
+      cu_gpa_find_bucket(gpa, mem.ptr, &slot);
   if (bucket) {
     cu_gpa_free_small(gpa, bucket, slot);
     return;
   }
-  cu_GPALargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
+  struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
   if (meta) {
     cu_gpa_free_large(gpa, meta);
   }
@@ -284,7 +290,7 @@ cu_Allocator cu_Allocator_GPAllocator(
 }
 
 static void cu_gpa_destroy_bucket(
-    cu_GPAllocator *gpa, cu_GPAllocator_BucketHeader *bucket) {
+    cu_GPAllocator *gpa, struct cu_GPAllocator_BucketHeader *bucket) {
   cu_Allocator_Free(gpa->backingAllocator,
       cu_Slice_create(bucket, sizeof(*bucket) + bucket->objects.objectSize *
                                                     bucket->objects.slotCount));
@@ -292,17 +298,17 @@ static void cu_gpa_destroy_bucket(
 
 void cu_GPAllocator_destroy(cu_GPAllocator *alloc) {
   for (int i = 0; i < CU_GPA_NUM_SMALL_BUCKETS; ++i) {
-    cu_GPAllocator_BucketHeader *b = alloc->smallBuckets[i];
+    struct cu_GPAllocator_BucketHeader *b = alloc->smallBuckets[i];
     while (b) {
-      cu_GPAllocator_BucketHeader *next = b->next;
+      struct cu_GPAllocator_BucketHeader *next = b->next;
       cu_gpa_destroy_bucket(alloc, b);
       b = next;
     }
     alloc->smallBuckets[i] = NULL;
   }
-  cu_GPALargeAlloc *la = alloc->largeAllocs;
+  struct cu_GPAllocator_LargeAlloc *la = alloc->largeAllocs;
   while (la) {
-    cu_GPALargeAlloc *next = la->next;
+    struct cu_GPAllocator_LargeAlloc *next = la->next;
     cu_gpa_free_large(alloc, la);
     la = next;
   }
