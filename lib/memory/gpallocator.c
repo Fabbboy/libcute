@@ -113,7 +113,7 @@ static cu_Slice_Optional cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
 
   size_t slot = 0;
   for (; slot < bucket->objects.slotCount; ++slot) {
-    if (!cu_GPAllocator_UsedBits_is_set(&bucket->objects.used, slot)) {
+    if (!cu_GPAllocator_UsedBits_get(&bucket->objects.used, slot)) {
       break;
     }
   }
