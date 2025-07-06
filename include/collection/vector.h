@@ -1,3 +1,4 @@
+/** @file vector.h Growable vector container. */
 #pragma once
 
 #include "macro.h"
@@ -39,8 +40,14 @@ CU_OPTIONAL_DECL(cu_Vector_Error, cu_Vector_Error)
 /** Create a new vector. */
 cu_Vector_Result cu_Vector_create(
     cu_Allocator allocator, cu_Layout layout, Size_Optional initial_capacity);
-/** Adjust the capacity of the vector. */
-cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity);
+/**
+ * @brief Change the number of stored elements.
+ *
+ * The vector grows to at least @p size elements, reserving additional
+ * capacity when required. When shrinking, elements are discarded but the
+ * underlying buffer is retained.
+ */
+cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t size);
 /** Release resources owned by @p vector. */
 void cu_Vector_destroy(cu_Vector *vector);
 
@@ -74,5 +81,16 @@ static inline bool cu_Vector_is_empty(const cu_Vector *vector) {
   CU_IF_NULL(vector) { return true; }
   return vector->length == 0;
 }
+
+/** Ensure at least @p capacity slots are allocated. */
+cu_Vector_Error_Optional cu_Vector_reserve(cu_Vector *vector, size_t capacity);
+/** Reduce capacity to the current size. */
+cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector);
+/** Reset the vector. */
+void cu_Vector_clear(cu_Vector *vector);
+
+void *cu_Vector_at(const cu_Vector *vector, size_t index);
+
+#define CU_VECTOR_AT_AS(vector, T, index) ((T *)cu_Vector_at((vector), (index)))
 
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem);
