@@ -1,3 +1,4 @@
+/** @file vector.h Growable vector container. */
 #pragma once
 
 #include "macro.h"
@@ -62,7 +63,7 @@ static inline size_t cu_Vector_capacity(const cu_Vector *vector) {
 }
 
 static inline cu_Slice_Optional cu_Vector_data(const cu_Vector *vector) {
-  CU_IF_NULL(vector) { return cu_Slice_none(); }
+  CU_IF_NULL(vector) { return cu_Slice_Optional_none(); }
   return vector->data;
 }
 

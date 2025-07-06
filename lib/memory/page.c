@@ -20,11 +20,11 @@ static cu_Slice_Optional cu_PageAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
   if (size == 0) {
-    return cu_Slice_none();
+    return cu_Slice_Optional_none();
   }
 
   if (alignment == 0 || (alignment & (alignment - 1)) != 0) {
-    return cu_Slice_none();
+    return cu_Slice_Optional_none();
   }
 
   const size_t page_size = allocator->pageSize;
@@ -41,13 +41,13 @@ static cu_Slice_Optional cu_PageAllocator_Alloc(
   base_ptr = mmap(NULL, overalloc_len, PROT_READ | PROT_WRITE,
       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (base_ptr == MAP_FAILED) {
-    return cu_Slice_none();
+    return cu_Slice_Optional_none();
   }
 #elif defined(_WIN32)
   base_ptr = VirtualAlloc(
       NULL, overalloc_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (base_ptr == NULL) {
-    return cu_Slice_none();
+    return cu_Slice_Optional_none();
   }
 #endif
 
@@ -73,23 +73,24 @@ static cu_Slice_Optional cu_PageAllocator_Alloc(
   }
 #endif
 
-  return cu_Slice_some(cu_Slice_create((void *)aligned_addr, aligned_len));
+  return cu_Slice_Optional_some(
+      cu_Slice_create((void *)aligned_addr, aligned_len));
 }
 
 static cu_Slice_Optional cu_PageAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   if (size == 0) {
     cu_PageAllocator_Free(self, mem);
-    return cu_Slice_none();
+    return cu_Slice_Optional_none();
   }
 
   if (mem.length == size) {
-    return cu_Slice_some(mem);
+    return cu_Slice_Optional_some(mem);
   }
 
   cu_Slice_Optional new_mem = cu_PageAllocator_Alloc(self, size, alignment);
-  if (cu_Slice_is_none(&new_mem)) {
-    return cu_Slice_none();
+  if (cu_Slice_Optional_is_none(&new_mem)) {
+    return cu_Slice_Optional_none();
   }
 
   size_t copy_size = (mem.length < size) ? mem.length : size;

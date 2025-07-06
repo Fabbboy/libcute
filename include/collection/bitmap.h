@@ -1,3 +1,4 @@
+/** @file bitmap.h Heap-backed bitmap container. */
 #pragma once
 
 #include "memory/allocator.h"

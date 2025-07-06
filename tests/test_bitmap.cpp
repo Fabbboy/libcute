@@ -7,7 +7,7 @@ extern "C" {
 TEST(Bitmap, Basic) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   cu_Bitmap_Optional opt = cu_Bitmap_create(alloc, 128);
-  ASSERT_TRUE(cu_Bitmap_is_some(&opt));
+  ASSERT_TRUE(cu_Bitmap_Optional_is_some(&opt));
   cu_Bitmap map = opt.value;
 
   EXPECT_EQ(cu_Bitmap_size(&map), 128u);

@@ -5,14 +5,14 @@ CU_OPTIONAL_IMPL(cu_Bitmap, cu_Bitmap)
 cu_Bitmap_Optional cu_Bitmap_create(
     cu_Allocator backingAllocator, size_t bitCount) {
   if (bitCount == 0) {
-    return cu_Bitmap_none();
+    return cu_Bitmap_Optional_none();
   }
 
   size_t size = (bitCount + sizeof(size_t) * 8 - 1) / (sizeof(size_t) * 8);
   cu_Slice_Optional mem = cu_Allocator_Alloc(
       backingAllocator, size * sizeof(size_t), sizeof(size_t));
-  if (cu_Slice_is_none(&mem)) {
-    return cu_Bitmap_none();
+  if (cu_Slice_Optional_is_none(&mem)) {
+    return cu_Bitmap_Optional_none();
   }
 
   cu_Bitmap bitmap;
@@ -22,7 +22,7 @@ cu_Bitmap_Optional cu_Bitmap_create(
   for (size_t i = 0; i < size; ++i) {
     bitmap.bits[i] = 0;
   }
-  return cu_Bitmap_some(bitmap);
+  return cu_Bitmap_Optional_some(bitmap);
 }
 
 void cu_Bitmap_destroy(cu_Bitmap *bitmap) {

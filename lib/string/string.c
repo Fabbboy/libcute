@@ -21,7 +21,7 @@ static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
     mem = cu_Allocator_Resize(str->allocator,
         cu_Slice_create(str->data, str->capacity + 1), cap + 1, 1);
   }
-  if (cu_Slice_is_none(&mem)) {
+  if (cu_Slice_Optional_is_none(&mem)) {
     return CU_STRING_ERROR_OOM;
   }
   str->data = mem.value.ptr;

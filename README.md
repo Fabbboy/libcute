@@ -57,7 +57,7 @@ method-features:
 
 ## Todo's
 
-- [ ] Rename optional generated methods to include `Optional` in the name
+- [x] Rename optional generated methods to include `Optional` in the name
 
 ## Allocators
 

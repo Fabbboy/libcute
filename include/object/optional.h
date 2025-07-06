@@ -9,11 +9,11 @@
 
 /** Declare optional helper functions for a given type. */
 #define CU_OPTIONAL_HEADER(NAME, T)                                            \
-  NAME##_Optional NAME##_some(T value);                                        \
-  NAME##_Optional NAME##_none(void);                                           \
-  bool NAME##_is_some(const NAME##_Optional *opt);                             \
-  bool NAME##_is_none(const NAME##_Optional *opt);                             \
-  T NAME##_unwrap(NAME##_Optional *opt);
+  NAME##_Optional NAME##_Optional_some(T value);                               \
+  NAME##_Optional NAME##_Optional_none(void);                                  \
+  bool NAME##_Optional_is_some(const NAME##_Optional *opt);                    \
+  bool NAME##_Optional_is_none(const NAME##_Optional *opt);                    \
+  T NAME##_Optional_unwrap(NAME##_Optional *opt);
 
 /** Declare the optional struct and associated functions. */
 #define CU_OPTIONAL_DECL(NAME, T)                                              \
@@ -25,24 +25,28 @@
 
 /** Define the implementation of the optional helpers. */
 #define CU_OPTIONAL_IMPL(NAME, T)                                              \
-  NAME##_Optional NAME##_some(T value) {                                       \
+  NAME##_Optional NAME##_Optional_some(T value) {                              \
     NAME##_Optional opt;                                                       \
     opt.value = value;                                                         \
     opt.isSome = true;                                                         \
     return opt;                                                                \
   }                                                                            \
                                                                                \
-  NAME##_Optional NAME##_none(void) {                                          \
+  NAME##_Optional NAME##_Optional_none(void) {                                 \
     NAME##_Optional opt;                                                       \
     opt.isSome = false;                                                        \
     return opt;                                                                \
   }                                                                            \
                                                                                \
-  bool NAME##_is_some(const NAME##_Optional *opt) { return opt->isSome; }      \
+  bool NAME##_Optional_is_some(const NAME##_Optional *opt) {                   \
+    return opt->isSome;                                                        \
+  }                                                                            \
                                                                                \
-  bool NAME##_is_none(const NAME##_Optional *opt) { return !opt->isSome; }     \
+  bool NAME##_Optional_is_none(const NAME##_Optional *opt) {                   \
+    return !opt->isSome;                                                       \
+  }                                                                            \
                                                                                \
-  T NAME##_unwrap(NAME##_Optional *opt) {                                      \
+  T NAME##_Optional_unwrap(NAME##_Optional *opt) {                             \
     if (!opt->isSome) {                                                        \
       CU_DIE("Attempted to unwrap a None optional");                           \
     }                                                                          \
