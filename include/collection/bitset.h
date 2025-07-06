@@ -9,12 +9,12 @@
 /** Declare helper functions for a fixed-size bitset type. */
 
 #define CU_BITSET_HEADER(NAME)                                                 \
-  NAME##_BitSet NAME##_create(void);                                           \
-  void NAME##_set(NAME##_BitSet *set, size_t index);                           \
-  void NAME##_clear(NAME##_BitSet *set, size_t index);                         \
-  bool NAME##_get(const NAME##_BitSet *set, size_t index);                     \
-  void NAME##_clear_all(NAME##_BitSet *set);                                   \
-  size_t NAME##_size(void);
+  NAME##_BitSet NAME##_BitSet_create(void);                                           \
+  void NAME##_BitSet_set(NAME##_BitSet *set, size_t index);                           \
+  void NAME##_BitSet_clear(NAME##_BitSet *set, size_t index);                         \
+  bool NAME##_BitSet_get(const NAME##_BitSet *set, size_t index);                     \
+  void NAME##_BitSet_clear_all(NAME##_BitSet *set);                                   \
+  size_t NAME##_BitSet_size(void);
 
 /** Declare the bitset struct and its helpers. */
 
@@ -27,31 +27,31 @@
 /** Implement the helpers declared by \ref CU_BITSET_DECL. */
 
 #define CU_BITSET_IMPL(NAME, SIZE)                                             \
-  NAME##_BitSet NAME##_create(void) {                                          \
+  NAME##_BitSet NAME##_BitSet_create(void) {                                          \
     NAME##_BitSet set = {0};                                                   \
     return set;                                                                \
   }                                                                            \
                                                                                \
-  void NAME##_set(NAME##_BitSet *set, size_t index) {                          \
+  void NAME##_BitSet_set(NAME##_BitSet *set, size_t index) {                          \
     if (index < SIZE) {                                                        \
       set->bits[index / 8] |= (1u << (index % 8));                             \
     }                                                                          \
   }                                                                            \
                                                                                \
-  void NAME##_clear(NAME##_BitSet *set, size_t index) {                        \
+  void NAME##_BitSet_clear(NAME##_BitSet *set, size_t index) {                        \
     if (index < SIZE) {                                                        \
       set->bits[index / 8] &= (uint8_t)~(1u << (index % 8));                   \
     }                                                                          \
   }                                                                            \
                                                                                \
-  bool NAME##_get(const NAME##_BitSet *set, size_t index) {                    \
+  bool NAME##_BitSet_get(const NAME##_BitSet *set, size_t index) {                    \
     return index < SIZE && (set->bits[index / 8] & (1u << (index % 8)));       \
   }                                                                            \
                                                                                \
-  void NAME##_clear_all(NAME##_BitSet *set) {                                  \
+  void NAME##_BitSet_clear_all(NAME##_BitSet *set) {                                  \
     for (size_t i = 0; i < sizeof(set->bits); ++i) {                           \
       set->bits[i] = 0;                                                        \
     }                                                                          \
   }                                                                            \
                                                                                \
-  size_t NAME##_size(void) { return SIZE; }
+  size_t NAME##_BitSet_size(void) { return SIZE; }
