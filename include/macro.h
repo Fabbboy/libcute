@@ -25,6 +25,23 @@
 /** Create a bit mask with bit @p x set. */
 #define CU_BIT(x) (1u << (x))
 
+/** Round up to the next power of two. */
+static inline size_t cu_next_pow2(size_t x) {
+  if (x <= 1) {
+    return 1;
+  }
+  x--;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+#if SIZE_MAX > UINT32_MAX
+  x |= x >> 32;
+#endif
+  return x + 1;
+}
+
 /** Platform detection macros. */
 #if defined(_WIN32) || defined(_WIN64)
 /** Defined on Windows systems */

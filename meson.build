@@ -12,6 +12,7 @@ sources = [
   'lib/object/optional.c',
   'lib/memory/allocator.c',
   'lib/memory/page.c',
+  'lib/memory/gpallocator.c',
   'lib/hash/hash.c',
   'lib/string/string.c',
 ]

@@ -42,3 +42,5 @@ static inline void cu_Allocator_Free(cu_Allocator allocator, cu_Slice mem) {
 
 /** Standard allocator backed by malloc and free. */
 cu_Allocator cu_Allocator_CAllocator(void);
+
+CU_OPTIONAL_DECL(cu_Allocator, cu_Allocator)
