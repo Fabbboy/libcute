@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 extern "C" {
-#include "memory/gpallocator.h"
 #include "memory/allocator.h"
+#include "memory/gpallocator.h"
 }
 
 TEST(Allocator, GPABasic) {

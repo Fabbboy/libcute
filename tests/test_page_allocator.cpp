@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 extern "C" {
-#include "memory/page.h"
 #include "memory/allocator.h"
+#include "memory/page.h"
 }
 
 TEST(PageAllocator, Basic) {

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 extern "C" {
-#include "string/string.h"
 #include "memory/allocator.h"
+#include "string/string.h"
 }
 
 TEST(String, AppendAndSubstring) {
@@ -13,8 +13,7 @@ TEST(String, AppendAndSubstring) {
   EXPECT_EQ(str.length, 5u);
   EXPECT_STREQ(str.data, "hello");
 
-  EXPECT_EQ(CU_STRING_ERROR_NONE,
-            cu_String_append_cstr(&str, ", world"));
+  EXPECT_EQ(CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
   EXPECT_EQ(str.length, 12u);
   EXPECT_STREQ(str.data, "hello, world");
 

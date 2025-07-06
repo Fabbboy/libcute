@@ -2,7 +2,7 @@
 #include "macro.h"
 #include <string.h>
 
-CU_BITSET_IMPL(cu_GPAllocator_UsedBits, CU_GPA_BUCKET_SIZE);
+CU_BITSET_IMPL(cu_GPAllocator_UsedBits, CU_GPA_BUCKET_SIZE)
 
 /* Helper forward declarations */
 static cu_Slice_Optional cu_gpa_alloc(

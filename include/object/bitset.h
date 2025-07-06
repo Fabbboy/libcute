@@ -1,9 +1,9 @@
 #pragma once
 
+#include <stdalign.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdalign.h>
 
 /** @file bitset.h Fixed-size local bitset utilities. */
 /** Declare helper functions for a fixed-size bitset type. */
@@ -21,7 +21,6 @@
 #define CU_BITSET_DECL(NAME, SIZE)                                             \
   typedef struct {                                                             \
     alignas(sizeof(size_t)) uint8_t bits[((SIZE) + 7) / 8];                    \
-    enum { NAME##_FixedSize = (SIZE) };                                        \
   } NAME##_BitSet;                                                             \
   CU_BITSET_HEADER(NAME)
 

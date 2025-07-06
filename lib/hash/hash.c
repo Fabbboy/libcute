@@ -78,26 +78,27 @@ static inline uint64_t cu_hash_read64(const uint8_t *p) {
   return v;
 }
 
-#define SIPROUND                                                             \
-  do {                                                                       \
-    v0 += v1;                                                                \
-    v1 = (v1 << 13) | (v1 >> 51);                                            \
-    v1 ^= v0;                                                                \
-    v0 = (v0 << 32) | (v0 >> 32);                                            \
-    v2 += v3;                                                                \
-    v3 = (v3 << 16) | (v3 >> 48);                                            \
-    v3 ^= v2;                                                                \
-    v0 += v3;                                                                \
-    v3 = (v3 << 21) | (v3 >> 43);                                            \
-    v3 ^= v0;                                                                \
-    v2 += v1;                                                                \
-    v1 = (v1 << 17) | (v1 >> 47);                                            \
-    v1 ^= v2;                                                                \
-    v2 = (v2 << 32) | (v2 >> 32);                                            \
+#define SIPROUND                                                               \
+  do {                                                                         \
+    v0 += v1;                                                                  \
+    v1 = (v1 << 13) | (v1 >> 51);                                              \
+    v1 ^= v0;                                                                  \
+    v0 = (v0 << 32) | (v0 >> 32);                                              \
+    v2 += v3;                                                                  \
+    v3 = (v3 << 16) | (v3 >> 48);                                              \
+    v3 ^= v2;                                                                  \
+    v0 += v3;                                                                  \
+    v3 = (v3 << 21) | (v3 >> 43);                                              \
+    v3 ^= v0;                                                                  \
+    v2 += v1;                                                                  \
+    v1 = (v1 << 17) | (v1 >> 47);                                              \
+    v1 ^= v2;                                                                  \
+    v2 = (v2 << 32) | (v2 >> 32);                                              \
   } while (0)
 
 /** Compute SipHash-2-4 for the given input. */
-uint64_t cu_Hash_SipHash24(const uint8_t key[16], const void *data, size_t len) {
+uint64_t cu_Hash_SipHash24(
+    const uint8_t key[16], const void *data, size_t len) {
   uint64_t k0 = cu_hash_read64(key);
   uint64_t k1 = cu_hash_read64(key + 8);
   uint64_t v0 = CU_SIPHASH_V0_INIT ^ k0;
