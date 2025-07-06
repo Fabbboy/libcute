@@ -17,10 +17,12 @@ All notable changes to this project will be documented in this file. See [conven
 - setup pages deployment - ([f19eb3a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f19eb3a08e323a8a877b6ea14a1da2327f565382)) - Fabrice
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
 - adds changelog - ([18a2468](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/18a24688ea8d9afe6c99cba593fbc1bf2b9207f4)) - Fabrice
+- designing the gpa - ([fe09ec3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe09ec368895dfed564d7664363d68f1f8b55525)) - Fabrice
 
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
+- adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 
 ### Refactoring
 
@@ -28,6 +30,7 @@ All notable changes to this project will be documented in this file. See [conven
 - removes gitignores - ([652dbc8](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/652dbc81bef5e4c29c87c74a7330140a8904dade)) - Fabrice
 - correcting branch name - ([80af898](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/80af8989a30e0886d746ea887464de4ee60b733a)) - Fabrice
 - changed template and moved file name - ([ac615b9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ac615b92133f8500b4ea82457d101c8014feb4d7)) - Fabrice
+- changed changelog format again - ([87b6f41](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/87b6f416f96f7d5fe2afc5b649d8648c626b41a9)) - Fabrice
 
 ### String
 
