@@ -43,11 +43,13 @@ TEST(Vector, Resize) {
 
   cu_Vector_Error_Optional err = cu_Vector_resize(&vector, 20);
   ASSERT_TRUE(cu_Vector_Error_is_none(&err));
-  EXPECT_EQ(cu_Vector_capacity(&vector), 20u);
+  EXPECT_EQ(cu_Vector_size(&vector), 20u);
+  EXPECT_GE(cu_Vector_capacity(&vector), 20u);
 
   err = cu_Vector_resize(&vector, 5);
   ASSERT_TRUE(cu_Vector_Error_is_none(&err));
-  EXPECT_EQ(cu_Vector_capacity(&vector), 20u);
+  EXPECT_EQ(cu_Vector_size(&vector), 5u);
+  EXPECT_GE(cu_Vector_capacity(&vector), 20u);
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
@@ -94,6 +96,7 @@ TEST(Vector, PopBack) {
   ASSERT_TRUE(cu_Vector_Error_is_none(&err));
   EXPECT_EQ(out, 1);
   EXPECT_EQ(cu_Vector_size(&vector), 0u);
+  EXPECT_EQ(cu_Vector_capacity(&vector), 0u);
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
@@ -127,6 +130,35 @@ TEST(Vector, Copy) {
   }
 
   cu_Vector_destroy(&copy);
+  cu_Vector_destroy(&vector);
+  cu_GPAllocator_destroy(&gpa);
+}
+
+TEST(Vector, ReserveClearAt) {
+  cu_PageAllocator page;
+  cu_GPAllocator gpa;
+  cu_Allocator alloc = create_allocator(&gpa, &page);
+
+  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_some(0));
+  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
+  cu_Vector vector = cu_Vector_result_unwrap(&res);
+
+  cu_Vector_Error_Optional err = cu_Vector_reserve(&vector, 10);
+  ASSERT_TRUE(cu_Vector_Error_is_none(&err));
+  EXPECT_GE(cu_Vector_capacity(&vector), 10u);
+
+  for (int i = 0; i < 5; ++i) {
+    cu_Vector_push_back(&vector, &i);
+  }
+
+  int *val = CU_VECTOR_AT_AS(&vector, int, 2);
+  ASSERT_NE(val, nullptr);
+  EXPECT_EQ(*val, 2);
+
+  cu_Vector_clear(&vector);
+  EXPECT_EQ(cu_Vector_size(&vector), 0u);
+  EXPECT_EQ(cu_Vector_capacity(&vector), 0u);
+
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }

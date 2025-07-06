@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -28,6 +28,9 @@ All notable changes to this project will be documented in this file. See [conven
 - adjusted changelog - ([4d30fb1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4d30fb172c6bac60eeb3adca3a23ab7999a4fc88)) - Fabrice
 
 ### Features
+
+- expand vector API with reserve, clear and shrink helpers
+- resize now adjusts length and removal frees memory automatically
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice

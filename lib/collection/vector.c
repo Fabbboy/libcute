@@ -39,7 +39,8 @@ cu_Vector_Result cu_Vector_create(
   return cu_Vector_result_ok(vector);
 }
 
-cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity) {
+static cu_Vector_Error_Optional cu_Vector_set_capacity(
+    cu_Vector *vector, size_t capacity) {
   CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
 
   CU_LAYOUT_CHECK(vector->layout) {
@@ -57,10 +58,6 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity) {
 
   if (capacity < vector->length) {
     return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID);
-  }
-
-  if (capacity < vector->capacity) {
-    return cu_Vector_Error_none();
   }
 
   if (cu_Slice_is_some(&vector->data)) {
@@ -86,7 +83,20 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity) {
 
   vector->data = new_data;
   vector->capacity = capacity;
-  vector->length = 0;
+  return cu_Vector_Error_none();
+}
+
+cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t size) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+
+  if (size > vector->capacity) {
+    cu_Vector_Error_Optional err = cu_Vector_set_capacity(vector, size);
+    if (cu_Vector_Error_is_some(&err)) {
+      return err;
+    }
+  }
+
+  vector->length = size;
   return cu_Vector_Error_none();
 }
 
@@ -107,10 +117,10 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
   }
 
   if (vector->length >= vector->capacity) {
-    cu_Vector_Error_Optional resize_result = cu_Vector_resize(
-        vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
-    if (cu_Vector_Error_is_some(&resize_result)) {
-      return resize_result;
+    size_t new_cap = vector->capacity == 0 ? 1 : vector->capacity * 2;
+    cu_Vector_Error_Optional err = cu_Vector_reserve(vector, new_cap);
+    if (cu_Vector_Error_is_some(&err)) {
+      return err;
     }
   }
 
@@ -136,6 +146,10 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
   void *src = (unsigned char *)vector->data.value.ptr +
               vector->length * vector->layout.elem_size;
   memcpy(out_elem, src, vector->layout.elem_size);
+
+  if (vector->length == 0) {
+    cu_Vector_shrink_to_fit(vector);
+  }
   return cu_Vector_Error_none();
 }
 
@@ -147,10 +161,10 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
   }
 
   if (vector->length >= vector->capacity) {
-    cu_Vector_Error_Optional resize_result = cu_Vector_resize(
-        vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
-    if (cu_Vector_Error_is_some(&resize_result)) {
-      return resize_result;
+    size_t new_cap = vector->capacity == 0 ? 1 : vector->capacity * 2;
+    cu_Vector_Error_Optional err = cu_Vector_reserve(vector, new_cap);
+    if (cu_Vector_Error_is_some(&err)) {
+      return err;
     }
   }
 
@@ -184,6 +198,9 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
   memmove(dest, src, (vector->length - 1) * vector->layout.elem_size);
 
   vector->length--;
+  if (vector->length == 0) {
+    cu_Vector_shrink_to_fit(vector);
+  }
   return cu_Vector_Error_none();
 }
 
@@ -207,6 +224,35 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
   }
 
   return result;
+}
+
+cu_Vector_Error_Optional cu_Vector_reserve(cu_Vector *vector, size_t capacity) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  if (capacity <= vector->capacity) {
+    return cu_Vector_Error_none();
+  }
+  return cu_Vector_set_capacity(vector, capacity);
+}
+
+cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  return cu_Vector_set_capacity(vector, vector->length);
+}
+
+void cu_Vector_clear(cu_Vector *vector) {
+  CU_IF_NULL(vector) { return; }
+  vector->length = 0;
+  cu_Vector_shrink_to_fit(vector);
+}
+
+void *cu_Vector_at(const cu_Vector *vector, size_t index) {
+  CU_IF_NULL(vector) { return NULL; }
+  CU_LAYOUT_CHECK(vector->layout) { return NULL; }
+  if (index >= vector->length) {
+    return NULL;
+  }
+  return (unsigned char *)vector->data.value.ptr +
+         index * vector->layout.elem_size;
 }
 
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem) {
