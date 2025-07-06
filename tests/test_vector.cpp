@@ -127,8 +127,7 @@ TEST(Vector, Copy) {
   ASSERT_EQ(cu_Vector_size(&copy), 5u);
   ASSERT_EQ(cu_Vector_capacity(&copy), 5u);
   for (int i = 0; i < 5; ++i) {
-    EXPECT_EQ(
-        *(int *)((unsigned char *)copy.data.value.ptr + i * sizeof(int)), i);
+    EXPECT_EQ(*CU_VECTOR_AT_AS(&copy, int, i), i);
   }
 
   cu_Vector_destroy(&copy);

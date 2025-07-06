@@ -24,7 +24,17 @@ typedef struct {
 } cu_Layout;
 
 static inline cu_Layout cu_Layout_create(size_t elem_size, size_t alignment) {
-  return (cu_Layout){elem_size, alignment};
+  cu_Layout layout = {0};
+  if (elem_size == 0 || alignment == 0) {
+    return layout;
+  }
+
+  if (elem_size % alignment != 0) {
+    return layout; 
+  }
+  layout.elem_size = elem_size;
+  layout.alignment = alignment;
+  return layout;
 }
 
 #define CU_LAYOUT(T) cu_Layout_create(sizeof(T), alignof(T))
