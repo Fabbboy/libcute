@@ -30,8 +30,8 @@ object-features:
  - [ ] generic error interface
 
  string-features:
- - [ ] string buffer
- - [ ] string views
+ - [X] string buffer
+ - [X] string views
 - [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
 
 collection-features:
