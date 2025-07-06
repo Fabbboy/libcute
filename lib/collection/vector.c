@@ -19,12 +19,13 @@ cu_Vector_Result cu_Vector_create(
   }
 
   size_t cap = 0;
-  cu_Slice_Optional data = cu_Slice_none();
-  if (Size_is_some(&initial_capacity) && Size_unwrap(&initial_capacity) > 0) {
-    cap = Size_unwrap(&initial_capacity);
+  cu_Slice_Optional data = cu_Slice_Optional_none();
+  if (Size_Optional_is_some(&initial_capacity) &&
+      Size_Optional_unwrap(&initial_capacity) > 0) {
+    cap = Size_Optional_unwrap(&initial_capacity);
     data =
         cu_Allocator_Alloc(allocator, cap * layout.elem_size, layout.alignment);
-    if (cu_Slice_is_none(&data)) {
+    if (cu_Slice_Optional_is_none(&data)) {
       return cu_Vector_result_error(CU_VECTOR_ERROR_OOM);
     }
   }
@@ -40,76 +41,80 @@ cu_Vector_Result cu_Vector_create(
 }
 
 cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity) {
-  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(vector) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
+  }
 
   CU_LAYOUT_CHECK(vector->layout) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   if (capacity == vector->capacity) {
-    return cu_Vector_Error_none();
+    return cu_Vector_Error_Optional_none();
   }
 
   if (capacity == 0) {
     cu_Vector_destroy(vector);
-    return cu_Vector_Error_none();
+    return cu_Vector_Error_Optional_none();
   }
 
   if (capacity < vector->length) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
   }
 
   if (capacity < vector->capacity) {
-    return cu_Vector_Error_none();
+    return cu_Vector_Error_Optional_none();
   }
 
-  if (cu_Slice_is_some(&vector->data)) {
-    cu_Slice old_data = cu_Slice_unwrap(&vector->data);
+  if (cu_Slice_Optional_is_some(&vector->data)) {
+    cu_Slice old_data = cu_Slice_Optional_unwrap(&vector->data);
     cu_Slice_Optional new_data =
         cu_Allocator_Resize(vector->allocator, old_data,
             capacity * vector->layout.elem_size, vector->layout.alignment);
 
-    if (cu_Slice_is_none(&new_data)) {
-      return cu_Vector_Error_some(CU_VECTOR_ERROR_OOM);
+    if (cu_Slice_Optional_is_none(&new_data)) {
+      return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
     }
 
     vector->data = new_data;
     vector->capacity = capacity;
-    return cu_Vector_Error_none();
+    return cu_Vector_Error_Optional_none();
   }
 
   cu_Slice_Optional new_data = cu_Allocator_Alloc(vector->allocator,
       capacity * vector->layout.elem_size, vector->layout.alignment);
-  if (cu_Slice_is_none(&new_data)) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_OOM);
+  if (cu_Slice_Optional_is_none(&new_data)) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
   }
 
   vector->data = new_data;
   vector->capacity = capacity;
   vector->length = 0;
-  return cu_Vector_Error_none();
+  return cu_Vector_Error_Optional_none();
 }
 
 void cu_Vector_destroy(cu_Vector *vector) {
-  if (cu_Slice_is_some(&vector->data)) {
+  if (cu_Slice_Optional_is_some(&vector->data)) {
     cu_Allocator_Free(vector->allocator, vector->data.value);
-    vector->data = cu_Slice_none();
+    vector->data = cu_Slice_Optional_none();
   }
   vector->length = 0;
   vector->capacity = 0;
 }
 
 cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
-  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(vector) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
+  }
 
   CU_LAYOUT_CHECK(vector->layout) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   if (vector->length >= vector->capacity) {
     cu_Vector_Error_Optional resize_result = cu_Vector_resize(
         vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
-    if (cu_Vector_Error_is_some(&resize_result)) {
+    if (cu_Vector_Error_Optional_is_some(&resize_result)) {
       return resize_result;
     }
   }
@@ -118,38 +123,42 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
                vector->length * vector->layout.elem_size;
   memcpy(dest, elem, vector->layout.elem_size);
   vector->length++;
-  return cu_Vector_Error_none();
+  return cu_Vector_Error_Optional_none();
 }
 
 cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
-  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(vector) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
+  }
 
   CU_LAYOUT_CHECK(vector->layout) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   if (vector->length == 0) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_OOB);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOB);
   }
 
   vector->length--;
   void *src = (unsigned char *)vector->data.value.ptr +
               vector->length * vector->layout.elem_size;
   memcpy(out_elem, src, vector->layout.elem_size);
-  return cu_Vector_Error_none();
+  return cu_Vector_Error_Optional_none();
 }
 
 cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
-  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(vector) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
+  }
 
   CU_LAYOUT_CHECK(vector->layout) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   if (vector->length >= vector->capacity) {
     cu_Vector_Error_Optional resize_result = cu_Vector_resize(
         vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
-    if (cu_Vector_Error_is_some(&resize_result)) {
+    if (cu_Vector_Error_Optional_is_some(&resize_result)) {
       return resize_result;
     }
   }
@@ -161,19 +170,21 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
 
   memcpy(vector->data.value.ptr, elem, vector->layout.elem_size);
   vector->length++;
-  return cu_Vector_Error_none();
+  return cu_Vector_Error_Optional_none();
 }
 
 cu_Vector_Error_Optional cu_Vector_pop_front(
     cu_Vector *vector, void *out_elem) {
-  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(vector) {
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID);
+  }
 
   CU_LAYOUT_CHECK(vector->layout) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   if (vector->length == 0) {
-    return cu_Vector_Error_some(CU_VECTOR_ERROR_OOB);
+    return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOB);
   }
 
   void *src = vector->data.value.ptr;
@@ -184,7 +195,7 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
   memmove(dest, src, (vector->length - 1) * vector->layout.elem_size);
 
   vector->length--;
-  return cu_Vector_Error_none();
+  return cu_Vector_Error_Optional_none();
 }
 
 cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
@@ -194,8 +205,8 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
     return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
-  cu_Vector_Result result =
-      cu_Vector_create(src->allocator, src->layout, Size_some(src->capacity));
+  cu_Vector_Result result = cu_Vector_create(
+      src->allocator, src->layout, Size_Optional_some(src->capacity));
   if (!cu_Vector_result_is_ok(&result)) {
     return result;
   }
