@@ -10,7 +10,6 @@ All notable changes to this project will be documented in this file. See [conven
 - corrected gitlab ci file name - ([3d4237e](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3d4237e0ae7f51552ee8f305850866339f6eff85)) - Fabrice
 - adds propper ci tag - ([ed4ee7b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ed4ee7b0a9ce79ca91173fee9f0c0dc99537241c)) - Fabrice
 - use different tag - ([eb54093](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/eb54093b52dfbca882885f3a8c6744531477b06b)) - Fabrice
-- fixed bitset implementation to avoid crashes on invalid indices
 
 ### Documentation
 
@@ -19,7 +18,8 @@ All notable changes to this project will be documented in this file. See [conven
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
 - adds changelog - ([18a2468](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/18a24688ea8d9afe6c99cba593fbc1bf2b9207f4)) - Fabrice
 - designing the gpa - ([fe09ec3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe09ec368895dfed564d7664363d68f1f8b55525)) - Fabrice
-- documented bitset API and clarified bitset vs bitmap
+- updated changelog - ([fe8eea2](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe8eea2dd4ec72a762e4dd7927d9c46a783b4d2e)) - Fabrice
+- clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
 
 ### Features
 
