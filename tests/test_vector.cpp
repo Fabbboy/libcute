@@ -25,13 +25,21 @@ TEST(Vector, CreateAndResize) {
 
   cu_Vector_Error_Optional resize_result = cu_Vector_resize(&vector, 20);
   ASSERT_TRUE(cu_Vector_Error_is_none(&resize_result));
-  ASSERT_EQ(cu_Vector_capacity(&vector), 0);
+  ASSERT_EQ(cu_Vector_capacity(&vector), 20);
   ASSERT_EQ(cu_Vector_size(&vector), 0);
 
   resize_result = cu_Vector_resize(&vector, 5);
   ASSERT_TRUE(cu_Vector_Error_is_none(&resize_result));
-  ASSERT_EQ(cu_Vector_capacity(&vector), 0);
+  ASSERT_EQ(cu_Vector_capacity(&vector), 20);
   ASSERT_EQ(cu_Vector_size(&vector), 0);
+
+  int value = 42;
+  resize_result = cu_Vector_push_back(&vector, &value);
+  ASSERT_TRUE(cu_Vector_Error_is_none(&resize_result));
+  ASSERT_EQ(cu_Vector_size(&vector), 1);
+  ASSERT_EQ(*(int *)((unsigned char *)vector.data.value.ptr +
+                     0 * vector.layout.elem_size),
+      42);
 
   cu_Vector_destroy(&vector);
 }

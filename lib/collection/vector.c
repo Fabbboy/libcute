@@ -7,6 +7,7 @@
 #include "utility.h"
 #include <stdalign.h>
 #include <stddef.h>
+#include <string.h>
 
 CU_RESULT_IMPL(cu_Vector, cu_Vector, cu_Vector_Error)
 CU_OPTIONAL_IMPL(cu_Vector_Error, cu_Vector_Error)
@@ -58,6 +59,10 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t capacity) {
     return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID);
   }
 
+  if (capacity < vector->capacity) {
+    return cu_Vector_Error_none();
+  }
+
   if (cu_Slice_is_some(&vector->data)) {
     cu_Slice old_data = cu_Slice_unwrap(&vector->data);
     cu_Slice_Optional new_data =
@@ -92,4 +97,44 @@ void cu_Vector_destroy(cu_Vector *vector) {
   }
   vector->length = 0;
   vector->capacity = 0;
+}
+
+cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+
+  CU_LAYOUT_CHECK(vector->layout) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+  }
+
+  if (vector->length >= vector->capacity) {
+    cu_Vector_Error_Optional resize_result = cu_Vector_resize(
+        vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
+    if (cu_Vector_Error_is_some(&resize_result)) {
+      return resize_result;
+    }
+  }
+
+  void *dest = (unsigned char *)vector->data.value.ptr +
+               vector->length * vector->layout.elem_size;
+  memcpy(dest, elem, vector->layout.elem_size);
+  vector->length++;
+  return cu_Vector_Error_none();
+}
+
+cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+
+  CU_LAYOUT_CHECK(vector->layout) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+  }
+
+  if (vector->length == 0) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_OOB);
+  }
+
+  vector->length--;
+  void *src = (unsigned char *)vector->data.value.ptr +
+              vector->length * vector->layout.elem_size;
+  memcpy(out_elem, src, vector->layout.elem_size);
+  return cu_Vector_Error_none();
 }
