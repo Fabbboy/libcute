@@ -13,4 +13,4 @@ pages:
   only:
     - master
   tags:
-    - docker
+    - ubuntu
