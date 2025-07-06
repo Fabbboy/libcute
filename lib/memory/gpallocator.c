@@ -8,6 +8,8 @@ static cu_Slice_Optional cu_gpa_alloc(
 static cu_Slice_Optional cu_gpa_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_gpa_free(void *self, cu_Slice mem);
+static void cu_gpa_destroy_bucket(
+    cu_GPAllocator *gpa, struct cu_GPAllocator_BucketHeader *bucket);
 
 /* -------------------------------------------------------------------------- */
 /* Utility functions                                                          */
@@ -100,20 +102,19 @@ static struct cu_GPAllocator_LargeAlloc *cu_gpa_find_large(
 static cu_Slice_Optional cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
     size_t alignment, size_t obj_size, int idx) {
   struct cu_GPAllocator_BucketHeader *bucket = gpa->smallBuckets[idx];
-  while (bucket && bucket->objects.usedCount == bucket->objects.slotCount) {
-    bucket = bucket->next;
-  }
-
-  if (!bucket) {
+  if (!bucket || bucket->objects.usedCount == bucket->objects.slotCount) {
     bucket = cu_gpa_create_bucket(gpa, obj_size);
     if (!bucket) {
       return cu_Slice_none();
     }
-    bucket->next = gpa->smallBuckets[idx];
-    if (bucket->next) {
-      bucket->next->prev = bucket;
+    bucket->prev = gpa->smallBucketTails[idx];
+    bucket->next = NULL;
+    if (bucket->prev) {
+      bucket->prev->next = bucket;
+    } else {
+      gpa->smallBuckets[idx] = bucket;
     }
-    gpa->smallBuckets[idx] = bucket;
+    gpa->smallBucketTails[idx] = bucket;
   }
 
   size_t slot = 0;
@@ -230,7 +231,20 @@ static void cu_gpa_free_small(cu_GPAllocator *gpa,
   if (bucket->objects.usedCount > 0) {
     bucket->objects.usedCount--;
   }
-  CU_UNUSED(gpa);
+  if (bucket->objects.usedCount == 0) {
+    int idx = cu_gpa_index_from_size(bucket->objects.objectSize);
+    if (bucket->prev) {
+      bucket->prev->next = bucket->next;
+    } else {
+      gpa->smallBuckets[idx] = bucket->next;
+    }
+    if (bucket->next) {
+      bucket->next->prev = bucket->prev;
+    } else {
+      gpa->smallBucketTails[idx] = bucket->prev;
+    }
+    cu_gpa_destroy_bucket(gpa, bucket);
+  }
 }
 
 static void cu_gpa_free_large(
@@ -281,6 +295,7 @@ cu_Allocator cu_Allocator_GPAllocator(
       config.bucketSize ? config.bucketSize : CU_GPA_BUCKET_SIZE;
   for (int i = 0; i < CU_GPA_NUM_SMALL_BUCKETS; ++i) {
     alloc->smallBuckets[i] = NULL;
+    alloc->smallBucketTails[i] = NULL;
   }
   alloc->largeAllocs = NULL;
 
@@ -309,6 +324,7 @@ void cu_GPAllocator_destroy(cu_GPAllocator *alloc) {
       b = next;
     }
     alloc->smallBuckets[i] = NULL;
+    alloc->smallBucketTails[i] = NULL;
   }
   struct cu_GPAllocator_LargeAlloc *la = alloc->largeAllocs;
   while (la) {
