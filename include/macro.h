@@ -46,3 +46,16 @@
 #else
 #define CU_PLAT_LINUX 0
 #endif
+
+#define UNREACHABLE(msg)                                                       \
+  do {                                                                         \
+    fprintf(stderr, "Unreachable code reached (%s:%d): %s\n", __FILE__,        \
+        __LINE__, msg);                                                        \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)
+
+#define TODO(msg)                                                              \
+  do {                                                                         \
+    fprintf(stderr, "TODO (%s:%d): %s\n", __FILE__, __LINE__, msg);            \
+    exit(EXIT_FAILURE);                                                        \
+  } while (0)

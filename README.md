@@ -8,6 +8,7 @@ memory-features:
  - [ ] GP Allocator 
  - [ ] Slab Allocator
  - [ ] Arena Allocator 
+ - [ ] Fixed Allocator
 
 macro-features:
  - [X] IF_NULL
@@ -18,8 +19,8 @@ macro-features:
  - [X] BIT
  - [X] PLAT_X (platform macros)
  - [X] ARRAY_LEN
- - [ ] UNREACHABLE(msg) (with line and file)
- - [ ] TODO(msg) (with line and file)
+ - [X] UNREACHABLE(msg) (with line and file)
+ - [X] TODO(msg) (with line and file)
 
 object-features:
  - [X] generic optional
@@ -37,7 +38,7 @@ object-features:
 collection-features:
  - [ ] vector
  - [ ] hashmap
- - [ ] bitmap/bitset
+ - [X] bitmap/bitset
  - [ ] linked and doubly linked 
  - [ ] ring buffer 
 
@@ -66,6 +67,8 @@ Utility types and methods that do not belong to any specific subsystem can be pl
 Files that can be implemented in C should **not** use header-based implementations (i.e., avoid `static inline` unless necessary or otherways useless).
 
 If additional types are required for implementation or if you come up with something useful, add it to the list above.
+
+For structs which are exposed to the user but are not intended to be used should use `struct T` instead of `typedef struct`. But naming stays the same
 
 ## Commit Style
 
