@@ -10,17 +10,20 @@ TEST(String, AppendAndSubstring) {
   ASSERT_TRUE(cu_String_result_is_ok(&res));
   cu_String str = res.value;
 
-  EXPECT_EQ(str.length, 5u);
-  EXPECT_STREQ(str.data, "hello");
+  EXPECT_EQ(cu_String_length(&str), 5u);
+  cu_Slice view = cu_String_as_slice(&str);
+  EXPECT_STREQ((char *)view.ptr, "hello");
 
   EXPECT_EQ(CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
-  EXPECT_EQ(str.length, 12u);
-  EXPECT_STREQ(str.data, "hello, world");
+  EXPECT_EQ(cu_String_length(&str), 12u);
+  view = cu_String_as_slice(&str);
+  EXPECT_STREQ((char *)view.ptr, "hello, world");
 
   cu_String_Result sub = cu_String_substring(&str, 7, 5);
   ASSERT_TRUE(cu_String_result_is_ok(&sub));
   cu_String part = sub.value;
-  EXPECT_STREQ(part.data, "world");
+  cu_Slice part_view = cu_String_as_slice(&part);
+  EXPECT_STREQ((char *)part_view.ptr, "world");
 
   cu_String_destroy(&part);
   cu_String_destroy(&str);

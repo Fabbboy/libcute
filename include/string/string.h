@@ -6,6 +6,7 @@
 #include "memory/allocator.h"
 #include "object/result.h"
 #include "object/slice.h"
+#include "collection/vector.h"
 
 /**
  * @brief Error codes returned by string operations.
@@ -21,11 +22,24 @@ typedef enum {
  * @brief Dynamically allocated UTF-8 string.
  */
 typedef struct {
-  cu_Allocator allocator; /**< backing allocator */
-  char *data;             /**< character buffer */
-  size_t length;          /**< string length without null terminator */
-  size_t capacity;        /**< allocated capacity */
+  cu_Vector vec; /**< underlying vector storing the characters */
 } cu_String;
+
+/** Get the underlying memory as an optional slice. */
+static inline cu_Slice_Optional cu_String_data(const cu_String *str) {
+  return cu_Vector_data(&str->vec);
+}
+
+static inline size_t cu_String_length(const cu_String *str) {
+  return str->vec.length;
+}
+
+static inline size_t cu_String_capacity(const cu_String *str) {
+  if (str->vec.capacity == 0) {
+    return 0;
+  }
+  return str->vec.capacity - 1;
+}
 CU_RESULT_DECL(cu_String, cu_String, cu_String_Error)
 
 /** Initialize an empty string using the given allocator. */

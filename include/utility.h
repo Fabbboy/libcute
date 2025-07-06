@@ -2,6 +2,7 @@
 
 /** Round up to the next power of two. */
 #include <stddef.h>
+#include <stdalign.h>
 static inline size_t cu_next_pow2(size_t x) {
   if (x <= 1) {
     return 1;
