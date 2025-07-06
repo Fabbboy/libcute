@@ -16,6 +16,7 @@ sources = [
   'lib/collection/bitmap.c',
   'lib/hash/hash.c',
   'lib/string/string.c',
+  'lib/collection/vector.c',
 ]
 
 cute_lib = library(
@@ -32,12 +33,6 @@ cute_dep = declare_dependency(
 if get_option('tests').enabled()
   subdir('tests')
 endif
-
-executable(
-  'cute_test',
-  sources: ['example.c'],
-  dependencies: [cute_dep],
-)
 
 doxygen = find_program('doxygen', required: false)
 if doxygen.found()

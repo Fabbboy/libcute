@@ -1,5 +1,6 @@
 #include "memory/gpallocator.h"
 #include "macro.h"
+#include "utility.h"
 #include <string.h>
 
 /* Helper forward declarations */

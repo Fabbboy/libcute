@@ -1,63 +1,77 @@
-## libcute 
+## libcute
+
 libcute is a c-utility library.
 
 memory-features:
- - [X] Allocator interface
- - [X] Page Allocator 
- - [X] C Allocator
- - [X] GP Allocator 
- - [ ] Slab Allocator
- - [ ] Arena Allocator 
- - [ ] Fixed Allocator
+
+- [x] Allocator interface
+- [x] Page Allocator
+- [x] C Allocator
+- [x] GP Allocator
+- [ ] Slab Allocator
+- [ ] Arena Allocator
+- [ ] Fixed Allocator
 
 macro-features:
- - [X] IF_NULL
- - [X] IF_NOT_NULL
- - [X] DIE 
- - [X] UNUSED
- - [X] ALIGN_UP
- - [X] BIT
- - [X] PLAT_X (platform macros)
- - [X] ARRAY_LEN
- - [X] UNREACHABLE(msg) (with line and file)
- - [X] TODO(msg) (with line and file)
+
+- [x] IF_NULL
+- [x] IF_NOT_NULL
+- [x] DIE
+- [x] UNUSED
+- [x] ALIGN_UP
+- [x] BIT
+- [x] PLAT_X (platform macros)
+- [x] ARRAY_LEN
+- [x] UNREACHABLE(msg) (with line and file)
+- [x] TODO(msg) (with line and file)
 
 object-features:
- - [X] generic optional
- - [X] generic result
- - [X] slice (non-owning view of memory)
- - [ ] configurable passable (non global) logger 
- - [ ] string builder
- - [ ] generic error interface
 
- string-features:
- - [X] string buffer
- - [X] string views
+- [x] generic optional
+- [x] generic result
+- [x] slice (non-owning view of memory)
+- [ ] configurable passable (non global) logger
+- [ ] string builder
+- [ ] generic error interface
+
+string-features:
+
+- [x] string buffer
+- [x] string views
 - [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
 
 collection-features:
- - [ ] vector
- - [ ] hashmap
- - [X] bitset (local)
- - [X] bitmap (heaped)
-Bitsets keep their storage inline and provide fast, stack-friendly access.
-Bitmaps allocate their storage on the heap and are used for larger dynamic sets.
- - [ ] linked and doubly linked
- - [ ] ring buffer
 
- method-features:
- - [X] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
+- [x] vector
+- [ ] hashmap
+- [x] bitset (local)
+- [x] bitmap (heaped)
+      Bitsets keep their storage inline and provide fast, stack-friendly access.
+      Bitmaps allocate their storage on the heap and are used for larger dynamic sets.
+- [ ] linked and doubly linked
+- [ ] ring buffer
+
+method-features:
+
+- [x] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
+
+## Todo's
+
+- [ ] Rename optional generated methods to include `Optional` in the name
 
 ## Allocators
-All methods or datastructures that need an allocator should accept the generic allocator interface in a zig style 
- 
+
+All methods or datastructures that need an allocator should accept the generic allocator interface in a zig style
+
 ## Coding standards
+
 Code must be written and formatted in a `clang-format`-friendly way.
 
 All methods and structs that do not represent standard library types (e.g. `Int_Optional`) must be prefixed with `cu_`. This prefix is followed by the category (e.g. `Allocator`) and finally the actual type or function name.
 
 Example:
- - `PageAllocator` → `cu_Allocator_PageAllocator`
+
+- `PageAllocator` → `cu_Allocator_PageAllocator`
 
 The same naming convention applies to functions.
 
@@ -85,6 +99,7 @@ This project does **not** enforce conventional commits, but commits should follo
 - Avoid "Update", "Changes", or generic nonsense
 
 #### ✅ Good examples
+
 ```
 allocator: implement aligned page allocator
 macro: add CU_ARRAY_LEN
@@ -94,6 +109,7 @@ simd: add platform dispatch detection
 ```
 
 #### ❌ Bad examples
+
 ```
 update stuff
 misc fixes
@@ -113,5 +129,3 @@ GitHub Pages and GitLab Pages. Locally you can run:
 meson setup build
 ninja -C build docs
 ```
-
-
