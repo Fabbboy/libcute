@@ -38,9 +38,12 @@ object-features:
 collection-features:
  - [ ] vector
  - [ ] hashmap
- - [X] bitmap/bitset
- - [ ] linked and doubly linked 
- - [ ] ring buffer 
+ - [X] bitset (local)
+ - [ ] bitmap (heaped)
+Bitsets keep their storage inline and provide fast, stack-friendly access.
+Bitmaps allocate their storage on the heap and are used for larger dynamic sets.
+ - [ ] linked and doubly linked
+ - [ ] ring buffer
 
  method-features:
  - [X] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
