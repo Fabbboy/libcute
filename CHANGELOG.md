@@ -10,6 +10,7 @@ All notable changes to this project will be documented in this file. See [conven
 - corrected gitlab ci file name - ([3d4237e](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3d4237e0ae7f51552ee8f305850866339f6eff85)) - Fabrice
 - adds propper ci tag - ([ed4ee7b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ed4ee7b0a9ce79ca91173fee9f0c0dc99537241c)) - Fabrice
 - use different tag - ([eb54093](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/eb54093b52dfbca882885f3a8c6744531477b06b)) - Fabrice
+- fixes test case, feat: interduces push pop methods - ([05993a1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05993a1fd1b0d8cafe1e5b7933ed1c743b60b282)) - Fabrice
 
 ### Documentation
 
@@ -22,13 +23,15 @@ All notable changes to this project will be documented in this file. See [conven
 - clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
 - adds changelog - ([0bc1278](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0bc1278bbbce8395fe775b69a17c5577cae5f2db)) - Fabrice
 - ticked of bitmap in readme - ([656315c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/656315cda577df40dc79e4d1c64659e52c9f2d09)) - Fabrice
-- document vector type and functions
+- updates changelog - ([e3f3356](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/e3f3356052862c0d6a7241e1282099bb5bb5af2e)) - Fabrice
+- improve vector documentation - ([d70ff92](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d70ff92948baf5b0633518751aa086c7af2e13e4)) - Fabrice
 
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
+- adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 
 ### Refactoring
 
@@ -43,7 +46,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
-- split vector tests and cover pop_back
 
 ### Allocator
 

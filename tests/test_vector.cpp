@@ -6,7 +6,8 @@ extern "C" {
 }
 #include <gtest/gtest.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa, cu_PageAllocator *page) {
+static cu_Allocator create_allocator(
+    cu_GPAllocator *gpa, cu_PageAllocator *page) {
   cu_Allocator page_alloc = cu_Allocator_PageAllocator(page);
   cu_GPAllocator_Config cfg = {};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
@@ -94,6 +95,38 @@ TEST(Vector, PopBack) {
   EXPECT_EQ(out, 1);
   EXPECT_EQ(cu_Vector_size(&vector), 0u);
 
+  cu_Vector_destroy(&vector);
+  cu_GPAllocator_destroy(&gpa);
+}
+
+TEST(Vector, Copy) {
+  cu_PageAllocator page;
+  cu_GPAllocator gpa;
+  cu_Allocator alloc = create_allocator(&gpa, &page);
+
+  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_some(5));
+  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
+
+  cu_Vector vector = cu_Vector_result_unwrap(&res);
+
+  for (int i = 0; i < 5; ++i) {
+    cu_Vector_push_back(&vector, &i);
+  }
+  ASSERT_EQ(cu_Vector_size(&vector), 5u);
+  ASSERT_EQ(cu_Vector_capacity(&vector), 5u);
+
+  cu_Vector_Result copy_res = cu_Vector_copy(&vector);
+  ASSERT_TRUE(cu_Vector_result_is_ok(&copy_res));
+  cu_Vector copy = cu_Vector_result_unwrap(&copy_res);
+
+  ASSERT_EQ(cu_Vector_size(&copy), 5u);
+  ASSERT_EQ(cu_Vector_capacity(&copy), 5u);
+  for (int i = 0; i < 5; ++i) {
+    EXPECT_EQ(
+        *(int *)((unsigned char *)copy.data.value.ptr + i * sizeof(int)), i);
+  }
+
+  cu_Vector_destroy(&copy);
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }

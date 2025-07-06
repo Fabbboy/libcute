@@ -26,11 +26,11 @@ typedef struct {
  * @brief Error codes returned by vector operations.
  */
 typedef enum {
-  CU_VECTOR_ERROR_NONE = 0,    /**< success */
-  CU_VECTOR_ERROR_OOM,         /**< out of memory */
+  CU_VECTOR_ERROR_NONE = 0,       /**< success */
+  CU_VECTOR_ERROR_OOM,            /**< out of memory */
   CU_VECTOR_ERROR_INVALID_LAYOUT, /**< invalid element layout */
-  CU_VECTOR_ERROR_INVALID,     /**< invalid argument */
-  CU_VECTOR_ERROR_OOB,         /**< out of bounds access */
+  CU_VECTOR_ERROR_INVALID,        /**< invalid argument */
+  CU_VECTOR_ERROR_OOB,            /**< out of bounds access */
 } cu_Vector_Error;
 
 CU_RESULT_DECL(cu_Vector, cu_Vector, cu_Vector_Error)
@@ -55,7 +55,17 @@ static inline size_t cu_Vector_capacity(const cu_Vector *vector) {
   return vector->capacity;
 }
 
+static inline cu_Slice_Optional cu_Vector_data(const cu_Vector *vector) {
+  CU_IF_NULL(vector) { return cu_Slice_none(); }
+  return vector->data;
+}
+
 /** Append a new element to the end of the vector. */
 cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem);
 /** Remove the last element and copy it into @p out_elem. */
 cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem);
+
+cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem);
+cu_Vector_Error_Optional cu_Vector_pop_front(cu_Vector *vector, void *out_elem);
+
+cu_Vector_Result cu_Vector_copy(const cu_Vector *src);

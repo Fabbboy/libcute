@@ -138,3 +138,73 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
   memcpy(out_elem, src, vector->layout.elem_size);
   return cu_Vector_Error_none();
 }
+
+cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+
+  CU_LAYOUT_CHECK(vector->layout) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+  }
+
+  if (vector->length >= vector->capacity) {
+    cu_Vector_Error_Optional resize_result = cu_Vector_resize(
+        vector, vector->capacity == 0 ? 1 : vector->capacity * 2);
+    if (cu_Vector_Error_is_some(&resize_result)) {
+      return resize_result;
+    }
+  }
+
+  void *dest =
+      (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
+  memmove(
+      dest, vector->data.value.ptr, vector->length * vector->layout.elem_size);
+
+  memcpy(vector->data.value.ptr, elem, vector->layout.elem_size);
+  vector->length++;
+  return cu_Vector_Error_none();
+}
+
+cu_Vector_Error_Optional cu_Vector_pop_front(
+    cu_Vector *vector, void *out_elem) {
+  CU_IF_NULL(vector) { return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID); }
+
+  CU_LAYOUT_CHECK(vector->layout) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_INVALID_LAYOUT);
+  }
+
+  if (vector->length == 0) {
+    return cu_Vector_Error_some(CU_VECTOR_ERROR_OOB);
+  }
+
+  void *src = vector->data.value.ptr;
+  memcpy(out_elem, src, vector->layout.elem_size);
+
+  void *dest =
+      (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
+  memmove(dest, src, (vector->length - 1) * vector->layout.elem_size);
+
+  vector->length--;
+  return cu_Vector_Error_none();
+}
+
+cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
+  CU_IF_NULL(src) { return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID); }
+
+  CU_LAYOUT_CHECK(src->layout) {
+    return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
+  }
+
+  cu_Vector_Result result =
+      cu_Vector_create(src->allocator, src->layout, Size_some(src->capacity));
+  if (!cu_Vector_result_is_ok(&result)) {
+    return result;
+  }
+
+  if (src->length > 0) {
+    size_t size = src->length * src->layout.elem_size;
+    memcpy(result.value.data.value.ptr, src->data.value.ptr, size);
+    result.value.length = src->length;
+  }
+
+  return result;
+}
