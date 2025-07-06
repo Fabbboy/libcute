@@ -5,7 +5,7 @@ memory-features:
  - [X] Allocator interface
  - [X] Page Allocator 
  - [X] C Allocator
- - [ ] GP Allocator 
+ - [X] GP Allocator 
  - [ ] Slab Allocator
  - [ ] Arena Allocator 
  - [ ] Fixed Allocator

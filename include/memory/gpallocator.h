@@ -2,8 +2,8 @@
 
 /** @file gpallocator.h General purpose allocator. */
 
+#include "collection/bitset.h"
 #include "memory/allocator.h"
-#include "object/bitset.h"
 #include <stdbool.h>
 #include <stddef.h>
 
