@@ -22,6 +22,7 @@ All notable changes to this project will be documented in this file. See [conven
 - clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
 - adds changelog - ([0bc1278](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0bc1278bbbce8395fe775b69a17c5577cae5f2db)) - Fabrice
 - ticked of bitmap in readme - ([656315c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/656315cda577df40dc79e4d1c64659e52c9f2d09)) - Fabrice
+- document vector type and functions
 
 ### Features
 
@@ -42,6 +43,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
+- split vector tests and cover pop_back
 
 ### Allocator
 
