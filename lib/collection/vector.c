@@ -208,3 +208,20 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
 
   return result;
 }
+
+bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem) {
+  CU_IF_NULL(vector) { return false; }
+  CU_IF_NULL(index) { return false; }
+  CU_IF_NULL(out_elem) { return false; }
+
+  CU_LAYOUT_CHECK(vector->layout) { return false; }
+
+  if (*index >= vector->length) {
+    return false;
+  }
+
+  *out_elem = (unsigned char *)vector->data.value.ptr +
+              (*index) * vector->layout.elem_size;
+  (*index)++;
+  return true;
+}

@@ -69,3 +69,10 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem);
 cu_Vector_Error_Optional cu_Vector_pop_front(cu_Vector *vector, void *out_elem);
 
 cu_Vector_Result cu_Vector_copy(const cu_Vector *src);
+
+static inline bool cu_Vector_is_empty(const cu_Vector *vector) {
+  CU_IF_NULL(vector) { return true; }
+  return vector->length == 0;
+}
+
+bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem);
