@@ -1,48 +1,43 @@
 [changelog]
-body = """
-{% if version %}
-## {{ version }} - {{ timestamp | date(format="%Y-%m-%d") }}
-{% else %}
-## Unreleased
-{% endif %}
-{% for group, commits in commits | group_by(attribute="group") %}
-### {{ group | upper_first }}
-{% for commit in commits %}
-- {{ commit.message | trim }}
-{% endfor %}
-{% endfor %}
-"""
+path = "CHANGELOG.md"
+header = ""
+footer = ""
 trim = true
-render_always = true
-postprocessors = []
+sort_commits = "oldest"
+group_by = "type"
+filter_unconventional = true
 
-[git]
-# Do not require conventional commits
-conventional_commits = false
-filter_unconventional = false
-require_conventional = false
-split_commits = false
-
-commit_parsers = [
-    { message = "allocator", group = "Memory" },
-    { message = "macro", group = "Macros" },
-    { message = "simd", group = "SIMD" },
-    { message = "vector", group = "Collections" },
-    { message = "hashmap", group = "Collections" },
-    { message = "result", group = "Objects" },
-    { message = "optional", group = "Objects" },
-    { message = "platform", group = "Platform" },
-    { message = "array_len", group = "Macros" },
-    { message = "slice", group = "Core" },
-    { message = "fix", group = "Fixes" },
-    { message = "refactor", group = "Refactoring" },
-    { message = "doc", group = "Documentation" },
-    { message = ".*", group = "Misc" }
+# Conventional commit type to changelog section mappings
+commit_preprocessors = [
+    { pattern = "^feat", replace = "Features" },
+    { pattern = "^fix", replace = "Bug Fixes" },
+    { pattern = "^perf", replace = "Performance Improvements" },
+    { pattern = "^refactor", replace = "Refactoring" },
+    { pattern = "^docs", replace = "Documentation" },
+    { pattern = "^test", replace = "Tests" },
+    { pattern = "^chore", replace = "Maintenance" },
+    { pattern = "^ci", replace = "CI" },
+    { pattern = "^build", replace = "Build System" },
 ]
 
-filter_commits = false
+[git]
+conventional_commits = true
+filter_commits = true
+tag_pattern = ".*"
 protect_breaking_commits = true
-sort_commits = "oldest"
-topo_order_commits = true
-recurse_submodules = false
 
+[template]
+tag = "{{ tag.name }}"
+body = """
+{% for date, commits in commits | group_by(attribute="committer.date | date('%Y-%m-%d')") %}
+{{ date }}
+{{ "-" * date | length }}
+{% for group, group_commits in commits | group_by(attribute="group") %}
+{{ group | upper_first }}:
+{% for commit in group_commits %}
+  - {{ commit.message | trim }} ({{ commit.author.name }})
+{% endfor %}
+{% endfor %}
+
+{% endfor %}
+"""
