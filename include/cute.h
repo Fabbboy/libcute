@@ -10,4 +10,5 @@
 #include "object/optional.h"
 #include "object/result.h"
 #include "object/slice.h"
+#include "object/bitset.h"
 #include "string/string.h"
