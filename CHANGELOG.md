@@ -23,6 +23,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
+- general purpose allocator allows custom backing allocator - Codex
+- GP allocator config uses optional backing allocator - Codex
 
 ### Refactoring
 

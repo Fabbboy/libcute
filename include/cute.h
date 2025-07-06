@@ -4,6 +4,7 @@
 
 #include "memory/allocator.h"
 #include "memory/page.h"
+#include "memory/gpallocator.h"
 
 #include "hash/hash.h"
 #include "macro.h"

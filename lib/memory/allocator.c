@@ -62,3 +62,5 @@ cu_Allocator cu_Allocator_CAllocator(void) {
   allocator.freeFn = cu_CAllocator_Free;
   return allocator;
 }
+
+CU_OPTIONAL_IMPL(cu_Allocator, cu_Allocator)
