@@ -1,6 +1,11 @@
 
 ## [unreleased]
 
+### 🐛 Bug Fixes
+
+- Corrected gitlab ci file name
+- Adds propper ci tag
+
 ### 💼 Other
 
 - Fix optional type usage
