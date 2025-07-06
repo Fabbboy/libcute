@@ -27,8 +27,10 @@ cu_Bitmap_Optional cu_Bitmap_create(
 
 void cu_Bitmap_destroy(cu_Bitmap *bitmap) {
   if (bitmap->bits) {
+    size_t size =
+        (bitmap->bitCount + sizeof(size_t) * 8 - 1) / (sizeof(size_t) * 8);
     cu_Allocator_Free(bitmap->backingAllocator,
-        cu_Slice_create(bitmap->bits, bitmap->bitCount / 8));
+        cu_Slice_create(bitmap->bits, size * sizeof(size_t)));
     bitmap->bits = NULL;
     bitmap->bitCount = 0;
   }

@@ -36,13 +36,17 @@ All notable changes to this project will be documented in this file. See [conven
 - changed changelog format again - ([87b6f41](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/87b6f416f96f7d5fe2afc5b649d8648c626b41a9)) - Fabrice
 - formats the codebase, splits tests into individual tests, fixes bitset warnings - ([2009a07](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2009a07316e9a08f24c40d0e720dfb3772b7aa45)) - Fabrice
 
+- keep gtest wrap files when ignoring subprojects - Codex
+
 ### Tests
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
+- stress test large and small GP allocator allocations - Codex
 
 ### Allocator
 
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
+- gpa uses bitmap for variable bucket sizes - Fabrice
 
 ### Note
 

@@ -2,7 +2,7 @@
 
 /** @file gpallocator.h General purpose allocator. */
 
-#include "collection/bitset.h"
+#include "collection/bitmap.h"
 #include "memory/allocator.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -11,17 +11,15 @@
 #define CU_GPA_NUM_SMALL_BUCKETS 16 /**< number of size classes */
 #define CU_GPA_CANARY 0x9232a6ff85dff10fULL /**< bucket canary value */
 
-CU_BITSET_DECL(cu_GPAllocator_UsedBits, CU_GPA_BUCKET_SIZE)
-
 struct cu_GPAllocator_BucketHeader;
 
 /** Object pool used by buckets to track slot usage. */
 struct cu_GPAllocator_ObjectPool {
-  cu_GPAllocator_UsedBits_BitSet used; /**< slot usage bitset */
-  unsigned char *data;                 /**< pointer to slot memory */
-  size_t objectSize;                   /**< size of each object */
-  size_t slotCount;                    /**< total slots */
-  size_t usedCount;                    /**< number of used slots */
+  cu_Bitmap used;      /**< slot usage bitmap */
+  unsigned char *data; /**< pointer to slot memory */
+  size_t objectSize;   /**< size of each object */
+  size_t slotCount;    /**< total slots */
+  size_t usedCount;    /**< number of used slots */
 };
 
 /** Metadata for a single bucket of small allocations. */
