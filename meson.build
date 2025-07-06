@@ -1,6 +1,6 @@
 project(
   'libcute',
-  'c',
+  ['c', 'cpp'],
   version: '0.1',
   default_options: ['warning_level=3', 'c_std=c11', 'default_library=static'],
 )
@@ -28,7 +28,9 @@ cute_dep = declare_dependency(
   link_with: cute_lib,
 )
 
-add_subdirectory('tests')
+if get_option('tests').enabled()
+  subdir('tests')
+endif
 
 executable(
   'cute_test',
