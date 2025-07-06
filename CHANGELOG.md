@@ -20,13 +20,12 @@ All notable changes to this project will be documented in this file. See [conven
 - designing the gpa - ([fe09ec3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe09ec368895dfed564d7664363d68f1f8b55525)) - Fabrice
 - updated changelog - ([fe8eea2](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe8eea2dd4ec72a762e4dd7927d9c46a783b4d2e)) - Fabrice
 - clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
+- adds changelog - ([0bc1278](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0bc1278bbbce8395fe775b69a17c5577cae5f2db)) - Fabrice
 
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
-- general purpose allocator allows custom backing allocator - Codex
-- GP allocator config uses optional backing allocator - Codex
 
 ### Refactoring
 
@@ -35,6 +34,10 @@ All notable changes to this project will be documented in this file. See [conven
 - correcting branch name - ([80af898](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/80af8989a30e0886d746ea887464de4ee60b733a)) - Fabrice
 - changed template and moved file name - ([ac615b9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ac615b92133f8500b4ea82457d101c8014feb4d7)) - Fabrice
 - changed changelog format again - ([87b6f41](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/87b6f416f96f7d5fe2afc5b649d8648c626b41a9)) - Fabrice
+
+### Allocator
+
+- use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 
 ### String
 
