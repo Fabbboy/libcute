@@ -25,6 +25,7 @@ All notable changes to this project will be documented in this file. See [conven
 - ticked of bitmap in readme - ([656315c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/656315cda577df40dc79e4d1c64659e52c9f2d09)) - Fabrice
 - updates changelog - ([e3f3356](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/e3f3356052862c0d6a7241e1282099bb5bb5af2e)) - Fabrice
 - improve vector documentation - ([d70ff92](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d70ff92948baf5b0633518751aa086c7af2e13e4)) - Fabrice
+- adjusted changelog - ([4d30fb1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4d30fb172c6bac60eeb3adca3a23ab7999a4fc88)) - Fabrice
 
 ### Features
 
