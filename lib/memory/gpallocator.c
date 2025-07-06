@@ -2,8 +2,6 @@
 #include "macro.h"
 #include <string.h>
 
-CU_BITSET_IMPL(cu_GPAllocator_UsedBits, CU_GPA_BUCKET_SIZE)
-
 /* Helper forward declarations */
 static cu_Slice_Optional cu_gpa_alloc(
     void *self, size_t size, size_t alignment);
@@ -21,8 +19,7 @@ static size_t cu_gpa_calc_slot_count(cu_GPAllocator *gpa, size_t obj_size) {
   if (count == 0) {
     count = 1;
   }
-  size_t bit_cap = cu_GPAllocator_UsedBits_size();
-  return count > bit_cap ? bit_cap : count;
+  return count;
 }
 
 static struct cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
@@ -40,7 +37,13 @@ static struct cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
       (struct cu_GPAllocator_BucketHeader *)mem.value.ptr;
   bucket->prev = NULL;
   bucket->next = NULL;
-  cu_GPAllocator_UsedBits_clear_all(&bucket->objects.used);
+  cu_Bitmap_Optional bits = cu_Bitmap_create(gpa->backingAllocator, slot_count);
+  if (cu_Bitmap_is_none(&bits)) {
+    cu_Allocator_Free(
+        gpa->backingAllocator, cu_Slice_create(mem.value.ptr, total));
+    return NULL;
+  }
+  bucket->objects.used = bits.value;
   bucket->objects.data = (unsigned char *)(bucket + 1);
   bucket->objects.objectSize = obj_size;
   bucket->objects.slotCount = slot_count;
@@ -115,14 +118,14 @@ static cu_Slice_Optional cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
 
   size_t slot = 0;
   for (; slot < bucket->objects.slotCount; ++slot) {
-    if (!cu_GPAllocator_UsedBits_get(&bucket->objects.used, slot)) {
+    if (!cu_Bitmap_get(&bucket->objects.used, slot)) {
       break;
     }
   }
   if (slot == bucket->objects.slotCount) {
     return cu_Slice_none();
   }
-  cu_GPAllocator_UsedBits_set(&bucket->objects.used, slot);
+  cu_Bitmap_set(&bucket->objects.used, slot);
   bucket->objects.usedCount++;
   void *ptr = bucket->objects.data + slot * bucket->objects.objectSize;
   CU_UNUSED(alignment);
@@ -223,7 +226,7 @@ static cu_Slice_Optional cu_gpa_resize(
 
 static void cu_gpa_free_small(cu_GPAllocator *gpa,
     struct cu_GPAllocator_BucketHeader *bucket, size_t slot) {
-  cu_GPAllocator_UsedBits_clear(&bucket->objects.used, slot);
+  cu_Bitmap_clear(&bucket->objects.used, slot);
   if (bucket->objects.usedCount > 0) {
     bucket->objects.usedCount--;
   }
@@ -291,6 +294,7 @@ cu_Allocator cu_Allocator_GPAllocator(
 
 static void cu_gpa_destroy_bucket(
     cu_GPAllocator *gpa, struct cu_GPAllocator_BucketHeader *bucket) {
+  cu_Bitmap_destroy(&bucket->objects.used);
   cu_Allocator_Free(gpa->backingAllocator,
       cu_Slice_create(bucket, sizeof(*bucket) + bucket->objects.objectSize *
                                                     bucket->objects.slotCount));
