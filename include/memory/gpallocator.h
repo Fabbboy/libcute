@@ -41,6 +41,7 @@ struct cu_GPAllocator_LargeAlloc {
 typedef struct {
   cu_Allocator backingAllocator; /**< allocator used for all bookkeeping */
   struct cu_GPAllocator_BucketHeader *smallBuckets[CU_GPA_NUM_SMALL_BUCKETS];
+  struct cu_GPAllocator_BucketHeader *smallBucketTails[CU_GPA_NUM_SMALL_BUCKETS];
   struct cu_GPAllocator_LargeAlloc
       *largeAllocs;  /**< linked list of large allocations */
   size_t bucketSize; /**< requested bucket size */
