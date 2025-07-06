@@ -28,6 +28,8 @@ cute_dep = declare_dependency(
   link_with: cute_lib,
 )
 
+add_subdirectory('tests')
+
 executable(
   'cute_test',
   sources: ['example.c'],
