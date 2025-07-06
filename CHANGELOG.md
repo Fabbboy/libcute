@@ -1,10 +1,15 @@
 
 ## [unreleased]
 
+### 🚀 Features
+
+- Adds changelog
+
 ### 🐛 Bug Fixes
 
 - Corrected gitlab ci file name
 - Adds propper ci tag
+- Use different tag
 
 ### 💼 Other
 
@@ -22,5 +27,6 @@
 
 - Expand header documentation
 - Setup pages deployment
+- Adjusted readme
 
 
