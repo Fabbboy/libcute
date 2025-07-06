@@ -11,8 +11,8 @@
 #define CU_OPTIONAL_HEADER(NAME, T)                                            \
   NAME##_Optional NAME##_some(T value);                                        \
   NAME##_Optional NAME##_none(void);                                           \
-  bool NAME##_is_some(NAME##_Optional *opt);                                   \
-  bool NAME##_is_none(NAME##_Optional *opt);                                   \
+  bool NAME##_is_some(const NAME##_Optional *opt);                             \
+  bool NAME##_is_none(const NAME##_Optional *opt);                             \
   T NAME##_unwrap(NAME##_Optional *opt);
 
 /** Declare the optional struct and associated functions. */
@@ -38,9 +38,9 @@
     return opt;                                                                \
   }                                                                            \
                                                                                \
-  bool NAME##_is_some(NAME##_Optional *opt) { return opt->isSome; }            \
+  bool NAME##_is_some(const NAME##_Optional *opt) { return opt->isSome; }      \
                                                                                \
-  bool NAME##_is_none(NAME##_Optional *opt) { return !opt->isSome; }           \
+  bool NAME##_is_none(const NAME##_Optional *opt) { return !opt->isSome; }     \
                                                                                \
   T NAME##_unwrap(NAME##_Optional *opt) {                                      \
     if (!opt->isSome) {                                                        \
