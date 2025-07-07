@@ -43,7 +43,7 @@ string-features:
 collection-features:
 
 - [x] vector
-- [ ] hashmap
+- [x] hashmap (customizable hashing and optional lookup)
 - [x] bitset (local)
 - [x] bitmap (heaped)
       Bitsets keep their storage inline and provide fast, stack-friendly access.
