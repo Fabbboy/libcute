@@ -53,6 +53,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
+- add hashmap stress test
 
 ### Allocator
 

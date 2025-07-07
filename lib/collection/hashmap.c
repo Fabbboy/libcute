@@ -86,7 +86,13 @@ static cu_HashMap_Error_Optional cu_HashMap_rehash(
     if (!b->used || b->deleted) {
       continue;
     }
-    cu_HashMap_insert(map, b->key, b->value);
+    cu_HashMap_Bucket *slot = cu_HashMap_find_slot(map, b->key, b->hash);
+    slot->used = true;
+    slot->deleted = false;
+    slot->hash = b->hash;
+    slot->key = b->key;
+    slot->value = b->value;
+    map->length++;
   }
   if (old_buckets) {
     cu_Allocator_Free(map->allocator,
