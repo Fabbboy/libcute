@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -32,6 +32,9 @@ All notable changes to this project will be documented in this file. See [conven
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
+- add initial hashmap container - TBD
+- refine hashmap api with customizable hashing and iterator
+- return optional from hashmap get and wrap callbacks in optionals
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
@@ -50,6 +53,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
+- add hashmap stress test
 
 ### Allocator
 

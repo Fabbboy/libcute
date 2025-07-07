@@ -9,6 +9,7 @@ test_files = [
   'test_bitmap.cpp',
   'test_gpa_large.cpp',
   'test_hash.cpp',
+  'test_hashmap.cpp',
   'test_page_allocator.cpp',
   'test_vector.cpp',
 ]

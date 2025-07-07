@@ -17,6 +17,7 @@ sources = [
   'lib/hash/hash.c',
   'lib/string/string.c',
   'lib/collection/vector.c',
+  'lib/collection/hashmap.c',
 ]
 
 cute_lib = library(
