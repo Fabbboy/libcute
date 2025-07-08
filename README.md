@@ -31,7 +31,7 @@ object-features:
 - [x] generic result
 - [x] slice (non-owning view of memory)
 - [ ] configurable passable (non global) logger
-- [ ] string builder
+- [x] string builder / format buffer
 - [ ] generic error interface
 
 string-features:

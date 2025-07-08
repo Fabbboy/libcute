@@ -12,6 +12,7 @@ test_files = [
   'test_hashmap.cpp',
   'test_page_allocator.cpp',
   'test_vector.cpp',
+  'test_fmt.cpp',
 ]
 
 foreach test_file : test_files
