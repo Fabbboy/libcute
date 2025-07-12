@@ -12,8 +12,9 @@ extern "C" {
 
 #include "collection/bitmap.h"
 #include "collection/bitset.h"
-#include "collection/vector.h"
 #include "collection/hashmap.h"
+#include "collection/ring_buffer.h"
+#include "collection/vector.h"
 
 #include "hash/hash.h"
 #include "macro.h"
