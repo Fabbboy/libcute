@@ -1,4 +1,4 @@
-#Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file. See [conven
 - use different tag - ([eb54093](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/eb54093b52dfbca882885f3a8c6744531477b06b)) - Fabrice
 - fixes test case, feat: interduces push pop methods - ([05993a1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05993a1fd1b0d8cafe1e5b7933ed1c743b60b282)) - Fabrice
 - some fixes - ([f02ca19](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f02ca19a63709948575507baaf15f5a745388d72)) - Fabrice
+- adjusted name - ([3e8ec20](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3e8ec20a5a070f784286564bcf7c80d54144ea78)) - Fabrice
 
 ### Documentation
 
@@ -28,20 +29,15 @@ All notable changes to this project will be documented in this file. See [conven
 - improve vector documentation - ([d70ff92](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d70ff92948baf5b0633518751aa086c7af2e13e4)) - Fabrice
 - adjusted changelog - ([4d30fb1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4d30fb172c6bac60eeb3adca3a23ab7999a4fc88)) - Fabrice
 - adds docs - ([a9bfa79](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a9bfa7916eb35b1a0da42e02bda8fb220d597f3b)) - Fabrice
+- generated them correctly - ([9b42ae5](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9b42ae516ba840c5d4b66b6c2acf1feac9a471c0)) - Fabrice
 
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
-- add initial hashmap container - TBD
-- refine hashmap api with customizable hashing and iterator
-- return optional from hashmap get and wrap callbacks in optionals
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
-- implement ring buffer container
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
-- adds string clear utility
-- adds formatting buffer with append helpers
 
 ### Refactoring
 
@@ -56,16 +52,39 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
-- add hashmap stress test
+- stress arena reuse - ([2e502f9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2e502f95e766ee9e63e6ca13f0282b6a92397651)) - Fabrice
 
 ### Allocator
 
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 - optimize small bucket performance - ([fc40724](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fc407241090ec0a39ba98901d0786ef3609b1b56)) - Fabrice
+- refine arena and add resize tests - ([67ad00f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/67ad00f27054ac18def1fe2ea09216c35ff338c9)) - Fabrice
+- document resize scan - ([94e545b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/94e545b7773bca83663de6b69fa2dfddce83d9b0)) - Fabrice
+- refine arena tests and docs - ([434103f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/434103f42770ddbf8b2d0cbe88b44dd0d350ca75)) - Fabrice
+- avoid resize scan - ([21c2090](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/21c20900c775d99d642a6337c9be58dfe342f1e5)) - Fabrice
+- refine slab allocator and tests - ([b4fb7ed](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/b4fb7ed1bb6709f29711d9f4f814ade155cb8190)) - Fabrice
+
+### Collection
+
+- add ring buffer container - ([5555350](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/55553500bdc85f506de28725cf9816dd939b3f39)) - Fabrice
+
+### Fmt
+
+- add formatting buffer - ([85608ce](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/85608ce0772cc22193cebba2bfee8b263fbd5f39)) - Fabrice
+
+### Fmtbuffer
+
+- expand api and tests - ([4820ed4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4820ed4f2fd3c0f3aa24de95127b7bcf02787d08)) - Fabrice
+
+### Hashmap
+
+- clarify optional fallback - ([4ba5ea0](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4ba5ea01a59b7e84ced0cf546d8ac86180d33a61)) - Fabrice
+- add stress test and improve rehash - ([4eb55c9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4eb55c9b5fa4574d7e515888a5a09e2e99e13a38)) - Fabrice
 
 ### Merge
 
 - integrate master changes - ([986090c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/986090cc13ef015d33112790a6cbfa3ac5bc06e8)) - Fabrice
+- incorporate master - ([b3f5ffb](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/b3f5ffbe03a1e7972122cf1f480b0c0bcca29d02)) - Fabrice
 
 ### Note
 
