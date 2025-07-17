@@ -65,6 +65,7 @@ All notable changes to this project will be documented in this file. See [conven
 - add arena allocator
 - document arena allocator and add tests
 - stress test verifies chunk reuse
+- add resize tests and naming cleanup
 
 ### Merge
 

@@ -33,5 +33,8 @@ typedef struct {
 cu_Allocator cu_Allocator_ArenaAllocator(
     cu_ArenaAllocator *arena, cu_ArenaAllocator_Config config);
 
-/** Release all chunks allocated by the arena. */
+/**
+ * @brief Destroy an arena allocator and free all chunks.
+ * @param arena Pointer to the arena to destroy.
+ */
 void cu_ArenaAllocator_destroy(cu_ArenaAllocator *arena);

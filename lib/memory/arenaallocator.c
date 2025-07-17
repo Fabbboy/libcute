@@ -5,7 +5,7 @@
 #include <string.h>
 static void cu_arena_free(void *self, cu_Slice mem);
 
-struct cu_ArenaAlloc_Header {
+struct cu_ArenaAllocator_Header {
   size_t prev_offset;
 };
 
@@ -35,7 +35,7 @@ static cu_Slice_Optional cu_arena_alloc(
     alignment = 1;
   }
 
-  const size_t header_size = sizeof(struct cu_ArenaAlloc_Header);
+  const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   size_t chunk_size = arena->chunkSize ? arena->chunkSize : CU_ARENA_CHUNK_SIZE;
   struct cu_ArenaAllocator_Chunk *chunk = arena->current;
   size_t needed = alignment - 1 + size + header_size;
@@ -53,8 +53,8 @@ static cu_Slice_Optional cu_arena_alloc(
 
   size_t start = CU_ALIGN_UP(chunk->used + header_size, alignment);
   size_t header_pos = start - header_size;
-  struct cu_ArenaAlloc_Header *hdr =
-      (struct cu_ArenaAlloc_Header *)(chunk->data + header_pos);
+  struct cu_ArenaAllocator_Header *hdr =
+      (struct cu_ArenaAllocator_Header *)(chunk->data + header_pos);
   hdr->prev_offset = chunk->used;
   chunk->used = start + size;
   return cu_Slice_Optional_some(cu_Slice_create(chunk->data + start, size));
@@ -115,9 +115,9 @@ static void cu_arena_free(void *self, cu_Slice mem) {
     return;
   }
   size_t header_pos = ((unsigned char *)mem.ptr - chunk->data) -
-                      sizeof(struct cu_ArenaAlloc_Header);
-  struct cu_ArenaAlloc_Header *hdr =
-      (struct cu_ArenaAlloc_Header *)(chunk->data + header_pos);
+                      sizeof(struct cu_ArenaAllocator_Header);
+  struct cu_ArenaAllocator_Header *hdr =
+      (struct cu_ArenaAllocator_Header *)(chunk->data + header_pos);
   chunk->used = hdr->prev_offset;
   if (chunk->used == 0 && chunk->prev) {
     struct cu_ArenaAllocator_Chunk *prev = chunk->prev;
