@@ -62,11 +62,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 - optimize small bucket performance - ([fc40724](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fc407241090ec0a39ba98901d0786ef3609b1b56)) - Fabrice
-- add arena allocator
-- document arena allocator and add tests
-- stress test verifies chunk reuse
-- add resize tests and rename header struct
-- store chunk pointer in header to avoid linear scan on resize
 
 ### Merge
 
