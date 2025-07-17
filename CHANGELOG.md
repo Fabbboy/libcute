@@ -31,6 +31,13 @@ All notable changes to this project will be documented in this file. See [conven
 - adds docs - ([a9bfa79](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a9bfa7916eb35b1a0da42e02bda8fb220d597f3b)) - Fabrice
 - generated them correctly - ([9b42ae5](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9b42ae516ba840c5d4b66b6c2acf1feac9a471c0)) - Fabrice
 
+### Examples
+
+- add 6502 emulator example
+- improve 6502 example with file loading
+- restructure example build
+
+
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice

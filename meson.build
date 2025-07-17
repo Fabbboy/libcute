@@ -41,6 +41,8 @@ if get_option('tests').enabled()
   subdir('tests')
 endif
 
+subdir('examples')
+
 doxygen = find_program('doxygen', required: false)
 if doxygen.found()
   conf = configuration_data()
