@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -36,6 +36,8 @@ All notable changes to this project will be documented in this file. See [conven
 - add 6502 emulator example
 - improve 6502 example with file loading
 - restructure example build
+- add HTTP server example using libuv and libcute
+- improve HTTP server to serve requested files and avoid globals
 
 
 ### Features
