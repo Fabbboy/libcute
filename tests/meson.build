@@ -11,6 +11,7 @@ test_files = [
   'test_hash.cpp',
   'test_hashmap.cpp',
   'test_page_allocator.cpp',
+  'test_slab_allocator.cpp',
   'test_ring_buffer.cpp',
   'test_vector.cpp',
   'test_fmt.cpp',
