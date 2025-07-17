@@ -13,6 +13,8 @@ test_files = [
   'test_page_allocator.cpp',
   'test_slab_allocator.cpp',
   'test_ring_buffer.cpp',
+  'test_list.cpp',
+  'test_dlist.cpp',
   'test_vector.cpp',
   'test_arena_allocator.cpp',
   'test_fmt.cpp',

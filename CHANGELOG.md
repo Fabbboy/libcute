@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -67,6 +67,8 @@ All notable changes to this project will be documented in this file. See [conven
 ### Collection
 
 - add ring buffer container - ([5555350](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/55553500bdc85f506de28725cf9816dd939b3f39)) - Fabrice
+- add list and dlist containers
+- add insert-before/after operations and iterators for list containers
 
 ### Fmt
 
