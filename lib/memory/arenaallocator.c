@@ -5,10 +5,6 @@
 #include <string.h>
 static void cu_arena_free(void *self, cu_Slice mem);
 
-struct cu_ArenaAllocator_Header {
-  size_t prev_offset;
-};
-
 static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(
     cu_ArenaAllocator *arena, size_t size) {
   size_t total = sizeof(struct cu_ArenaAllocator_Chunk) + size;
@@ -55,6 +51,7 @@ static cu_Slice_Optional cu_arena_alloc(
   size_t header_pos = start - header_size;
   struct cu_ArenaAllocator_Header *hdr =
       (struct cu_ArenaAllocator_Header *)(chunk->data + header_pos);
+  hdr->chunk = chunk;
   hdr->prev_offset = chunk->used;
   chunk->used = start + size;
   return cu_Slice_Optional_some(cu_Slice_create(chunk->data + start, size));
@@ -70,17 +67,11 @@ static cu_Slice_Optional cu_arena_resize(
     cu_arena_free(self, mem);
     return cu_Slice_Optional_none();
   }
-  struct cu_ArenaAllocator_Chunk *chunk = arena->current;
-  // search linearly through active chunks
-  // TODO: maintain lookup to avoid O(n) scan
-  while (chunk) {
-    uintptr_t begin = (uintptr_t)chunk->data;
-    if ((uintptr_t)mem.ptr >= begin &&
-        (uintptr_t)mem.ptr < begin + chunk->size) {
-      break;
-    }
-    chunk = chunk->prev;
-  }
+  const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
+  struct cu_ArenaAllocator_Header *hdr =
+      (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
+                                          header_size);
+  struct cu_ArenaAllocator_Chunk *chunk = hdr->chunk;
   if (!chunk) {
     return cu_Slice_Optional_none();
   }
@@ -109,17 +100,17 @@ static void cu_arena_free(void *self, cu_Slice mem) {
   if (mem.ptr == NULL) {
     return;
   }
-  struct cu_ArenaAllocator_Chunk *chunk = arena->current;
+  const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
+  struct cu_ArenaAllocator_Header *hdr =
+      (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
+                                          header_size);
+  struct cu_ArenaAllocator_Chunk *chunk = hdr->chunk;
   if (!chunk) {
     return;
   }
   if ((unsigned char *)mem.ptr + mem.length != chunk->data + chunk->used) {
     return;
   }
-  size_t header_pos = ((unsigned char *)mem.ptr - chunk->data) -
-                      sizeof(struct cu_ArenaAllocator_Header);
-  struct cu_ArenaAllocator_Header *hdr =
-      (struct cu_ArenaAllocator_Header *)(chunk->data + header_pos);
   chunk->used = hdr->prev_offset;
   if (chunk->used == 0 && chunk->prev) {
     struct cu_ArenaAllocator_Chunk *prev = chunk->prev;

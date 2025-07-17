@@ -16,6 +16,12 @@ struct cu_ArenaAllocator_Chunk {
   unsigned char data[];                 /**< flexible array for storage */
 };
 
+/** metadata written before each allocation */
+struct cu_ArenaAllocator_Header {
+  struct cu_ArenaAllocator_Chunk *chunk; /**< owning chunk */
+  size_t prev_offset;                    /**< previous used offset */
+};
+
 /** Runtime state for the arena allocator. */
 typedef struct {
   cu_Allocator backingAllocator;           /**< chunk backing allocator */

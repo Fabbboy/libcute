@@ -66,6 +66,7 @@ All notable changes to this project will be documented in this file. See [conven
 - document arena allocator and add tests
 - stress test verifies chunk reuse
 - add resize tests and rename header struct
+- store chunk pointer in header to avoid linear scan on resize
 
 ### Merge
 
