@@ -50,7 +50,7 @@ collection-features:
       Bitsets keep their storage inline and provide fast, stack-friendly access.
       Bitmaps allocate their storage on the heap and are used for larger dynamic sets.
 - [ ] linked and doubly linked
-- [ ] ring buffer
+- [x] ring buffer
 
 method-features:
 
