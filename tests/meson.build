@@ -18,6 +18,7 @@ test_files = [
   'test_vector.cpp',
   'test_arena_allocator.cpp',
   'test_fmt.cpp',
+  'test_worker_pool.cpp',
 ]
 
 foreach test_file : test_files

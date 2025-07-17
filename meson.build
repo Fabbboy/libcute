@@ -24,6 +24,7 @@ sources = [
   'lib/collection/dlist.c',
   'lib/collection/vector.c',
   'lib/collection/hashmap.c',
+  'lib/worker/pool.c',
 ]
 
 cute_lib = library(

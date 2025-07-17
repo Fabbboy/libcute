@@ -56,6 +56,10 @@ method-features:
 
 - [x] hashing methods FNV-1A, Murmur3, SipHash (tied to hashmap, stil separate)
 
+worker-features:
+
+- [x] worker pool with stealing scheduler
+
 ## Todo's
 
 - [x] Rename optional generated methods to include `Optional` in the name

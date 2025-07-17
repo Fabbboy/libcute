@@ -1,5 +1,4 @@
 #pragma once
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,6 +18,8 @@ extern "C" {
 #include "collection/list.h"
 #include "collection/ring_buffer.h"
 #include "collection/vector.h"
+
+#include "worker/pool.h"
 
 #include "hash/hash.h"
 #include "macro.h"
