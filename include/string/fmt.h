@@ -3,41 +3,42 @@
 #include "string.h"
 #include <stdarg.h>
 
-/** Simple formatting buffer built on top of ::cu_String. */
+/** String builder for efficient string construction and formatting. */
 typedef struct {
   cu_String string;
-} cu_FmtBuffer;
+} cu_StrBuilder;
 
-/** Initialize a formatting buffer using the given allocator. */
-cu_FmtBuffer cu_FmtBuffer_init(cu_Allocator allocator);
+/** Initialize a string builder using the given allocator. */
+cu_StrBuilder cu_StrBuilder_init(cu_Allocator allocator);
 
-/** Release resources owned by the buffer. */
-void cu_FmtBuffer_destroy(cu_FmtBuffer *buf);
+/** Release resources owned by the string builder. */
+void cu_StrBuilder_destroy(cu_StrBuilder *builder);
 
-/** Clear the buffer contents without releasing memory. */
-void cu_FmtBuffer_clear(cu_FmtBuffer *buf);
+/** Clear the string builder contents without releasing memory. */
+void cu_StrBuilder_clear(cu_StrBuilder *builder);
 
 /**
- * @brief Append formatted data to the buffer.
+ * @brief Append formatted data to the string builder.
  *
  * Accepts printf-style format specifiers.
  */
-cu_String_Error cu_FmtBuffer_appendf(cu_FmtBuffer *buf, const char *fmt, ...);
+cu_String_Error cu_StrBuilder_appendf(
+    cu_StrBuilder *builder, const char *fmt, ...);
 
-/** Append a slice to the buffer. */
-cu_String_Error cu_FmtBuffer_append_slice(cu_FmtBuffer *buf, cu_Slice slice);
+/** Append a slice to the string builder. */
+cu_String_Error cu_StrBuilder_append_slice(
+    cu_StrBuilder *builder, cu_Slice slice);
 
-/** Append a C string to the buffer. */
-cu_String_Error cu_FmtBuffer_append_cstr(cu_FmtBuffer *buf, const char *cstr);
+/** Append a C string to the string builder. */
+cu_String_Error cu_StrBuilder_append_cstr(
+    cu_StrBuilder *builder, const char *cstr);
 
-/** Append another string. */
-cu_String_Error cu_FmtBuffer_append(cu_FmtBuffer *buf, const cu_String *str);
+/** Append another string to the string builder. */
+cu_String_Error cu_StrBuilder_append(
+    cu_StrBuilder *builder, const cu_String *str);
 
-/** View the buffer contents as a slice. */
-cu_Slice cu_FmtBuffer_as_slice(const cu_FmtBuffer *buf);
+/** View the string builder contents as a slice. */
+cu_Slice cu_StrBuilder_as_slice(const cu_StrBuilder *builder);
 
-/** View the buffer contents as a C string. */
-const char *cu_FmtBuffer_cstr(const cu_FmtBuffer *buf);
-
-/** Finalize the buffer and move out the underlying string. */
-cu_String cu_FmtBuffer_into_string(cu_FmtBuffer *buf);
+/** Finalize the string builder and create a new string with the contents. */
+cu_String_Result cu_StrBuilder_finalize(const cu_StrBuilder *builder);
