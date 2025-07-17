@@ -29,7 +29,12 @@ typedef struct {
   cu_Allocator_Optional backingAllocator; /**< optional custom allocator */
 } cu_ArenaAllocator_Config;
 
-/** Create an arena allocator using the given configuration. */
+/**
+ * @brief Create an arena allocator using the given configuration.
+ * @param arena   Target arena allocator instance.
+ * @param config  Initialization settings.
+ * @return A cu_Allocator value using the arena.
+ */
 cu_Allocator cu_Allocator_ArenaAllocator(
     cu_ArenaAllocator *arena, cu_ArenaAllocator_Config config);
 

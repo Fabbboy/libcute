@@ -6,7 +6,7 @@ extern "C" {
 
 TEST(ArenaAllocator, LifoVectors) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 256;
   cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
@@ -26,7 +26,9 @@ TEST(ArenaAllocator, LifoVectors) {
   cu_Vector_push_back(&v1, &i);
   cu_Vector_push_back(&v2, &f);
 
-  void *v2_ptr = v2.data.value.ptr;
+  cu_Slice_Optional data = cu_Vector_data(&v2);
+  ASSERT_TRUE(cu_Slice_Optional_is_some(&data));
+  void *v2_ptr = data.value.ptr;
 
   cu_Vector_destroy(&v2);
 
@@ -41,8 +43,9 @@ TEST(ArenaAllocator, LifoVectors) {
 
 TEST(ArenaAllocator, NonLifoAlloc) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Optional a = cu_Allocator_Alloc(alloc, 16, 8);
@@ -62,8 +65,9 @@ TEST(ArenaAllocator, NonLifoAlloc) {
 }
 TEST(ArenaAllocator, ChunkReuseStress) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Optional first = cu_Allocator_Alloc(alloc, 32, 8);
@@ -84,8 +88,9 @@ TEST(ArenaAllocator, ChunkReuseStress) {
 
 TEST(ArenaAllocator, ResizeGrowInPlace) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Optional block = cu_Allocator_Alloc(alloc, 16, 8);
@@ -103,8 +108,9 @@ TEST(ArenaAllocator, ResizeGrowInPlace) {
 
 TEST(ArenaAllocator, ResizeShrinkInPlace) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Optional block = cu_Allocator_Alloc(alloc, 32, 8);
@@ -122,8 +128,9 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
 
 TEST(ArenaAllocator, ResizeAllocNewBlock) {
   cu_ArenaAllocator arena;
-  cu_ArenaAllocator_Config cfg = {0};
+  cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Optional a = cu_Allocator_Alloc(alloc, 16, 8);
