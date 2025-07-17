@@ -25,3 +25,15 @@ TEST(String, AppendAndSubstring) {
   cu_String_destroy(&part);
   cu_String_destroy(&str);
 }
+
+TEST(String, Clear) {
+  cu_Allocator alloc = cu_Allocator_CAllocator();
+  cu_String_Result res = cu_String_from_cstr(alloc, "data");
+  ASSERT_TRUE(cu_String_result_is_ok(&res));
+  cu_String str = res.value;
+  EXPECT_EQ(str.length, 4u);
+  cu_String_clear(&str);
+  EXPECT_EQ(str.length, 0u);
+  EXPECT_STREQ(str.data, "");
+  cu_String_destroy(&str);
+}

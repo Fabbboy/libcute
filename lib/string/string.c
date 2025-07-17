@@ -39,6 +39,13 @@ void cu_String_destroy(cu_String *str) {
   str->capacity = 0;
 }
 
+void cu_String_clear(cu_String *str) {
+  str->length = 0;
+  if (str->data != NULL) {
+    str->data[0] = '\0';
+  }
+}
+
 cu_String_Result cu_String_from_cstr(cu_Allocator allocator, const char *cstr) {
   cu_String str = cu_String_init(allocator);
   size_t len = cstr ? strlen(cstr) : 0;

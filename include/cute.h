@@ -22,6 +22,7 @@ extern "C" {
 #include "object/result.h"
 #include "object/slice.h"
 #include "string/string.h"
+#include "string/fmt.h"
 
 #include "utility.h"
 #ifdef __cplusplus

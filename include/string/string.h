@@ -34,6 +34,9 @@ cu_String cu_String_init(cu_Allocator allocator);
 /** Release resources owned by the string. */
 void cu_String_destroy(cu_String *str);
 
+/** Clear the string contents without releasing memory. */
+void cu_String_clear(cu_String *str);
+
 /** Create a new string from a C string. */
 cu_String_Result cu_String_from_cstr(cu_Allocator allocator, const char *cstr);
 

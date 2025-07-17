@@ -31,13 +31,14 @@ object-features:
 - [x] generic result
 - [x] slice (non-owning view of memory)
 - [ ] configurable passable (non global) logger
-- [ ] string builder
+- [x] string builder / format buffer
 - [ ] generic error interface
 
 string-features:
 
 - [x] string buffer
 - [x] string views
+- [x] clear method
 - [ ] string utility methods (maybe powered by simd. crossplat fallbacks very important)
 
 collection-features:
