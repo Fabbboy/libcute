@@ -8,6 +8,7 @@ extern "C" {
 
 #include "memory/allocator.h"
 #include "memory/gpallocator.h"
+#include "memory/arenaallocator.h"
 #include "memory/slab.h"
 #include "memory/page.h"
 

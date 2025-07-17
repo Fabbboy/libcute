@@ -14,6 +14,7 @@ test_files = [
   'test_slab_allocator.cpp',
   'test_ring_buffer.cpp',
   'test_vector.cpp',
+  'test_arena_allocator.cpp',
   'test_fmt.cpp',
 ]
 

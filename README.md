@@ -8,8 +8,9 @@ memory-features:
 - [x] Page Allocator
 - [x] C Allocator
 - [x] GP Allocator
+- [ ] Slab Allocator
+- [x] Arena Allocator
 - [x] Slab Allocator
-- [ ] Arena Allocator
 - [ ] Fixed Allocator
 
 macro-features:
