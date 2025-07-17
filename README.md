@@ -9,7 +9,7 @@ memory-features:
 - [x] C Allocator
 - [x] GP Allocator
 - [ ] Slab Allocator
-- [ ] Arena Allocator
+- [x] Arena Allocator
 - [ ] Fixed Allocator
 
 macro-features:
