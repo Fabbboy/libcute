@@ -33,3 +33,27 @@ cu_String_Error cu_FmtBuffer_appendf(cu_FmtBuffer *buf, const char *fmt, ...) {
   buf->string.length = new_len;
   return CU_STRING_ERROR_NONE;
 }
+
+cu_String_Error cu_FmtBuffer_append_slice(cu_FmtBuffer *buf, cu_Slice slice) {
+  return cu_String_append_slice(&buf->string, slice);
+}
+
+cu_String_Error cu_FmtBuffer_append_cstr(cu_FmtBuffer *buf, const char *cstr) {
+  return cu_String_append_cstr(&buf->string, cstr);
+}
+
+cu_String_Error cu_FmtBuffer_append(cu_FmtBuffer *buf, const cu_String *str) {
+  return cu_String_append(&buf->string, str);
+}
+
+cu_Slice cu_FmtBuffer_as_slice(const cu_FmtBuffer *buf) {
+  return cu_String_as_slice(&buf->string);
+}
+
+const char *cu_FmtBuffer_cstr(const cu_FmtBuffer *buf) { return buf->string.data; }
+
+cu_String cu_FmtBuffer_into_string(cu_FmtBuffer *buf) {
+  cu_String out = buf->string;
+  buf->string = cu_String_init(out.allocator);
+  return out;
+}
