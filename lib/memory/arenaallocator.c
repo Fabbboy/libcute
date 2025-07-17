@@ -71,6 +71,8 @@ static cu_Slice_Optional cu_arena_resize(
     return cu_Slice_Optional_none();
   }
   struct cu_ArenaAllocator_Chunk *chunk = arena->current;
+  // search linearly through active chunks
+  // TODO: maintain lookup to avoid O(n) scan
   while (chunk) {
     uintptr_t begin = (uintptr_t)chunk->data;
     if ((uintptr_t)mem.ptr >= begin &&
