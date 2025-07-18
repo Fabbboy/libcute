@@ -13,11 +13,12 @@ cu_RingBuffer_Result cu_RingBuffer_create(
 
   cu_Slice_Optional data = cu_Slice_Optional_none();
   if (capacity > 0) {
-    data = cu_Allocator_Alloc(
+    cu_Slice_Result r = cu_Allocator_Alloc(
         allocator, capacity * layout.elem_size, layout.alignment);
-    if (cu_Slice_Optional_is_none(&data)) {
+    if (!cu_Slice_result_is_ok(&r)) {
       return cu_RingBuffer_result_error(CU_RINGBUFFER_ERROR_OOM);
     }
+    data = cu_Slice_Optional_some(r.value);
   }
 
   cu_RingBuffer rb;

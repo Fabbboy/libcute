@@ -10,18 +10,18 @@ struct cu_SlabAllocator_Slab {
   unsigned char data[];
 };
 
-static cu_Slice_Optional cu_slab_alloc(
+static cu_Slice_Result cu_slab_alloc(
     void *self, size_t size, size_t alignment);
-static cu_Slice_Optional cu_slab_resize(
+static cu_Slice_Result cu_slab_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_slab_free(void *self, cu_Slice mem);
 
 static struct cu_SlabAllocator_Slab *cu_create_slab(
     cu_SlabAllocator *alloc, size_t capacity) {
   size_t total = sizeof(struct cu_SlabAllocator_Slab) + capacity;
-  cu_Slice_Optional mem =
+  cu_Slice_Result mem =
       cu_Allocator_Alloc(alloc->backingAllocator, total, sizeof(void *));
-  if (cu_Slice_Optional_is_none(&mem)) {
+  if (!cu_Slice_result_is_ok(&mem)) {
     return NULL;
   }
   struct cu_SlabAllocator_Slab *slab =
@@ -32,11 +32,13 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
   return slab;
 }
 
-static cu_Slice_Optional cu_slab_alloc(
+static cu_Slice_Result cu_slab_alloc(
     void *self, size_t size, size_t alignment) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
   if (size == 0) {
-    return cu_Slice_Optional_none();
+    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+                        .errno = Size_Optional_none() };
+    return cu_Slice_result_error(err);
   }
   if (alignment == 0) {
     alignment = 1;
@@ -51,7 +53,9 @@ static cu_Slice_Optional cu_slab_alloc(
     size_t cap = size > alloc->slabSize ? size : alloc->slabSize;
     slab = cu_create_slab(alloc, cap);
     if (!slab) {
-      return cu_Slice_Optional_none();
+      cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+                          .errno = Size_Optional_none() };
+      return cu_Slice_result_error(err);
     }
     if (alloc->current) {
       alloc->current->next = slab;
@@ -64,24 +68,26 @@ static cu_Slice_Optional cu_slab_alloc(
 
   void *ptr = slab->data + aligned;
   slab->offset = aligned + size;
-  return cu_Slice_Optional_some(cu_Slice_create(ptr, size));
+  return cu_Slice_result_ok(cu_Slice_create(ptr, size));
 }
 
-static cu_Slice_Optional cu_slab_resize(
+static cu_Slice_Result cu_slab_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   if (mem.ptr == NULL) {
     return cu_slab_alloc(self, size, alignment);
   }
   if (size == 0) {
     cu_slab_free(self, mem);
-    return cu_Slice_Optional_none();
+    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+                        .errno = Size_Optional_none() };
+    return cu_Slice_result_error(err);
   }
   if (size <= mem.length) {
-    return cu_Slice_Optional_some(cu_Slice_create(mem.ptr, size));
+    return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }
-  cu_Slice_Optional new_mem = cu_slab_alloc(self, size, alignment);
-  if (cu_Slice_Optional_is_none(&new_mem)) {
-    return cu_Slice_Optional_none();
+  cu_Slice_Result new_mem = cu_slab_alloc(self, size, alignment);
+  if (!cu_Slice_result_is_ok(&new_mem)) {
+    return new_mem;
   }
   memcpy(new_mem.value.ptr, mem.ptr, mem.length < size ? mem.length : size);
   return new_mem;
