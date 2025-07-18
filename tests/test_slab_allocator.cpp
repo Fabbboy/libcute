@@ -62,3 +62,21 @@ TEST(SlabAllocator, ManyAllocations) {
 
   cu_SlabAllocator_destroy(&slab);
 }
+
+TEST(SlabAllocator, ReuseFreed) {
+  cu_SlabAllocator slab;
+  cu_SlabAllocator_Config cfg = {0};
+  cfg.slabSize = 64;
+  cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
+
+  cu_Slice_Optional a = cu_Allocator_Alloc(alloc, 16, 8);
+  ASSERT_TRUE(cu_Slice_Optional_is_some(&a));
+  void *ptr = a.value.ptr;
+  cu_Allocator_Free(alloc, a.value);
+
+  cu_Slice_Optional b = cu_Allocator_Alloc(alloc, 16, 8);
+  ASSERT_TRUE(cu_Slice_Optional_is_some(&b));
+  EXPECT_EQ(b.value.ptr, ptr);
+
+  cu_SlabAllocator_destroy(&slab);
+}

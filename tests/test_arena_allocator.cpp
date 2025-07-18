@@ -86,6 +86,36 @@ TEST(ArenaAllocator, ChunkReuseStress) {
   cu_ArenaAllocator_destroy(&arena);
 }
 
+TEST(ArenaAllocator, ReuseOldChunk) {
+  cu_ArenaAllocator arena;
+  cu_ArenaAllocator_Config cfg = {};
+  cfg.chunkSize = 128;
+  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
+
+  cu_Slice_Optional first = cu_Allocator_Alloc(alloc, 32, 8);
+  ASSERT_TRUE(cu_Slice_Optional_is_some(&first));
+  void *ptr = first.value.ptr;
+
+  cu_Slice_Optional blocks[20];
+  for (int i = 0; i < 20; ++i) {
+    blocks[i] = cu_Allocator_Alloc(alloc, 112, 8);
+    ASSERT_TRUE(cu_Slice_Optional_is_some(&blocks[i]));
+  }
+
+  cu_Allocator_Free(alloc, first.value);
+
+  cu_Slice_Optional again = cu_Allocator_Alloc(alloc, 32, 8);
+  ASSERT_TRUE(cu_Slice_Optional_is_some(&again));
+  EXPECT_EQ(again.value.ptr, ptr);
+
+  for (int i = 0; i < 20; ++i) {
+    cu_Allocator_Free(alloc, blocks[i].value);
+  }
+  cu_Allocator_Free(alloc, again.value);
+  cu_ArenaAllocator_destroy(&arena);
+}
+
 TEST(ArenaAllocator, ResizeGrowInPlace) {
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
@@ -97,8 +127,7 @@ TEST(ArenaAllocator, ResizeGrowInPlace) {
   ASSERT_TRUE(cu_Slice_Optional_is_some(&block));
   void *ptr = block.value.ptr;
 
-  cu_Slice_Optional resized =
-      cu_Allocator_Resize(alloc, block.value, 32, 8);
+  cu_Slice_Optional resized = cu_Allocator_Resize(alloc, block.value, 32, 8);
   ASSERT_TRUE(cu_Slice_Optional_is_some(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
@@ -117,8 +146,7 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
   ASSERT_TRUE(cu_Slice_Optional_is_some(&block));
   void *ptr = block.value.ptr;
 
-  cu_Slice_Optional resized =
-      cu_Allocator_Resize(alloc, block.value, 16, 8);
+  cu_Slice_Optional resized = cu_Allocator_Resize(alloc, block.value, 16, 8);
   ASSERT_TRUE(cu_Slice_Optional_is_some(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
@@ -139,8 +167,7 @@ TEST(ArenaAllocator, ResizeAllocNewBlock) {
   ASSERT_TRUE(cu_Slice_Optional_is_some(&b));
   void *old_ptr = a.value.ptr;
 
-  cu_Slice_Optional resized =
-      cu_Allocator_Resize(alloc, a.value, 64, 8);
+  cu_Slice_Optional resized = cu_Allocator_Resize(alloc, a.value, 64, 8);
   ASSERT_TRUE(cu_Slice_Optional_is_some(&resized));
   EXPECT_NE(resized.value.ptr, old_ptr);
 
