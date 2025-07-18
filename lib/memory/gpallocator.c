@@ -4,8 +4,7 @@
 #include <string.h>
 
 /* Helper forward declarations */
-static cu_Slice_Result cu_gpa_alloc(
-    void *self, size_t size, size_t alignment);
+static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);
 static cu_Slice_Result cu_gpa_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_gpa_free(void *self, cu_Slice mem);
@@ -106,8 +105,8 @@ static cu_Slice_Result cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
   if (!bucket || bucket->objects.usedCount == bucket->objects.slotCount) {
     bucket = cu_gpa_create_bucket(gpa, obj_size);
     if (!bucket) {
-      cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-                          .errno = Size_Optional_none() };
+      cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+          .errnum = Size_Optional_none()};
       return cu_Slice_result_error(err);
     }
     bucket->prev = gpa->smallBucketTails[idx];
@@ -127,8 +126,8 @@ static cu_Slice_Result cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
     }
   }
   if (slot == bucket->objects.slotCount) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   cu_Bitmap_set(&bucket->objects.used, slot);
@@ -163,12 +162,11 @@ static cu_Slice_Result cu_gpa_alloc_large(
   return cu_Slice_result_ok(meta->slice);
 }
 
-static cu_Slice_Result cu_gpa_alloc(
-    void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
   if (size == 0) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   if (alignment == 0) {
@@ -197,8 +195,8 @@ static cu_Slice_Result cu_gpa_resize(
   }
   if (size == 0) {
     cu_gpa_free(self, mem);
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
@@ -208,8 +206,8 @@ static cu_Slice_Result cu_gpa_resize(
   if (!bucket) {
     struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
     if (!meta) {
-      cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                          .errno = Size_Optional_none() };
+      cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+          .errnum = Size_Optional_none()};
       return cu_Slice_result_error(err);
     }
     cu_Slice_Result resized = cu_Allocator_Resize(

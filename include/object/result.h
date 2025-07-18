@@ -28,14 +28,14 @@
 /** Implement the typed result helpers. */
 #define CU_RESULT_IMPL(NAME, T, E)                                             \
   NAME##_Result NAME##_result_ok(T value) {                                    \
-    NAME##_Result result;                                                      \
+    NAME##_Result result = {0};                                                \
     result.value = value;                                                      \
     result.isOk = true;                                                        \
     return result;                                                             \
   }                                                                            \
                                                                                \
   NAME##_Result NAME##_result_error(E error) {                                 \
-    NAME##_Result result;                                                      \
+    NAME##_Result result = {0};                                                \
     result.error = error;                                                      \
     result.isOk = false;                                                       \
     return result;                                                             \

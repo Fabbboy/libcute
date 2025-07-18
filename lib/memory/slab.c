@@ -78,7 +78,7 @@ static cu_Slice_Result cu_slab_alloc(
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
   if (size == 0) {
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   if (alignment == 0) {
@@ -86,7 +86,7 @@ static cu_Slice_Result cu_slab_alloc(
   }
   if (alignment > alloc->slabSize) {
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
@@ -115,7 +115,7 @@ static cu_Slice_Result cu_slab_alloc(
     slab = cu_create_slab(alloc, count);
     if (!slab) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-          .errno = Size_Optional_none()};
+          .errnum = Size_Optional_none()};
       return cu_Slice_result_error(err);
     }
     slab->next = alloc->slabs;
@@ -146,7 +146,7 @@ static cu_Slice_Result cu_slab_resize(
   if (size == 0) {
     cu_slab_free(self, mem);
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
