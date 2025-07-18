@@ -1,16 +1,32 @@
 #pragma once
 
 #include "object/optional.h"
+#include <stddef.h>
 
 typedef enum {
-  CU_IO_ERROR_NONE = 0,    // No error / success case
-  CU_IO_ERROR_EOF,         // End of stream / file
-  CU_IO_ERROR_UNSUPPORTED, // Operation not supported
-  CU_IO_ERROR_INVALID,     // Invalid argument
-  CU_IO_ERROR_IO,          // Generic I/O failure
-  CU_IO_ERROR_PERMISSION,  // Permission denied
-  CU_IO_ERROR_CLOSED,      // Operation on closed stream
-  CU_IO_ERROR_WOULDBLOCK,  // Non-blocking op would block
+  CU_IO_ERROR_KIND_NOT_FOUND,
+  CU_IO_ERROR_KIND_PERMISSION_DENIED,
+  CU_IO_ERROR_KIND_CONNECTION_REFUSED,
+  CU_IO_ERROR_KIND_CONNECTION_RESET,
+  CU_IO_ERROR_KIND_CONNECTION_ABORTED,
+  CU_IO_ERROR_KIND_NOT_CONNECTED,
+  CU_IO_ERROR_KIND_ADDR_IN_USE,
+  CU_IO_ERROR_KIND_ADDR_NOT_AVAILABLE,
+  CU_IO_ERROR_KIND_BROKEN_PIPE,
+  CU_IO_ERROR_KIND_WOULD_BLOCK,
+  CU_IO_ERROR_KIND_INVALID_INPUT,
+  CU_IO_ERROR_KIND_INVALID_DATA,
+  CU_IO_ERROR_KIND_TIMED_OUT,
+  CU_IO_ERROR_KIND_INTERRUPTED,
+  CU_IO_ERROR_KIND_UNEXPECTED_EOF,
+  CU_IO_ERROR_KIND_UNSUPPORTED,
+  CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+  CU_IO_ERROR_KIND_OTHER
+} cu_Io_ErrorKind;
+
+typedef struct {
+  cu_Io_ErrorKind kind; // The kind of error
+  Size_Optional errno;
 } cu_Io_Error;
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
