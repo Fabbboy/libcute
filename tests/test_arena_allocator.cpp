@@ -54,7 +54,7 @@ TEST(ArenaAllocator, NonLifoAlloc) {
   cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, 16, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&b_res));
   cu_Slice b = b_res.value;
-  void *first = a.value.ptr;
+  void *first = a.ptr;
 
   cu_Allocator_Free(alloc, a);
   cu_Slice_Result c_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -155,7 +155,7 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
   ASSERT_TRUE(cu_Slice_result_is_ok(&block_res));
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
-  
+
   cu_Slice_Result resized = cu_Allocator_Resize(alloc, block, 16, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);

@@ -64,11 +64,6 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
     cu_Allocator_Free(alloc->backingAllocator, mem.value);
     return NULL;
   }
-  cu_Bitmap_Optional bits = cu_Bitmap_create(alloc->backingAllocator, count);
-  if (cu_Bitmap_Optional_is_none(&bits)) {
-    cu_Allocator_Free(alloc->backingAllocator, mem.value);
-    return NULL;
-  }
   struct cu_SlabAllocator_Slab *slab =
       (struct cu_SlabAllocator_Slab *)mem.value.ptr;
   slab->next = NULL;
