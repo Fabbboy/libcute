@@ -33,20 +33,30 @@ static cu_Slice_Optional cu_arena_alloc(
 
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   size_t chunk_size = arena->chunkSize ? arena->chunkSize : CU_ARENA_CHUNK_SIZE;
-  struct cu_ArenaAllocator_Chunk *chunk = arena->current;
   size_t needed = alignment - 1 + size + header_size;
-  if (!chunk || chunk->used + needed > chunk->size) {
-    size_t new_size = (needed > chunk_size) ? needed : chunk_size;
-    struct cu_ArenaAllocator_Chunk *new_chunk =
-        cu_arena_create_chunk(arena, new_size);
-    if (!new_chunk) {
-      return cu_Slice_Optional_none();
+
+  struct cu_ArenaAllocator_Chunk *chunk = arena->current;
+  struct cu_ArenaAllocator_Chunk *target = NULL;
+
+  for (struct cu_ArenaAllocator_Chunk *c = chunk; c; c = c->prev) {
+    size_t start = CU_ALIGN_UP(c->used + header_size, alignment);
+    if (start + size <= c->size) {
+      target = c;
+      break;
     }
-    new_chunk->prev = chunk;
-    arena->current = new_chunk;
-    chunk = new_chunk;
   }
 
+  if (!target) {
+    size_t new_size = (needed > chunk_size) ? needed : chunk_size;
+    target = cu_arena_create_chunk(arena, new_size);
+    if (!target) {
+      return cu_Slice_Optional_none();
+    }
+    target->prev = arena->current;
+    arena->current = target;
+  }
+
+  chunk = target;
   size_t start = CU_ALIGN_UP(chunk->used + header_size, alignment);
   size_t header_pos = start - header_size;
   struct cu_ArenaAllocator_Header *hdr =
@@ -75,8 +85,7 @@ static cu_Slice_Optional cu_arena_resize(
   if (!chunk) {
     return cu_Slice_Optional_none();
   }
-  if (chunk == arena->current &&
-      (unsigned char *)mem.ptr + mem.length == chunk->data + chunk->used) {
+  if ((unsigned char *)mem.ptr + mem.length == chunk->data + chunk->used) {
     size_t avail = chunk->size - (chunk->used - mem.length);
     if (size <= mem.length + avail) {
       chunk->used = (chunk->used - mem.length) + size;
@@ -112,12 +121,6 @@ static void cu_arena_free(void *self, cu_Slice mem) {
     return;
   }
   chunk->used = hdr->prev_offset;
-  if (chunk->used == 0 && chunk->prev) {
-    struct cu_ArenaAllocator_Chunk *prev = chunk->prev;
-    cu_Allocator_Free(arena->backingAllocator,
-        cu_Slice_create(chunk, sizeof(*chunk) + chunk->size));
-    arena->current = prev;
-  }
 }
 
 static void cu_arena_destroy_chunk(
