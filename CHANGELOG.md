@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file. See [conven
 ## [unreleased]
 
 ### Bug Fixes
+
+- guard worker pool tests with libuv macro
 
 - corrected gitlab ci file name - ([3d4237e](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3d4237e0ae7f51552ee8f305850866339f6eff85)) - Fabrice
 - adds propper ci tag - ([ed4ee7b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ed4ee7b0a9ce79ca91173fee9f0c0dc99537241c)) - Fabrice
@@ -39,6 +41,9 @@ All notable changes to this project will be documented in this file. See [conven
 
 
 ### Features
+
+- optional libuv worker pool with per-loop workers and scheduler
+- extend worker pool tests with timers and signal watchers
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice

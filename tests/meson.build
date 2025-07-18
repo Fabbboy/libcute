@@ -20,6 +20,10 @@ test_files = [
   'test_fmt.cpp',
 ]
 
+if get_option('worker_pool').enabled()
+  test_files += ['test_worker_pool.cpp']
+endif
+
 foreach test_file : test_files
   test_name = test_file.split('.')[0]
   exe = executable(test_name, test_file,

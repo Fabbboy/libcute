@@ -1,1 +1,2 @@
 option('tests', type: 'feature', value: 'disabled', description: 'Build tests')
+option('worker_pool', type: 'feature', value: 'disabled', description: 'Enable libuv worker pool')

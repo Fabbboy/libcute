@@ -28,6 +28,8 @@ extern "C" {
 #include "string/fmt.h"
 #include "string/string.h"
 
+#include "concurrency/worker_pool.h"
+
 #include "utility.h"
 #ifdef __cplusplus
 }

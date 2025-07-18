@@ -26,15 +26,25 @@ sources = [
   'lib/collection/hashmap.c',
 ]
 
+deps = []
+if get_option('worker_pool').enabled()
+  uv_dep = dependency('libuv', fallback: ['libuv', 'libuv_dep'])
+  sources += ['lib/concurrency/worker_pool.c']
+  deps += uv_dep
+  add_project_arguments('-DCU_USE_LIBUV', '-D_GNU_SOURCE', language: ['c', 'cpp'])
+endif
+
 cute_lib = library(
   'cute',
   sources,
   include_directories: includes,
+  dependencies: deps,
 )
 
 cute_dep = declare_dependency(
   include_directories: includes,
   link_with: cute_lib,
+  dependencies: deps,
 )
 
 if get_option('tests').enabled()
