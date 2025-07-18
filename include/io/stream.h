@@ -10,12 +10,15 @@ typedef enum {
   CU_STREAM_WHENCE_END = SEEK_END,
 } cu_Stream_Whence;
 
-typedef cu_Io_Error_Optional (*cu_Stream_ReadFunc)(void *self, cu_Slice out);
-typedef cu_Io_Error_Optional (*cu_Stream_WriteFunc)(void *self, cu_Slice in);
-typedef void (*cu_Stream_CloseFunc)(void *self);
+typedef cu_Io_Error_Optional (*cu_Stream_ReadFunc)(
+    void *self, cu_Slice out); // read present data or from seeker
+typedef cu_Io_Error_Optional (*cu_Stream_WriteFunc)(void *self,
+    const cu_Slice *in); // write to the stream (if supported at seeker)
+typedef void (*cu_Stream_CloseFunc)(
+    void *self); // close the stream and all related resources
 
-typedef cu_Io_Error_Optional (*cu_Stream_SeekFunc)(
-    void *self, size_t offset, cu_Stream_Whence whence);
+typedef cu_Io_Error_Optional (*cu_Stream_SeekFunc)(void *self, size_t offset,
+    cu_Stream_Whence whence); // seek in the stream, if supported
 
 typedef struct {
   void *self;
@@ -33,7 +36,7 @@ static inline cu_Io_Error_Optional cu_Stream_Read(
 }
 
 static inline cu_Io_Error_Optional cu_Stream_Write(
-    cu_Stream stream, cu_Slice in) {
+    cu_Stream stream, const cu_Slice *in) {
   return stream.writeFn(stream.self, in);
 }
 

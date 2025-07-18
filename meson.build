@@ -3,6 +3,7 @@ project(
   ['c', 'cpp'],
   version: '0.1',
   default_options: ['warning_level=3', 'c_std=c11', 'default_library=static'],
+  meson_version: '>=1.4.0',
 )
 
 includes = include_directories('include')
@@ -51,7 +52,7 @@ if doxygen.found()
 
   doxy_conf = configuration_data()
   doxy_conf.set('PROJECT_VERSION', meson.project_version())
-  doxy_conf.set('CONFIG_H', 'config.h')
+  doxy_conf.set('CONFIG_H', config_h.full_path())
   doxyfile = configure_file(input: 'docs/Doxyfile.in', output: 'Doxyfile', configuration: doxy_conf)
 
   run_target('docs', command: [doxygen, doxyfile])
