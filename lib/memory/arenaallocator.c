@@ -73,7 +73,6 @@ static cu_Slice_Result cu_arena_alloc(
 
 static cu_Slice_Result cu_arena_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
-  cu_ArenaAllocator *arena = (cu_ArenaAllocator *)self;
   if (mem.ptr == NULL) {
     return cu_arena_alloc(self, size, alignment);
   }
@@ -113,7 +112,7 @@ static cu_Slice_Result cu_arena_resize(
 }
 
 static void cu_arena_free(void *self, cu_Slice mem) {
-  cu_ArenaAllocator *arena = (cu_ArenaAllocator *)self;
+  CU_UNUSED(self);
   if (mem.ptr == NULL) {
     return;
   }

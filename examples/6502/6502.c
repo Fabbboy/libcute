@@ -103,12 +103,16 @@ void cu_6502_step(cu_6502 *cpu) {
     update_zn(cpu, cpu->x);
     break;
   case 0x8D: { // STA absolute
-    uint16_t addr = mem[cpu->pc++] | ((uint16_t)mem[cpu->pc++] << 8);
+    uint8_t lo = mem[cpu->pc++];
+    uint8_t hi = mem[cpu->pc++];
+    uint16_t addr = (uint16_t)lo | ((uint16_t)hi << 8);
     mem[addr] = cpu->a;
     break;
   }
   case 0xAD: { // LDA absolute
-    uint16_t addr = mem[cpu->pc++] | ((uint16_t)mem[cpu->pc++] << 8);
+    uint8_t lo = mem[cpu->pc++];
+    uint8_t hi = mem[cpu->pc++];
+    uint16_t addr = (uint16_t)lo | ((uint16_t)hi << 8);
     cpu->a = mem[addr];
     update_zn(cpu, cpu->a);
     break;
