@@ -20,14 +20,14 @@ static cu_Slice_Result cu_PageAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
   if (size == 0) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
   if (alignment == 0 || (alignment & (alignment - 1)) != 0) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
@@ -45,16 +45,16 @@ static cu_Slice_Result cu_PageAllocator_Alloc(
   base_ptr = mmap(NULL, overalloc_len, PROT_READ | PROT_WRITE,
       MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   if (base_ptr == MAP_FAILED) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 #elif defined(_WIN32)
   base_ptr = VirtualAlloc(
       NULL, overalloc_len, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
   if (base_ptr == NULL) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 #endif
@@ -81,16 +81,15 @@ static cu_Slice_Result cu_PageAllocator_Alloc(
   }
 #endif
 
-  return cu_Slice_result_ok(
-      cu_Slice_create((void *)aligned_addr, aligned_len));
+  return cu_Slice_result_ok(cu_Slice_create((void *)aligned_addr, aligned_len));
 }
 
 static cu_Slice_Result cu_PageAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   if (size == 0) {
     cu_PageAllocator_Free(self, mem);
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 

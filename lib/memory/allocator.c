@@ -15,8 +15,8 @@ static cu_Slice_Result cu_CAllocator_Alloc(
   CU_UNUSED(self);
 
   if (size == 0) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
@@ -24,8 +24,8 @@ static cu_Slice_Result cu_CAllocator_Alloc(
   void *ptr = malloc(alignedSize);
 
   CU_IF_NULL(ptr) {
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
@@ -39,8 +39,8 @@ static cu_Slice_Result cu_CAllocator_Resize(
 
   if (size == 0) {
     cu_CAllocator_Free(NULL, mem);
-    cu_Io_Error err = { .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-                        .errno = Size_Optional_none() };
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 

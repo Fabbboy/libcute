@@ -25,8 +25,8 @@ typedef enum {
 } cu_Io_ErrorKind;
 
 typedef struct {
-  cu_Io_ErrorKind kind; // The kind of error
-  Size_Optional errno;
+  cu_Io_ErrorKind kind; /**< error kind */
+  Size_Optional errnum; /**< optional errno value */
 } cu_Io_Error;
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)

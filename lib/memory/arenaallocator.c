@@ -26,7 +26,7 @@ static cu_Slice_Result cu_arena_alloc(
   cu_ArenaAllocator *arena = (cu_ArenaAllocator *)self;
   if (size == 0) {
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   if (alignment == 0) {
@@ -53,7 +53,7 @@ static cu_Slice_Result cu_arena_alloc(
     target = cu_arena_create_chunk(arena, new_size);
     if (!target) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-          .errno = Size_Optional_none()};
+          .errnum = Size_Optional_none()};
       return cu_Slice_result_error(err);
     }
     target->prev = arena->current;
@@ -79,7 +79,7 @@ static cu_Slice_Result cu_arena_resize(
   if (size == 0) {
     cu_arena_free(self, mem);
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
@@ -89,7 +89,7 @@ static cu_Slice_Result cu_arena_resize(
   struct cu_ArenaAllocator_Chunk *chunk = hdr->chunk;
   if (!chunk) {
     cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
   if ((unsigned char *)mem.ptr + mem.length == chunk->data + chunk->used) {
