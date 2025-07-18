@@ -1,5 +1,7 @@
 #include "object/slice.h"
 #include "object/optional.h"
+#include "object/result.h"
+#include "io/error.h"
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {
   cu_Slice slice;
@@ -9,3 +11,4 @@ cu_Slice cu_Slice_create(void *ptr, size_t length) {
 }
 
 CU_OPTIONAL_IMPL(cu_Slice, cu_Slice)
+CU_RESULT_IMPL(cu_Slice, cu_Slice, cu_Io_Error)

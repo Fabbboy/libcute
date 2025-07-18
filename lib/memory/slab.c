@@ -27,9 +27,8 @@ struct cu_SlabAllocator_Slab {
   unsigned char data[];               /**< backing storage */
 };
 
-static cu_Slice_Optional cu_slab_alloc(
-    void *self, size_t size, size_t alignment);
-static cu_Slice_Optional cu_slab_resize(
+static cu_Slice_Result cu_slab_alloc(void *self, size_t size, size_t alignment);
+static cu_Slice_Result cu_slab_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_slab_free(void *self, cu_Slice mem);
 
@@ -55,9 +54,14 @@ static size_t cu_find_run(struct cu_SlabAllocator_Slab *slab, size_t need) {
 static struct cu_SlabAllocator_Slab *cu_create_slab(
     cu_SlabAllocator *alloc, size_t count) {
   size_t total = sizeof(struct cu_SlabAllocator_Slab) + count * alloc->slabSize;
-  cu_Slice_Optional mem =
+  cu_Slice_Result mem =
       cu_Allocator_Alloc(alloc->backingAllocator, total, alignof(max_align_t));
-  if (cu_Slice_Optional_is_none(&mem)) {
+  if (!cu_Slice_result_is_ok(&mem)) {
+    return NULL;
+  }
+  cu_Bitmap_Optional bits = cu_Bitmap_create(alloc->backingAllocator, count);
+  if (cu_Bitmap_Optional_is_none(&bits)) {
+    cu_Allocator_Free(alloc->backingAllocator, mem.value);
     return NULL;
   }
   cu_Bitmap_Optional bits = cu_Bitmap_create(alloc->backingAllocator, count);
@@ -74,17 +78,21 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
   return slab;
 }
 
-static cu_Slice_Optional cu_slab_alloc(
+static cu_Slice_Result cu_slab_alloc(
     void *self, size_t size, size_t alignment) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
   if (size == 0) {
-    return cu_Slice_Optional_none();
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+    return cu_Slice_result_error(err);
   }
   if (alignment == 0) {
     alignment = 1;
   }
   if (alignment > alloc->slabSize) {
-    return cu_Slice_Optional_none();
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+    return cu_Slice_result_error(err);
   }
 
   size_t total = size + sizeof(struct cu_SlabAllocator_Header);
@@ -111,7 +119,9 @@ static cu_Slice_Optional cu_slab_alloc(
     size_t count = need > def ? need : def;
     slab = cu_create_slab(alloc, count);
     if (!slab) {
-      return cu_Slice_Optional_none();
+      cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+          .errno = Size_Optional_none()};
+      return cu_Slice_result_error(err);
     }
     slab->next = alloc->slabs;
     alloc->slabs = slab;
@@ -128,12 +138,11 @@ static cu_Slice_Optional cu_slab_alloc(
   hdr->slab = slab;
   hdr->index = index;
   hdr->count = need;
-
-  return cu_Slice_Optional_some(
+  return cu_Slice_result_ok(
       cu_Slice_create(ptr + sizeof(struct cu_SlabAllocator_Header), size));
 }
 
-static cu_Slice_Optional cu_slab_resize(
+static cu_Slice_Result cu_slab_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
   if (mem.ptr == NULL) {
@@ -141,7 +150,9 @@ static cu_Slice_Optional cu_slab_resize(
   }
   if (size == 0) {
     cu_slab_free(self, mem);
-    return cu_Slice_Optional_none();
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errno = Size_Optional_none()};
+    return cu_Slice_result_error(err);
   }
 
   struct cu_SlabAllocator_Header *hdr =
@@ -151,12 +162,12 @@ static cu_Slice_Optional cu_slab_resize(
   size_t current =
       hdr->count * alloc->slabSize - sizeof(struct cu_SlabAllocator_Header);
   if (size <= current && alignment <= alloc->slabSize) {
-    return cu_Slice_Optional_some(cu_Slice_create(mem.ptr, size));
+    return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }
 
-  cu_Slice_Optional new_mem = cu_slab_alloc(self, size, alignment);
-  if (cu_Slice_Optional_is_none(&new_mem)) {
-    return cu_Slice_Optional_none();
+  cu_Slice_Result new_mem = cu_slab_alloc(self, size, alignment);
+  if (!cu_Slice_result_is_ok(&new_mem)) {
+    return new_mem;
   }
   memcpy(new_mem.value.ptr, mem.ptr, mem.length < size ? mem.length : size);
   cu_slab_free(self, mem);

@@ -7,10 +7,10 @@
 #include "object/slice.h"
 
 /** Allocation function signature. */
-typedef cu_Slice_Optional (*cu_Allocator_AllocFunc)(
+typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(
     void *self, size_t size, size_t alignment);
 /** Resize function signature. */
-typedef cu_Slice_Optional (*cu_Allocator_ReszizeFunc)(
+typedef cu_Slice_Result (*cu_Allocator_ReszizeFunc)(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 /** Free function signature. */
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
@@ -24,13 +24,13 @@ typedef struct {
 } cu_Allocator;
 
 /** Allocate memory using the allocator. */
-static inline cu_Slice_Optional cu_Allocator_Alloc(
+static inline cu_Slice_Result cu_Allocator_Alloc(
     cu_Allocator allocator, size_t size, size_t alignment) {
   return allocator.allocFn(allocator.self, size, alignment);
 }
 
 /** Resize a previously allocated block. */
-static inline cu_Slice_Optional cu_Allocator_Resize(
+static inline cu_Slice_Result cu_Allocator_Resize(
     cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
   return allocator.resizeFn(allocator.self, mem, size, alignment);
 }

@@ -12,10 +12,11 @@ TEST(Allocator, GPALargeAllocFree) {
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   const size_t big = 100 * 1024 * 1024; // 100 MiB
-  cu_Slice_Optional mem = cu_Allocator_Alloc(alloc, big, 16);
-  ASSERT_TRUE(cu_Slice_Optional_is_some(&mem));
-  memset(mem.value.ptr, 0xCD, mem.value.length);
-  cu_Allocator_Free(alloc, mem.value);
+  cu_Slice_Result mem_res = cu_Allocator_Alloc(alloc, big, 16);
+  ASSERT_TRUE(cu_Slice_result_is_ok(&mem_res));
+  cu_Slice mem = mem_res.value;
+  memset(mem.ptr, 0xCD, mem.length);
+  cu_Allocator_Free(alloc, mem);
 
   const size_t small = 4096; // 4 KiB blocks
   const size_t total = 100 * 1024 * 1024;
@@ -23,10 +24,11 @@ TEST(Allocator, GPALargeAllocFree) {
   std::vector<cu_Slice> blocks;
   blocks.reserve(count);
   for (size_t i = 0; i < count; ++i) {
-    cu_Slice_Optional s = cu_Allocator_Alloc(alloc, small, 16);
-    ASSERT_TRUE(cu_Slice_Optional_is_some(&s));
-    memset(s.value.ptr, 0xEF, s.value.length);
-    blocks.push_back(s.value);
+    cu_Slice_Result s_res = cu_Allocator_Alloc(alloc, small, 16);
+    ASSERT_TRUE(cu_Slice_result_is_ok(&s_res));
+    cu_Slice s = s_res.value;
+    memset(s.ptr, 0xEF, s.length);
+    blocks.push_back(s);
   }
   for (cu_Slice s : blocks) {
     cu_Allocator_Free(alloc, s);

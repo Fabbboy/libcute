@@ -67,9 +67,9 @@ static cu_HashMap_Error_Optional cu_HashMap_rehash(
     new_cap = 16;
   }
   new_cap = cu_next_pow2(new_cap);
-  cu_Slice_Optional mem = cu_Allocator_Alloc(map->allocator,
+  cu_Slice_Result mem = cu_Allocator_Alloc(map->allocator,
       new_cap * sizeof(cu_HashMap_Bucket), alignof(cu_HashMap_Bucket));
-  if (cu_Slice_Optional_is_none(&mem)) {
+  if (!cu_Slice_result_is_ok(&mem)) {
     return cu_HashMap_Error_Optional_some(CU_HASHMAP_ERROR_OOM);
   }
   cu_HashMap_Bucket *new_buckets = (cu_HashMap_Bucket *)mem.value.ptr;
@@ -116,9 +116,9 @@ cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
     cap = Size_Optional_unwrap(&initial_capacity);
   }
   cap = cu_next_pow2(cap);
-  cu_Slice_Optional mem = cu_Allocator_Alloc(
+  cu_Slice_Result mem = cu_Allocator_Alloc(
       allocator, cap * sizeof(cu_HashMap_Bucket), alignof(cu_HashMap_Bucket));
-  if (cu_Slice_Optional_is_none(&mem)) {
+  if (!cu_Slice_result_is_ok(&mem)) {
     return cu_HashMap_result_error(CU_HASHMAP_ERROR_OOM);
   }
   cu_HashMap_Bucket *buckets = (cu_HashMap_Bucket *)mem.value.ptr;
@@ -191,14 +191,14 @@ cu_HashMap_Error_Optional cu_HashMap_insert(
   slot->deleted = false;
   slot->hash = hash;
 
-  cu_Slice_Optional key_mem = cu_Allocator_Alloc(
+  cu_Slice_Result key_mem = cu_Allocator_Alloc(
       map->allocator, map->key_layout.elem_size, map->key_layout.alignment);
-  if (cu_Slice_Optional_is_none(&key_mem)) {
+  if (!cu_Slice_result_is_ok(&key_mem)) {
     return cu_HashMap_Error_Optional_some(CU_HASHMAP_ERROR_OOM);
   }
-  cu_Slice_Optional val_mem = cu_Allocator_Alloc(
+  cu_Slice_Result val_mem = cu_Allocator_Alloc(
       map->allocator, map->value_layout.elem_size, map->value_layout.alignment);
-  if (cu_Slice_Optional_is_none(&val_mem)) {
+  if (!cu_Slice_result_is_ok(&val_mem)) {
     cu_Allocator_Free(map->allocator, key_mem.value);
     return cu_HashMap_Error_Optional_some(CU_HASHMAP_ERROR_OOM);
   }
