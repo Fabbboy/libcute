@@ -59,9 +59,28 @@ TEST(SlabAllocator, ManyAllocations) {
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   for (int i = 0; i < 1000; ++i) {
-    cu_Slice_Result r = cu_Allocator_Alloc(alloc, 8, 4);
-    ASSERT_TRUE(cu_Slice_result_is_ok(&r));
+    cu_Slice_Result s_res = cu_Allocator_Alloc(alloc, 8, 4);
+    ASSERT_TRUE(cu_Slice_result_is_ok(&s_res));
   }
+
+  cu_SlabAllocator_destroy(&slab);
+}
+
+TEST(SlabAllocator, ReuseFreed) {
+  cu_SlabAllocator slab;
+  cu_SlabAllocator_Config cfg = {0};
+  cfg.slabSize = 64;
+  cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
+
+  cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);
+  ASSERT_TRUE(cu_Slice_result_is_ok(&a_res));
+  cu_Slice a = a_res.value;
+  void *ptr = a.ptr;
+  cu_Allocator_Free(alloc, a);
+
+  cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, 16, 8);
+  ASSERT_TRUE(cu_Slice_result_is_ok(&b_res));
+  EXPECT_EQ(b_res.value.ptr, ptr);
 
   cu_SlabAllocator_destroy(&slab);
 }
