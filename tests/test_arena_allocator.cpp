@@ -97,7 +97,6 @@ TEST(ArenaAllocator, ReuseOldChunk) {
   cfg.chunkSize = 128;
   cfg.backingAllocator = cu_Allocator_Optional_none();
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
-
   cu_Slice_Result first_res = cu_Allocator_Alloc(alloc, 32, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&first_res));
   cu_Slice first = first_res.value;
@@ -156,7 +155,7 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
   ASSERT_TRUE(cu_Slice_result_is_ok(&block_res));
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
-
+  
   cu_Slice_Result resized = cu_Allocator_Resize(alloc, block, 16, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
