@@ -28,6 +28,8 @@ extern "C" {
 #include "string/fmt.h"
 #include "string/string.h"
 
+#include "io/error.h"
+#include "io/file.h"
 #include "utility.h"
 #ifdef __cplusplus
 }

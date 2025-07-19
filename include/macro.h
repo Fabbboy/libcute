@@ -24,27 +24,35 @@
 #define CU_ARRAY_LEN(arr) (sizeof(arr) / sizeof((arr)[0]))
 /** Create a bit mask with bit @p x set. */
 #define CU_BIT(x) (1u << (x))
-
-/** Platform detection macros. */
+/** Platform detection macros */
 #if defined(_WIN32) || defined(_WIN64)
-/** Defined on Windows systems */
 #define CU_PLAT_WINDOWS 1
 #else
 #define CU_PLAT_WINDOWS 0
 #endif
 
 #if defined(__APPLE__)
-/** Defined on macOS systems */
 #define CU_PLAT_MACOS 1
 #else
 #define CU_PLAT_MACOS 0
 #endif
 
 #if defined(__linux__)
-/** Defined on Linux systems */
 #define CU_PLAT_LINUX 1
 #else
 #define CU_PLAT_LINUX 0
+#endif
+
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+#define CU_PLAT_BSD 1
+#else
+#define CU_PLAT_BSD 0
+#endif
+
+#if CU_PLAT_MACOS || CU_PLAT_LINUX || CU_PLAT_BSD
+#define CU_PLAT_POSIX 1
+#else
+#define CU_PLAT_POSIX 0
 #endif
 
 #define UNREACHABLE(msg)                                                       \

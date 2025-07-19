@@ -18,7 +18,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y doxygen graphviz meson ninja-build
+          sudo apt-get install -y doxygen graphviz python3-pip ninja-build
+          pip3 install --user meson
       - name: Generate documentation
         run: |
           meson setup build
