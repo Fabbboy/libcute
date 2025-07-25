@@ -49,6 +49,12 @@
 #define CU_PLAT_BSD 0
 #endif
 
+#if defined(__wasm__) || defined(__EMSCRIPTEN__)
+#define CU_PLAT_WASM 1
+#else
+#define CU_PLAT_WASM 0
+#endif
+
 #if CU_PLAT_MACOS || CU_PLAT_LINUX || CU_PLAT_BSD
 #define CU_PLAT_POSIX 1
 #else

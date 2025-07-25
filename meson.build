@@ -28,6 +28,11 @@ sources = [
   'lib/io/error.c'
 ]
 
+if host_machine.cpu_family().startswith('wasm') or \
+   host_machine.system() == 'emscripten'
+  sources += ['lib/memory/wasmallocator.c']
+endif
+
 cute_lib = library(
   'cute',
   sources,
