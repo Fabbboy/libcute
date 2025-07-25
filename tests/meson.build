@@ -19,6 +19,7 @@ test_files = [
   'test_arena_allocator.cpp',
   'test_fmt.cpp',
   'test_fixed_allocator.cpp',
+  'test_wasm_allocator.cpp',
 ]
 
 foreach test_file : test_files
