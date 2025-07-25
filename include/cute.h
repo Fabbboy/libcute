@@ -11,6 +11,7 @@ extern "C" {
 #include "memory/gpallocator.h"
 #include "memory/page.h"
 #include "memory/slab.h"
+#include "memory/fixedallocator.h"
 
 #include "collection/bitmap.h"
 #include "collection/bitset.h"
