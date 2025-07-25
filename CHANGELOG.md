@@ -72,6 +72,7 @@ All notable changes to this project will be documented in this file. See [conven
 - refine arena tests and docs - ([434103f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/434103f42770ddbf8b2d0cbe88b44dd0d350ca75)) - Fabrice
 - avoid resize scan - ([21c2090](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/21c20900c775d99d642a6337c9be58dfe342f1e5)) - Fabrice
 - refine slab allocator and tests - ([b4fb7ed](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/b4fb7ed1bb6709f29711d9f4f814ade155cb8190)) - Fabrice
+- fix slab alignment and add tests - (unreleased) - Codex
 
 
 ### Collection
