@@ -90,8 +90,8 @@ static cu_Slice_Result cu_slab_alloc(
     return cu_Slice_result_error(err);
   }
 
-  size_t total = size + sizeof(struct cu_SlabAllocator_Header);
-  size_t need = CU_DIV_CEIL(total, alloc->slabSize);
+  size_t needed = alignment - 1 + size + sizeof(struct cu_SlabAllocator_Header);
+  size_t need = CU_DIV_CEIL(needed, alloc->slabSize);
 
   struct cu_SlabAllocator_Slab *slab = alloc->slabs;
   size_t index = (size_t)-1;
@@ -128,13 +128,20 @@ static cu_Slice_Result cu_slab_alloc(
   }
   slab->freeCount -= need;
 
-  unsigned char *ptr = cu_slab_data(slab) + index * alloc->slabSize;
-  struct cu_SlabAllocator_Header *hdr = (struct cu_SlabAllocator_Header *)ptr;
+  unsigned char *data = cu_slab_data(slab);
+  size_t start = index * alloc->slabSize;
+  size_t user_pos =
+      CU_ALIGN_UP(
+          (size_t)(data + start + sizeof(struct cu_SlabAllocator_Header)),
+          alignment) -
+      (size_t)data;
+  size_t header_pos = user_pos - sizeof(struct cu_SlabAllocator_Header);
+  struct cu_SlabAllocator_Header *hdr =
+      (struct cu_SlabAllocator_Header *)(data + header_pos);
   hdr->slab = slab;
   hdr->index = index;
   hdr->count = need;
-  return cu_Slice_result_ok(
-      cu_Slice_create(ptr + sizeof(struct cu_SlabAllocator_Header), size));
+  return cu_Slice_result_ok(cu_Slice_create(data + user_pos, size));
 }
 
 static cu_Slice_Result cu_slab_resize(
@@ -154,8 +161,9 @@ static cu_Slice_Result cu_slab_resize(
       (struct cu_SlabAllocator_Header *)((unsigned char *)mem.ptr -
                                          sizeof(
                                              struct cu_SlabAllocator_Header));
-  size_t current =
-      hdr->count * alloc->slabSize - sizeof(struct cu_SlabAllocator_Header);
+  unsigned char *base = cu_slab_data(hdr->slab) + hdr->index * alloc->slabSize;
+  size_t prefix = (unsigned char *)mem.ptr - base;
+  size_t current = hdr->count * alloc->slabSize - prefix;
   if (size <= current && alignment <= alloc->slabSize) {
     return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }

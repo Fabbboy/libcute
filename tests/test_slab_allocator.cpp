@@ -84,3 +84,16 @@ TEST(SlabAllocator, ReuseFreed) {
 
   cu_SlabAllocator_destroy(&slab);
 }
+
+TEST(SlabAllocator, Alignment) {
+  cu_SlabAllocator slab;
+  cu_SlabAllocator_Config cfg = {0};
+  cfg.slabSize = 64;
+  cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
+
+  cu_Slice_Result res = cu_Allocator_Alloc(alloc, 8, 16);
+  ASSERT_TRUE(cu_Slice_result_is_ok(&res));
+  EXPECT_EQ((uintptr_t)res.value.ptr % 16, 0u);
+
+  cu_SlabAllocator_destroy(&slab);
+}
