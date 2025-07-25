@@ -15,6 +15,7 @@ sources = [
   'lib/memory/page.c',
   'lib/memory/arenaallocator.c',
   'lib/memory/gpallocator.c',
+  'lib/memory/wasmallocator.c',
   'lib/memory/slab.c',
   'lib/collection/bitmap.c',
   'lib/hash/hash.c',
