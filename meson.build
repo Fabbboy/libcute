@@ -17,6 +17,7 @@ sources = [
   'lib/memory/gpallocator.c',
   'lib/memory/slab.c',
   'lib/memory/fixedallocator.c',
+  'lib/memory/wasmallocator.c',
   'lib/collection/bitmap.c',
   'lib/hash/hash.c',
   'lib/string/string.c',
