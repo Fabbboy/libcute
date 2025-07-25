@@ -43,6 +43,13 @@
 #define CU_PLAT_LINUX 0
 #endif
 
+/* WebAssembly platform detection */
+#if defined(__EMSCRIPTEN__) || defined(__wasm__) || defined(__wasm32__)
+#define CU_PLAT_WASM 1
+#else
+#define CU_PLAT_WASM 0
+#endif
+
 #if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
 #define CU_PLAT_BSD 1
 #else

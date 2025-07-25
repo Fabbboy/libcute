@@ -8,10 +8,10 @@ extern "C" {
 
 #include "memory/allocator.h"
 #include "memory/arenaallocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
 #include "memory/slab.h"
-#include "memory/fixedallocator.h"
 
 #include "collection/bitmap.h"
 #include "collection/bitset.h"
@@ -32,6 +32,7 @@ extern "C" {
 #include "io/error.h"
 #include "io/file.h"
 #include "utility.h"
+#include "wasm.h"
 #ifdef __cplusplus
 }
 #endif
