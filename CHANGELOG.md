@@ -63,6 +63,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Allocator
 
+- add fixed buffer allocator
+
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 - optimize small bucket performance - ([fc40724](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fc407241090ec0a39ba98901d0786ef3609b1b56)) - Fabrice
 - refine arena and add resize tests - ([67ad00f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/67ad00f27054ac18def1fe2ea09216c35ff338c9)) - Fabrice
