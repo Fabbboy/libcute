@@ -4,6 +4,9 @@ extern "C" {
 #include "memory/page.h"
 }
 
+#if CU_FREESTANDING
+TEST(PageAllocator, Unsupported) { SUCCEED(); }
+#else
 TEST(PageAllocator, Basic) {
   cu_PageAllocator palloc;
   cu_Allocator a = cu_Allocator_PageAllocator(&palloc);
@@ -13,3 +16,4 @@ TEST(PageAllocator, Basic) {
   cu_Memory_memset(mem.ptr, 0, mem.length);
   cu_Allocator_Free(a, mem);
 }
+#endif

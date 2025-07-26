@@ -2,12 +2,18 @@
 extern "C" {
 #include "collection/bitmap.h"
 #include "memory/allocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/wasmallocator.h"
 }
 
 TEST(Bitmap, Basic) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#elif CU_FREESTANDING
+  static char buf[1024];
+  cu_FixedAllocator fa;
+  cu_Allocator alloc =
+      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
 #else
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif

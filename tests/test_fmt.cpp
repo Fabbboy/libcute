@@ -2,12 +2,18 @@
 extern "C" {
 #include "memory/allocator.h"
 #include "memory/wasmallocator.h"
+#include "memory/fixedallocator.h"
 #include "string/fmt.h"
 }
 
 TEST(StrBuilder, AppendFormatted) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#elif CU_FREESTANDING
+  static char buf[1024];
+  cu_FixedAllocator fa;
+  cu_Allocator alloc =
+      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
 #else
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
@@ -27,6 +33,11 @@ TEST(StrBuilder, AppendFormatted) {
 TEST(StrBuilder, AppendAndFinalize) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#elif CU_FREESTANDING
+  static char buf2[1024];
+  cu_FixedAllocator fa2;
+  cu_Allocator alloc =
+      cu_Allocator_FixedAllocator(&fa2, cu_Slice_create(buf2, sizeof(buf2)));
 #else
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif

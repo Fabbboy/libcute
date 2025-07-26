@@ -1,24 +1,34 @@
+#if CU_FREESTANDING
+#include <gtest/gtest.h>
+TEST(DList, Unsupported) { SUCCEED(); }
+#else
 extern "C" {
 #include "collection/dlist.h"
 #include "memory/allocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
-#include "memory/page.h"
 }
 #include <gtest/gtest.h>
 
-static cu_Allocator create_allocator(
-    cu_GPAllocator *gpa, cu_PageAllocator *page) {
-  cu_Allocator page_alloc = cu_Allocator_PageAllocator(page);
+static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
+#if CU_FREESTANDING
+  static char buf[32 * 1024];
+  cu_FixedAllocator fa;
+  cu_Allocator backing =
+      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
+#else
+  cu_PageAllocator page;
+  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
+#endif
   cu_GPAllocator_Config cfg = {};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(page_alloc);
+  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
   return cu_Allocator_GPAllocator(gpa, cfg);
 }
 
 TEST(DList, PushPop) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
   ASSERT_TRUE(cu_DList_result_is_ok(&res));
@@ -44,9 +54,8 @@ TEST(DList, PushPop) {
 }
 
 TEST(DList, InsertIter) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
   ASSERT_TRUE(cu_DList_result_is_ok(&res));
@@ -76,3 +85,4 @@ TEST(DList, InsertIter) {
   cu_DList_destroy(&list);
   cu_GPAllocator_destroy(&gpa);
 }
+#endif

@@ -1,25 +1,34 @@
+#if CU_FREESTANDING
+#include <gtest/gtest.h>
+TEST(Vector, Unsupported) { SUCCEED(); }
+#else
 extern "C" {
 #include "collection/vector.h"
 #include "memory/allocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
-#include "memory/page.h"
 }
 #include <gtest/gtest.h>
 
-static cu_Allocator create_allocator(
-    cu_GPAllocator *gpa, cu_PageAllocator *page) {
-  cu_Allocator page_alloc = cu_Allocator_PageAllocator(page);
+static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
+#if CU_FREESTANDING
+  static char buf[32 * 1024];
+  cu_FixedAllocator fa;
+  cu_Allocator backing =
+      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
+#else
+  cu_PageAllocator page;
+  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
+#endif
   cu_GPAllocator_Config cfg = {};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(page_alloc);
-  cfg.backingAllocator = cu_Allocator_Optional_some(page_alloc);
+  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
   return cu_Allocator_GPAllocator(gpa, cfg);
 }
 
 TEST(Vector, Create) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
@@ -34,9 +43,8 @@ TEST(Vector, Create) {
 }
 
 TEST(Vector, Resize) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
@@ -58,9 +66,8 @@ TEST(Vector, Resize) {
 }
 
 TEST(Vector, PushBack) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   ASSERT_TRUE(cu_Vector_result_is_ok(&res));
@@ -77,9 +84,8 @@ TEST(Vector, PushBack) {
 }
 
 TEST(Vector, PopBack) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   ASSERT_TRUE(cu_Vector_result_is_ok(&res));
@@ -105,9 +111,8 @@ TEST(Vector, PopBack) {
 }
 
 TEST(Vector, Copy) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
   ASSERT_TRUE(cu_Vector_result_is_ok(&res));
@@ -136,9 +141,8 @@ TEST(Vector, Copy) {
 }
 
 TEST(Vector, ReserveClearAt) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   ASSERT_TRUE(cu_Vector_result_is_ok(&res));
@@ -163,3 +167,4 @@ TEST(Vector, ReserveClearAt) {
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }
+#endif

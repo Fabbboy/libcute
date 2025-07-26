@@ -1,4 +1,4 @@
-# Always build tests for the host, never with freestanding flags
+# Build tests with freestanding flags
 gtest_dep = dependency('gtest')
 gtest_main = dependency('gtest_main')
 
@@ -30,9 +30,8 @@ foreach test_file : test_files
     test_file,
     dependencies: [cute_dep, gtest_dep, gtest_main],
     include_directories: includes,
-    # Ensure no freestanding flags are used for tests
-    c_args: [],
-    cpp_args: [],
+    c_args: ['-DCU_FREESTANDING'],
+    cpp_args: ['-DCU_FREESTANDING'],
   )
   test(test_name, exe)
 endforeach

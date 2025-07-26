@@ -144,3 +144,6 @@ All notable changes to this project will be documented in this file. See [conven
 - use malloc/free for cu_CAllocator when stdlib is available
 - rename nostd option to freestanding and simplify allocators
 - ensure aligned allocations in C allocator and use null-check macros
+
+- allow building tests with freestanding flags
+

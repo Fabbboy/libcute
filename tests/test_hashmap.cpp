@@ -1,8 +1,12 @@
+#if CU_FREESTANDING
+#include <gtest/gtest.h>
+TEST(HashMap, Unsupported) { SUCCEED(); }
+#else
 extern "C" {
 #include "collection/hashmap.h"
 #include "memory/allocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
-#include "memory/page.h"
 }
 #include <algorithm>
 #include <gtest/gtest.h>
@@ -10,19 +14,25 @@ extern "C" {
 #include <random>
 #include <vector>
 
-static cu_Allocator create_allocator(
-    cu_GPAllocator *gpa, cu_PageAllocator *page) {
-  cu_Allocator page_alloc = cu_Allocator_PageAllocator(page);
+static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
+#if CU_FREESTANDING
+  static char buf[32 * 1024];
+  cu_FixedAllocator fa;
+  cu_Allocator backing =
+      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
+#else
+  cu_PageAllocator page;
+  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
+#endif
   cu_GPAllocator_Config cfg = {};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(page_alloc);
+  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
   return cu_Allocator_GPAllocator(gpa, cfg);
 }
 
 TEST(HashMap, BasicInsertGet) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(8), cu_HashMap_HashFn_Optional_none(),
@@ -54,9 +64,8 @@ static bool int_eq(const void *a, const void *b, size_t) {
 }
 
 TEST(HashMap, CustomHashIter) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_HashMap_Result res =
       cu_HashMap_create(alloc, CU_LAYOUT(int), CU_LAYOUT(int),
@@ -84,9 +93,8 @@ TEST(HashMap, CustomHashIter) {
 }
 
 TEST(HashMap, StressRandomAccess) {
-  cu_PageAllocator page;
   cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa, &page);
+  cu_Allocator alloc = create_allocator(&gpa);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(128),
@@ -115,3 +123,4 @@ TEST(HashMap, StressRandomAccess) {
   cu_HashMap_destroy(&map);
   cu_GPAllocator_destroy(&gpa);
 }
+#endif
