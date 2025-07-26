@@ -1,4 +1,5 @@
 #include "macro.h"
+#include "string/string.h"
 #include "string/nostd.h"
 #include <nostd.h>
 

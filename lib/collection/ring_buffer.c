@@ -1,6 +1,7 @@
 #include "collection/ring_buffer.h"
 #include "utility.h"
 #include <nostd.h>
+#include "string/nostd.h"
 
 CU_RESULT_IMPL(cu_RingBuffer, cu_RingBuffer, cu_RingBuffer_Error)
 CU_OPTIONAL_IMPL(cu_RingBuffer_Error, cu_RingBuffer_Error)

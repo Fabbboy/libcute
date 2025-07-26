@@ -1,7 +1,9 @@
 #include "memory/arenaallocator.h"
 #include "macro.h"
 #include "nostd.h"
+#include "string/nostd.h"
 #include <nostd.h>
+#include "io/error.h"
 #include <stdalign.h>
 static void cu_arena_free(void *self, cu_Slice mem);
 

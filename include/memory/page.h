@@ -1,6 +1,8 @@
 #pragma once
 
 /** @file page.h OS backed page allocator. */
+#include "macro.h"
+#ifndef CU_NO_STD
 
 #include "memory/allocator.h"
 #include <stddef.h>
@@ -12,3 +14,4 @@ typedef struct {
 
 /** Create an allocator that allocates memory using OS pages. */
 cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator);
+#endif

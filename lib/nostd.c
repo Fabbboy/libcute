@@ -1,5 +1,6 @@
 #include "nostd.h"
 #include "macro.h"
+#include "io/error.h"
 
 void cu_memmove(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
@@ -75,6 +76,32 @@ bool cu_memcmp(cu_Slice a, cu_Slice b) {
   }
   return true;
 }
+
+#ifdef CU_NO_STD
+void *memcpy(void *dest, const void *src, size_t n) {
+  cu_memcpy(dest, cu_Slice_create((void *)src, n));
+  return dest;
+}
+
+void *memmove(void *dest, const void *src, size_t n) {
+  cu_memmove(dest, cu_Slice_create((void *)src, n));
+  return dest;
+}
+
+void *memset(void *dest, int c, size_t n) {
+  cu_memset(dest, c, n);
+  return dest;
+}
+
+int memcmp(const void *s1, const void *s2, size_t n) {
+  return cu_memcmp(cu_Slice_create((void *)s1, n),
+                   cu_Slice_create((void *)s2, n))
+             ? 0
+             : 1;
+}
+
+size_t strlen(const char *s) { return cu_strlen(s); }
+#endif
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {
   cu_Slice slice;

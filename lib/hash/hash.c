@@ -1,5 +1,6 @@
 #include "hash/hash.h"
 #include <nostd.h>
+#include "string/nostd.h"
 #include <stddef.h>
 #include <stdint.h>
 

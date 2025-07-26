@@ -6,6 +6,7 @@
 #include "object/result.h"
 #include "utility.h"
 #include <nostd.h>
+#include "string/nostd.h"
 #include <stdalign.h>
 #include <stddef.h>
 

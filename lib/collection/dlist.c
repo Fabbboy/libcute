@@ -1,5 +1,6 @@
 #include "collection/dlist.h"
 #include <nostd.h>
+#include "string/nostd.h"
 #include <stdalign.h>
 
 CU_RESULT_IMPL(cu_DList, cu_DList, cu_DList_Error)

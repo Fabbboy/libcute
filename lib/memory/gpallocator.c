@@ -2,6 +2,8 @@
 #include "macro.h"
 #include "utility.h"
 #include <nostd.h>
+#include "string/nostd.h"
+#include "io/error.h"
 
 /* Helper forward declarations */
 static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);

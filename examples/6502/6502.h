@@ -2,6 +2,7 @@
 
 #include "cute.h"
 #include <stdint.h>
+#ifndef CU_NO_STD
 
 /**\@file 6502.h Simple 6502 CPU emulator using libcute types. */
 
@@ -29,3 +30,5 @@ bool cu_6502_load_file(cu_6502 *cpu, const char *path, uint16_t addr);
 void cu_6502_reset(cu_6502 *cpu, uint16_t addr);
 void cu_6502_step(cu_6502 *cpu);
 void cu_6502_run(cu_6502 *cpu);
+
+#endif

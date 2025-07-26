@@ -1,6 +1,8 @@
 #include "memory/wasmallocator.h"
 #include "macro.h"
 #include "nostd.h"
+#include "string/nostd.h"
+#include "io/error.h"
 
 #if CU_PLAT_WASM
 

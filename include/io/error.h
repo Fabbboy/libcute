@@ -30,3 +30,4 @@ typedef struct {
 } cu_Io_Error;
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
+CU_RESULT_DECL(cu_Slice, cu_Slice, cu_Io_Error)

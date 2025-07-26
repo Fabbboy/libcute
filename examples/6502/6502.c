@@ -1,4 +1,7 @@
+
 #include "6502.h"
+
+#ifndef CU_NO_STD
 #include "macro.h"
 #include <nostd.h>
 #include <stdio.h>
@@ -132,3 +135,4 @@ void cu_6502_run(cu_6502 *cpu) {
     cu_6502_step(cpu);
   }
 }
+#endif

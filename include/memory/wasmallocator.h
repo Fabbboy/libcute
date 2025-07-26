@@ -4,7 +4,7 @@
 
 #include "memory/allocator.h"
 
-#if CU_PLAT_WASM
+#if defined(CU_PLAT_WASM) 
 
 /** Size of a single WebAssembly memory page. */
 #define CU_WASM_PAGE_SIZE 65536

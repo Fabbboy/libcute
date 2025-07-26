@@ -30,9 +30,7 @@ extern "C" {
 #include "string/nostd.h"
 
 #include "io/error.h"
-#include "io/file.h"
 #include "utility.h"
-#include "wasm.h"
 #ifdef __cplusplus
 }
 #endif

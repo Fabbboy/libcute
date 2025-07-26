@@ -1,8 +1,12 @@
 #include "memory/allocator.h"
 #include "macro.h"
 #include "nostd.h"
+#include "string/nostd.h"
 #include <nostd.h>
+#include "io/error.h"
 #include <stddef.h>
+
+#ifndef CU_NO_STD
 
 static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {
   CU_UNUSED(self);
@@ -69,5 +73,7 @@ cu_Allocator cu_Allocator_CAllocator(void) {
   allocator.freeFn = cu_CAllocator_Free;
   return allocator;
 }
+
+#endif
 
 CU_OPTIONAL_IMPL(cu_Allocator, cu_Allocator)

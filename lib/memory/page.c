@@ -1,9 +1,12 @@
 #include "memory/page.h"
+#include "io/error.h"
 #include "macro.h"
 #include "nostd.h"
 #include <nostd.h>
 #include <stddef.h>
 #include <stdint.h>
+
+#ifndef CU_NO_STD
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>
@@ -140,3 +143,5 @@ cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
   alloc.freeFn = cu_PageAllocator_Free;
   return alloc;
 }
+
+#endif
