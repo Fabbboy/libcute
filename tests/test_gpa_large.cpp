@@ -2,13 +2,20 @@
 #include <vector>
 extern "C" {
 #include "memory/allocator.h"
+#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 }
 
+static unsigned char backing[512 * 1024 * 1024];
+
 TEST(Allocator, GPALargeAllocFree) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_GPAllocator gpa;
   cu_GPAllocator_Config cfg = {0};
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   const size_t big = 100 * 1024 * 1024; // 100 MiB

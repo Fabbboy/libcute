@@ -2,13 +2,20 @@
 extern "C" {
 #include "collection/vector.h"
 #include "memory/arenaallocator.h"
+#include "memory/fixedallocator.h"
 }
 
+static unsigned char backing[64 * 1024];
+
 TEST(ArenaAllocator, LifoVectors) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 256;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Vector_Result r1 =
@@ -42,10 +49,14 @@ TEST(ArenaAllocator, LifoVectors) {
 }
 
 TEST(ArenaAllocator, NonLifoAlloc) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -67,10 +78,14 @@ TEST(ArenaAllocator, NonLifoAlloc) {
   cu_ArenaAllocator_destroy(&arena);
 }
 TEST(ArenaAllocator, ChunkReuseStress) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Result first_res = cu_Allocator_Alloc(alloc, 32, 8);
@@ -92,10 +107,14 @@ TEST(ArenaAllocator, ChunkReuseStress) {
 }
 
 TEST(ArenaAllocator, ReuseOldChunk) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
   cu_Slice_Result first_res = cu_Allocator_Alloc(alloc, 32, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&first_res));
@@ -125,10 +144,14 @@ TEST(ArenaAllocator, ReuseOldChunk) {
 }
 
 TEST(ArenaAllocator, ResizeGrowInPlace) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Result block_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -145,10 +168,14 @@ TEST(ArenaAllocator, ResizeGrowInPlace) {
 }
 
 TEST(ArenaAllocator, ResizeShrinkInPlace) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Result block_res = cu_Allocator_Alloc(alloc, 32, 8);
@@ -165,10 +192,14 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
 }
 
 TEST(ArenaAllocator, ResizeAllocNewBlock) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_ArenaAllocator arena;
   cu_ArenaAllocator_Config cfg = {};
   cfg.chunkSize = 128;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);

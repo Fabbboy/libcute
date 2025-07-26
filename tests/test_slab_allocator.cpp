@@ -1,14 +1,21 @@
 #include <gtest/gtest.h>
 #include <nostd.h>
 extern "C" {
+#include "memory/fixedallocator.h"
 #include "memory/slab.h"
 }
 
+static unsigned char backing[512 * 1024];
+
 TEST(SlabAllocator, Basic) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 64;
-  cfg.backingAllocator = cu_Allocator_Optional_none();
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -23,9 +30,14 @@ TEST(SlabAllocator, Basic) {
 }
 
 TEST(SlabAllocator, BigAllocation) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 64;
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   cu_Slice_Result big_res = cu_Allocator_Alloc(alloc, 256, 8);
@@ -35,9 +47,14 @@ TEST(SlabAllocator, BigAllocation) {
 }
 
 TEST(SlabAllocator, Resize) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 64;
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   cu_Slice_Result mem_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -53,9 +70,14 @@ TEST(SlabAllocator, Resize) {
 }
 
 TEST(SlabAllocator, ManyAllocations) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 32;
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   for (int i = 0; i < 1000; ++i) {
@@ -67,9 +89,14 @@ TEST(SlabAllocator, ManyAllocations) {
 }
 
 TEST(SlabAllocator, ReuseFreed) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 64;
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);
@@ -86,9 +113,14 @@ TEST(SlabAllocator, ReuseFreed) {
 }
 
 TEST(SlabAllocator, Alignment) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
   cu_SlabAllocator slab;
   cu_SlabAllocator_Config cfg = {0};
   cfg.slabSize = 64;
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   cu_Slice_Result res = cu_Allocator_Alloc(alloc, 8, 16);
