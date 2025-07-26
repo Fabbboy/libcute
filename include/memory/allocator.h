@@ -46,3 +46,6 @@ static inline void cu_Allocator_Free(cu_Allocator allocator, cu_Slice mem) {
 #if !CU_FREESTANDING
 cu_Allocator cu_Allocator_CAllocator(void);
 #endif
+
+/** Allocator that always fails with out-of-memory errors. */
+cu_Allocator cu_Allocator_NullAllocator(void);
