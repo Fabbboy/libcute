@@ -1,6 +1,6 @@
 #include "6502.h"
+#include <nostd.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 int main(int argc, char **argv) {
   cu_Allocator alloc = cu_Allocator_CAllocator();

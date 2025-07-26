@@ -75,3 +75,13 @@ bool cu_memcmp(cu_Slice a, cu_Slice b) {
   }
   return true;
 }
+
+cu_Slice cu_Slice_create(void *ptr, size_t length) {
+  cu_Slice slice;
+  slice.ptr = ptr;
+  slice.length = length;
+  return slice;
+}
+
+CU_OPTIONAL_IMPL(cu_Slice, cu_Slice)
+CU_RESULT_IMPL(cu_Slice, cu_Slice, cu_Io_Error)

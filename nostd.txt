@@ -6,7 +6,7 @@ strip = 'llvm-strip'
 ld = 'wasm-ld'  # this is llvm's WebAssembly linker
 
 [host_machine]
-system = 'emscripten'  # technically not "linux"
+system = 'emscripten' #  only used to identify the machine 
 cpu_family = 'wasm32'
 cpu = 'wasm32'
 endian = 'little'

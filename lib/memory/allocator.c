@@ -1,8 +1,8 @@
 #include "memory/allocator.h"
 #include "macro.h"
-#include "object/slice.h"
+#include "nostd.h"
+#include <nostd.h>
 #include <stddef.h>
-#include <stdlib.h>
 #include <string.h>
 
 static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {

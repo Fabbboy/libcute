@@ -3,7 +3,7 @@
 /** @file fixedallocator.h Fixed-size buffer allocator. */
 
 #include "memory/allocator.h"
-#include "object/slice.h"
+#include "nostd.h"
 
 struct cu_FixedAllocator_Header {
   size_t prev_offset;
@@ -12,7 +12,7 @@ struct cu_FixedAllocator_Header {
 /** Runtime state for the fixed allocator. */
 typedef struct {
   cu_Slice buffer; /**< memory backing */
-  size_t used;    /**< consumed bytes */
+  size_t used;     /**< consumed bytes */
 } cu_FixedAllocator;
 
 /** Initialize a fixed allocator using the given buffer. */

@@ -4,7 +4,7 @@
 
 #include <stddef.h>
 
-#include "object/slice.h"
+#include "nostd.h"
 
 /** Allocation function signature. */
 typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(

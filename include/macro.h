@@ -2,15 +2,14 @@
 
 /** @file macro.h Common utility macros. */
 
-#include "nostd.h"
-#include <stdlib.h>
+#include <nostd.h>
 
 /** Execute the following block if @p expr is NULL. */
 #define CU_IF_NULL(expr) if ((expr) == NULL)
 /** Execute the following block if @p expr is not NULL. */
 #define CU_IF_NOT_NULL(expr) if ((expr) != NULL)
 /** Abort the program with an error message. */
-#define CU_DIE(msg)     cu_panic_handler("Fatal error: %s", msg)
+#define CU_DIE(msg) cu_panic_handler("Fatal error: %s", msg)
 
 /** Round @p x up to the nearest multiple of @p align. */
 #define CU_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))

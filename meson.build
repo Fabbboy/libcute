@@ -9,7 +9,6 @@ project(
 includes = include_directories('include')
 
 sources = [
-  'lib/object/slice.c',
   'lib/object/optional.c',
   'lib/memory/allocator.c',
   'lib/memory/page.c',

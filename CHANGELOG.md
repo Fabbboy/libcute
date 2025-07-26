@@ -1,4 +1,4 @@
-#Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -30,20 +30,11 @@ All notable changes to this project will be documented in this file. See [conven
 - adjusted changelog - ([4d30fb1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4d30fb172c6bac60eeb3adca3a23ab7999a4fc88)) - Fabrice
 - adds docs - ([a9bfa79](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a9bfa7916eb35b1a0da42e02bda8fb220d597f3b)) - Fabrice
 - generated them correctly - ([9b42ae5](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9b42ae516ba840c5d4b66b6c2acf1feac9a471c0)) - Fabrice
-
-### Examples
-
-- add 6502 emulator example
-- improve 6502 example with file loading
-- restructure example build
-
+- clarify per-slab bitmap - ([01a4f49](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/01a4f49f27b050d0f3ec7773e5bbf76ac7a84246)) - Fabrice
 
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
-- add CU_PLAT_WASM macro and wasm helper header - (unreleased) - Codex
-- implement WebAssembly memory allocator - (unreleased) - Codex
-- add tests for the WebAssembly allocator - (unreleased) - Codex
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
@@ -66,8 +57,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Allocator
 
-- add fixed buffer allocator
-
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 - optimize small bucket performance - ([fc40724](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fc407241090ec0a39ba98901d0786ef3609b1b56)) - Fabrice
 - refine arena and add resize tests - ([67ad00f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/67ad00f27054ac18def1fe2ea09216c35ff338c9)) - Fabrice
@@ -75,13 +64,23 @@ All notable changes to this project will be documented in this file. See [conven
 - refine arena tests and docs - ([434103f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/434103f42770ddbf8b2d0cbe88b44dd0d350ca75)) - Fabrice
 - avoid resize scan - ([21c2090](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/21c20900c775d99d642a6337c9be58dfe342f1e5)) - Fabrice
 - refine slab allocator and tests - ([b4fb7ed](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/b4fb7ed1bb6709f29711d9f4f814ade155cb8190)) - Fabrice
-- fix slab alignment and add tests - (unreleased) - Codex
-
+- return slice result - ([a55cc95](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a55cc95caf931398a9fd6b268ee35ed4e664db50)) - Fabrice
+- use slice for fixed allocator - ([16d9730](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/16d97306e0263643cc2651898be539045ffa107f)) - Fabrice
+- fix slab alignment - ([973a9f3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/973a9f3422a2ee4869560b0c8e7f2dbd7083a0d6)) - Fabrice
+- refine wasm allocator - ([6bd14cd](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/6bd14cd31a0bb1d7921dc01771f70e6087614c32)) - Fabrice
 
 ### Collection
 
 - add ring buffer container - ([5555350](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/55553500bdc85f506de28725cf9816dd939b3f39)) - Fabrice
 - extend list APIs - ([8788373](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/878837377a7c283cfe5b39355b43de0782e9b410)) - Fabrice
+
+### Example
+
+- fix 6502 address decode - ([95b7be4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/95b7be41c7199f38e03cc423395e6bb00889a5b8)) - Fabrice
+
+### Examples
+
+- restructure build - ([12e1a30](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/12e1a3039a1d0fbc68b6e6533f8b719b66df369a)) - Fabrice
 
 ### Fmt
 
@@ -96,14 +95,28 @@ All notable changes to this project will be documented in this file. See [conven
 - clarify optional fallback - ([4ba5ea0](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4ba5ea01a59b7e84ced0cf546d8ac86180d33a61)) - Fabrice
 - add stress test and improve rehash - ([4eb55c9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/4eb55c9b5fa4574d7e515888a5a09e2e99e13a38)) - Fabrice
 
+### Io
+
+- populated io error - ([912c4a3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/912c4a3ee8e0c1e07551ab512156688ec4b47b8c)) - Fabrice
+- rename errno field to errnum - ([c8731ed](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c8731edf91be95ce975d645858c703aa400657fe)) - Fabrice
+
+### Macro
+
+- add wasm platform macro - ([c3c4cb6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c3c4cb66f54a36485732cfc44be3de07ca48d307)) - Fabrice
+
 ### Merge
 
 - integrate master changes - ([986090c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/986090cc13ef015d33112790a6cbfa3ac5bc06e8)) - Fabrice
 - incorporate master - ([b3f5ffb](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/b3f5ffbe03a1e7972122cf1f480b0c0bcca29d02)) - Fabrice
+- incorporate master - ([0b26559](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0b26559cce72e6ff416c04c4de8d817674535651)) - Fabrice
 
 ### Note
 
 - must've forgotten - ([c202c75](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c202c7599e6cdf1b776ffed18f9d718f26b6d623)) - Fabrice
+
+### Stream
+
+- adds stream - ([65e2c6b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/65e2c6b813ff7186840831f781311419a6926448)) - Fabrice
 
 ### String
 

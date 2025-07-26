@@ -4,8 +4,8 @@
 #include <stddef.h>
 
 #include "memory/allocator.h"
+#include "nostd.h"
 #include "object/result.h"
-#include "object/slice.h"
 
 /**
  * @brief Error codes returned by string operations.

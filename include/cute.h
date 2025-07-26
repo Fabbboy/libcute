@@ -23,9 +23,9 @@ extern "C" {
 
 #include "hash/hash.h"
 #include "macro.h"
+#include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include "object/slice.h"
 #include "string/fmt.h"
 #include "string/string.h"
 

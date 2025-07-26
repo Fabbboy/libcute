@@ -2,7 +2,7 @@
 #include <string.h>
 extern "C" {
 #include "memory/fixedallocator.h"
-#include "object/slice.h"
+#include "nostd.h"
 }
 
 TEST(FixedAllocator, Basic) {

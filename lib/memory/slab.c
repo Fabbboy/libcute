@@ -1,7 +1,7 @@
 #include "memory/slab.h"
 #include "collection/bitmap.h"
 #include "macro.h"
-#include "object/slice.h"
+#include "nostd.h"
 #include <stdalign.h>
 #include <string.h>
 

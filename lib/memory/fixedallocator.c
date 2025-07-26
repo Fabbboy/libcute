@@ -1,6 +1,6 @@
 #include "memory/fixedallocator.h"
 #include "macro.h"
-#include "object/slice.h"
+#include "nostd.h"
 #include <string.h>
 
 static void cu_fixed_free(void *self, cu_Slice mem);
