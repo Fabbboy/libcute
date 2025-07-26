@@ -197,10 +197,12 @@ cu_Allocator cu_Allocator_SlabAllocator(
   if (cu_Allocator_Optional_is_some(&cfg.backingAllocator)) {
     alloc->backingAllocator = cfg.backingAllocator.value;
   } else {
-#if CU_PLAT_WASM || CU_FREESTANDING
+#if CU_PLAT_WASM
     alloc->backingAllocator = cu_Allocator_WasmAllocator();
-#else
+#elif !CU_FREESTANDING
     alloc->backingAllocator = cu_Allocator_CAllocator();
+#else
+    alloc->backingAllocator = cu_Allocator_NullAllocator();
 #endif
   }
   alloc->slabs = NULL;

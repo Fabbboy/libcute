@@ -81,3 +81,38 @@ cu_Allocator cu_Allocator_CAllocator(void) {
 #endif // !CU_FREESTANDING
 
 CU_OPTIONAL_IMPL(cu_Allocator, cu_Allocator)
+
+static cu_Slice_Result cu_null_alloc(
+    void *self, size_t size, size_t alignment) {
+  CU_UNUSED(self);
+  CU_UNUSED(size);
+  CU_UNUSED(alignment);
+  cu_Io_Error err = {
+      .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
+  return cu_Slice_result_error(err);
+}
+
+static cu_Slice_Result cu_null_resize(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  CU_UNUSED(self);
+  CU_UNUSED(mem);
+  CU_UNUSED(size);
+  CU_UNUSED(alignment);
+  cu_Io_Error err = {
+      .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
+  return cu_Slice_result_error(err);
+}
+
+static void cu_null_free(void *self, cu_Slice mem) {
+  CU_UNUSED(self);
+  CU_UNUSED(mem);
+}
+
+cu_Allocator cu_Allocator_NullAllocator(void) {
+  cu_Allocator allocator;
+  allocator.self = NULL;
+  allocator.allocFn = cu_null_alloc;
+  allocator.resizeFn = cu_null_resize;
+  allocator.freeFn = cu_null_free;
+  return allocator;
+}

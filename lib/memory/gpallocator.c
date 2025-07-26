@@ -296,10 +296,12 @@ cu_Allocator cu_Allocator_GPAllocator(
   if (cu_Allocator_Optional_is_some(&config.backingAllocator)) {
     alloc->backingAllocator = config.backingAllocator.value;
   } else {
-#if CU_PLAT_WASM || CU_FREESTANDING
+#if CU_PLAT_WASM
     alloc->backingAllocator = cu_Allocator_WasmAllocator();
-#else
+#elif !CU_FREESTANDING
     alloc->backingAllocator = cu_Allocator_CAllocator();
+#else
+    alloc->backingAllocator = cu_Allocator_NullAllocator();
 #endif
   }
   alloc->bucketSize =

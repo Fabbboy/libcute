@@ -138,10 +138,12 @@ cu_Allocator cu_Allocator_ArenaAllocator(
   if (cu_Allocator_Optional_is_some(&config.backingAllocator)) {
     arena->backingAllocator = config.backingAllocator.value;
   } else {
-#if CU_PLAT_WASM || CU_FREESTANDING
+#if CU_PLAT_WASM
     arena->backingAllocator = cu_Allocator_WasmAllocator();
-#else
+#elif !CU_FREESTANDING
     arena->backingAllocator = cu_Allocator_CAllocator();
+#else
+    arena->backingAllocator = cu_Allocator_NullAllocator();
 #endif
   }
   arena->chunkSize = config.chunkSize ? config.chunkSize : CU_ARENA_CHUNK_SIZE;
