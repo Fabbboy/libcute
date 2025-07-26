@@ -27,13 +27,20 @@ sources = [
   'lib/collection/dlist.c',
   'lib/collection/vector.c',
   'lib/collection/hashmap.c',
-  'lib/io/error.c'
+  'lib/io/error.c',
 ]
+
+nostd = get_option('nostd')
+c_args = []
+if nostd.enabled()
+  c_args += ['-DCU_NO_STD']
+endif
 
 cute_lib = library(
   'cute',
   sources,
   include_directories: includes,
+  c_args: c_args,
 )
 
 cute_dep = declare_dependency(
