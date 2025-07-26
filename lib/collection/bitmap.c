@@ -42,7 +42,7 @@ bool cu_Bitmap_get(const cu_Bitmap *bitmap, size_t index) {
   }
   size_t bitIndex = index / (sizeof(size_t) * 8);
   size_t bitOffset = index % (sizeof(size_t) * 8);
-  return (bitmap->bits[bitIndex] & (1u << bitOffset)) != 0;
+  return (bitmap->bits[bitIndex] & ((size_t)1 << bitOffset)) != 0;
 }
 
 void cu_Bitmap_set(cu_Bitmap *bitmap, size_t index) {
@@ -51,7 +51,7 @@ void cu_Bitmap_set(cu_Bitmap *bitmap, size_t index) {
   }
   size_t bitIndex = index / (sizeof(size_t) * 8);
   size_t bitOffset = index % (sizeof(size_t) * 8);
-  bitmap->bits[bitIndex] |= (1u << bitOffset);
+  bitmap->bits[bitIndex] |= ((size_t)1 << bitOffset);
 }
 
 void cu_Bitmap_clear(cu_Bitmap *bitmap, size_t index) {
@@ -60,7 +60,7 @@ void cu_Bitmap_clear(cu_Bitmap *bitmap, size_t index) {
   }
   size_t bitIndex = index / (sizeof(size_t) * 8);
   size_t bitOffset = index % (sizeof(size_t) * 8);
-  bitmap->bits[bitIndex] &= ~(1u << bitOffset);
+  bitmap->bits[bitIndex] &= ~((size_t)1 << bitOffset);
 }
 
 void cu_Bitmap_clear_all(cu_Bitmap *bitmap) {

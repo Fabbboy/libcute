@@ -9,11 +9,11 @@ extern "C" {
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
   static char buf[32 * 1024];
-  cu_FixedAllocator fa;
+  static cu_FixedAllocator fa;
   cu_Allocator backing =
       cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
 #else
-  cu_PageAllocator page;
+  static cu_PageAllocator page;
   cu_Allocator backing = cu_Allocator_PageAllocator(&page);
 #endif
   cu_GPAllocator_Config cfg = {};

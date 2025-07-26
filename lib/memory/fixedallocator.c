@@ -18,7 +18,10 @@ static cu_Slice_Result cu_fixed_alloc(
   }
 
   const size_t header_size = sizeof(struct cu_FixedAllocator_Header);
-  size_t start = CU_ALIGN_UP(alloc->used + header_size, alignment);
+  size_t req_align = alignment > _Alignof(struct cu_FixedAllocator_Header)
+                          ? alignment
+                          : _Alignof(struct cu_FixedAllocator_Header);
+  size_t start = CU_ALIGN_UP(alloc->used + header_size, req_align);
   if (start + size > alloc->buffer.length) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};

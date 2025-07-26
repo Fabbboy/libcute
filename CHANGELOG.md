@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. See [conven
 - fixes test case, feat: interduces push pop methods - ([05993a1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05993a1fd1b0d8cafe1e5b7933ed1c743b60b282)) - Fabrice
 - some fixes - ([f02ca19](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f02ca19a63709948575507baaf15f5a745388d72)) - Fabrice
 - adjusted name - ([3e8ec20](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3e8ec20a5a070f784286564bcf7c80d54144ea78)) - Fabrice
+- fix UB in bitmap bit operations and alignment in fixed allocator
+- keep backing allocators alive in ring buffer tests
 
 ### Documentation
 
