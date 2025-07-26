@@ -1,11 +1,16 @@
 #include <gtest/gtest.h>
 extern "C" {
 #include "memory/allocator.h"
+#include "memory/wasmallocator.h"
 #include "string/fmt.h"
 }
 
 TEST(StrBuilder, AppendFormatted) {
+#if CU_PLAT_WASM
+  cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#else
   cu_Allocator alloc = cu_Allocator_CAllocator();
+#endif
   cu_StrBuilder builder = cu_StrBuilder_init(alloc);
   EXPECT_EQ(
       CU_STRING_ERROR_NONE, cu_StrBuilder_appendf(&builder, "number %d", 10));
@@ -20,7 +25,11 @@ TEST(StrBuilder, AppendFormatted) {
 }
 
 TEST(StrBuilder, AppendAndFinalize) {
+#if CU_PLAT_WASM
+  cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#else
   cu_Allocator alloc = cu_Allocator_CAllocator();
+#endif
   cu_StrBuilder builder = cu_StrBuilder_init(alloc);
   cu_StrBuilder_append_slice(&builder, cu_Slice_create((void *)"ab", 2));
   cu_StrBuilder_append_cstr(&builder, "cd");

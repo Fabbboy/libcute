@@ -1,6 +1,5 @@
 #include "hash/hash.h"
 #include <nostd.h>
-#include "string/nostd.h"
 #include <stddef.h>
 #include <stdint.h>
 
@@ -35,7 +34,7 @@ uint32_t cu_Hash_Murmur3_32(const void *data, size_t len, uint32_t seed) {
   size_t i = 0;
   while (len - i >= 4) {
     uint32_t k1;
-    memcpy(&k1, bytes + i, 4);
+    cu_Memory_memcpy(&k1, cu_Slice_create((void *)(bytes + i), 4));
     k1 *= c1;
     k1 = (k1 << 15) | (k1 >> 17);
     k1 *= c2;
@@ -75,7 +74,7 @@ uint32_t cu_Hash_Murmur3_32(const void *data, size_t len, uint32_t seed) {
 
 static inline uint64_t cu_hash_read64(const uint8_t *p) {
   uint64_t v;
-  memcpy(&v, p, 8);
+  cu_Memory_memcpy(&v, cu_Slice_create((void *)p, 8));
   return v;
 }
 

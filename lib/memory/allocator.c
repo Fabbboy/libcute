@@ -1,45 +1,56 @@
 #include "memory/allocator.h"
-#include "macro.h"
-#include "nostd.h"
-#include "string/nostd.h"
-#include <nostd.h>
 #include "io/error.h"
+#include "macro.h"
+#include <nostd.h>
 #include <stddef.h>
+#include <stdint.h>
+#if !CU_FREESTANDING
+#include <stdlib.h>
+#endif
 
-#ifndef CU_NO_STD
+#if !CU_FREESTANDING
+
+static void cu_CAllocator_init(void) {}
 
 static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {
   CU_UNUSED(self);
-  free(mem.ptr);
+  CU_IF_NULL(mem.ptr) { return; }
+  void *raw = *((void **)mem.ptr - 1);
+  free(raw);
 }
 
 static cu_Slice_Result cu_CAllocator_Alloc(
     void *self, size_t size, size_t alignment) {
   CU_UNUSED(self);
-
   if (size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
-  size_t alignedSize = CU_ALIGN_UP(size, alignment);
-  void *ptr = malloc(alignedSize);
+  if (alignment < sizeof(void *))
+    alignment = sizeof(void *);
 
-  CU_IF_NULL(ptr) {
+  size_t total = size + alignment - 1 + sizeof(void *);
+  void *raw = malloc(total);
+  if (raw == NULL) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
 
-  cu_Slice slice = cu_Slice_create(ptr, size);
-  return cu_Slice_result_ok(slice);
+  uintptr_t aligned_addr = ((uintptr_t)raw + sizeof(void *) + alignment - 1) &
+                           ~(uintptr_t)(alignment - 1);
+  void **store = (void **)aligned_addr - 1;
+  *store = raw;
+
+  return cu_Slice_result_ok(cu_Slice_create((void *)aligned_addr, size));
 }
 
 static cu_Slice_Result cu_CAllocator_Resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_UNUSED(self);
-
+  CU_IF_NULL(mem.ptr) { return cu_CAllocator_Alloc(self, size, alignment); }
   if (size == 0) {
     cu_CAllocator_Free(NULL, mem);
     cu_Io_Error err = {
@@ -47,25 +58,18 @@ static cu_Slice_Result cu_CAllocator_Resize(
     return cu_Slice_result_error(err);
   }
 
-  if (mem.length == size) {
-    return cu_Slice_result_ok(mem);
+  cu_Slice_Result new_mem = cu_CAllocator_Alloc(self, size, alignment);
+  if (!cu_Slice_result_is_ok(&new_mem)) {
+    return new_mem;
   }
-
-  cu_Slice_Result newSlice = cu_CAllocator_Alloc(NULL, size, alignment);
-  if (!cu_Slice_result_is_ok(&newSlice)) {
-    return newSlice;
-  }
-
-  void *newPtr = newSlice.value.ptr;
-
-  size_t copySize = mem.length < size ? mem.length : size;
-  memmove(newPtr, mem.ptr, copySize);
+  size_t copy = mem.length < size ? mem.length : size;
+  cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
   cu_CAllocator_Free(NULL, mem);
-
-  return newSlice;
+  return new_mem;
 }
 
 cu_Allocator cu_Allocator_CAllocator(void) {
+  cu_CAllocator_init();
   cu_Allocator allocator;
   allocator.self = NULL;
   allocator.allocFn = cu_CAllocator_Alloc;
@@ -74,6 +78,6 @@ cu_Allocator cu_Allocator_CAllocator(void) {
   return allocator;
 }
 
-#endif
+#endif // !CU_FREESTANDING
 
 CU_OPTIONAL_IMPL(cu_Allocator, cu_Allocator)

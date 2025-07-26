@@ -1,9 +1,9 @@
 #include "memory/gpallocator.h"
+#include "io/error.h"
 #include "macro.h"
+#include "memory/wasmallocator.h"
 #include "utility.h"
 #include <nostd.h>
-#include "string/nostd.h"
-#include "io/error.h"
 
 /* Helper forward declarations */
 static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);
@@ -192,9 +192,7 @@ static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment) {
 static cu_Slice_Result cu_gpa_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
-  if (mem.ptr == NULL) {
-    return cu_gpa_alloc(self, size, alignment);
-  }
+  CU_IF_NULL(mem.ptr) { return cu_gpa_alloc(self, size, alignment); }
   if (size == 0) {
     cu_gpa_free(self, mem);
     cu_Io_Error err = {
@@ -231,7 +229,7 @@ static cu_Slice_Result cu_gpa_resize(
     return new_mem;
   }
   size_t copy = mem.length < size ? mem.length : size;
-  memmove(new_mem.value.ptr, mem.ptr, copy);
+  cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
   cu_gpa_free(self, mem);
   return new_mem;
 }
@@ -275,9 +273,7 @@ static void cu_gpa_free_large(
 
 static void cu_gpa_free(void *self, cu_Slice mem) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
-  if (mem.ptr == NULL) {
-    return;
-  }
+  CU_IF_NULL(mem.ptr) { return; }
   size_t slot;
   struct cu_GPAllocator_BucketHeader *bucket =
       cu_gpa_find_bucket(gpa, mem.ptr, &slot);
@@ -300,7 +296,11 @@ cu_Allocator cu_Allocator_GPAllocator(
   if (cu_Allocator_Optional_is_some(&config.backingAllocator)) {
     alloc->backingAllocator = config.backingAllocator.value;
   } else {
+#if CU_PLAT_WASM || CU_FREESTANDING
+    alloc->backingAllocator = cu_Allocator_WasmAllocator();
+#else
     alloc->backingAllocator = cu_Allocator_CAllocator();
+#endif
   }
   alloc->bucketSize =
       config.bucketSize ? config.bucketSize : CU_GPA_BUCKET_SIZE;

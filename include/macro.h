@@ -58,14 +58,6 @@
 #endif
 
 #define UNREACHABLE(msg)                                                       \
-  do {                                                                         \
-    fprintf(stderr, "Unreachable code reached (%s:%d): %s\n", __FILE__,        \
-        __LINE__, msg);                                                        \
-    exit(EXIT_FAILURE);                                                        \
-  } while (0)
+  cu_panic_handler("Unreachable code reached: %s", msg)
 
-#define TODO(msg)                                                              \
-  do {                                                                         \
-    fprintf(stderr, "TODO (%s:%d): %s\n", __FILE__, __LINE__, msg);            \
-    exit(EXIT_FAILURE);                                                        \
-  } while (0)
+#define TODO(msg) cu_panic_handler("TODO: %s", msg)

@@ -1,12 +1,10 @@
 #include "memory/wasmallocator.h"
-#include "macro.h"
-#include "nostd.h"
-#include "string/nostd.h"
 #include "io/error.h"
+#include "macro.h"
+#include "utility.h"
+#include <nostd.h>
 
 #if CU_PLAT_WASM
-
-#include <nostd.h>
 #include <stdint.h>
 
 struct cu_WasmAllocator_Header {
@@ -122,9 +120,7 @@ static cu_Slice_Result cu_wasm_alloc(
 
 static cu_Slice_Result cu_wasm_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
-  if (mem.ptr == NULL) {
-    return cu_wasm_alloc(self, size, alignment);
-  }
+  CU_IF_NULL(mem.ptr) { return cu_wasm_alloc(self, size, alignment); }
   if (size == 0) {
     cu_wasm_free(self, mem);
     cu_Io_Error err = {
@@ -150,16 +146,15 @@ static cu_Slice_Result cu_wasm_resize(
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }
-  memcpy(new_mem.value.ptr, mem.ptr, mem.length < size ? mem.length : size);
+  cu_Memory_memcpy(new_mem.value.ptr,
+      cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
   cu_wasm_free(self, mem);
   return new_mem;
 }
 
 static void cu_wasm_free(void *self, cu_Slice mem) {
   CU_UNUSED(self);
-  if (mem.ptr == NULL) {
-    return;
-  }
+  CU_IF_NULL(mem.ptr) { return; }
   struct cu_WasmAllocator_Header *hdr =
       (struct cu_WasmAllocator_Header *)((unsigned char *)mem.ptr -
                                          sizeof(

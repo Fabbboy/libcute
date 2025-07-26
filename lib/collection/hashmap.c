@@ -5,7 +5,6 @@
 #include "object/result.h"
 #include "utility.h"
 #include <nostd.h>
-#include "string/nostd.h"
 #include <stdalign.h>
 #include <stddef.h>
 
@@ -20,7 +19,9 @@ static uint64_t cu_HashMap_default_hash(const void *key, size_t key_size) {
 
 static bool cu_HashMap_default_equals(
     const void *a, const void *b, size_t key_size) {
-  return memcmp(a, b, key_size) == 0;
+  return cu_Memory_memcmp(
+             cu_Slice_create((void *)a, key_size),
+             cu_Slice_create((void *)b, key_size)) == true;
 }
 
 static cu_HashMap_Bucket *cu_HashMap_lookup_bucket(
@@ -74,7 +75,7 @@ static cu_HashMap_Error_Optional cu_HashMap_rehash(
     return cu_HashMap_Error_Optional_some(CU_HASHMAP_ERROR_OOM);
   }
   cu_HashMap_Bucket *new_buckets = (cu_HashMap_Bucket *)mem.value.ptr;
-  memset(new_buckets, 0, new_cap * sizeof(cu_HashMap_Bucket));
+  cu_Memory_memset(new_buckets, 0, new_cap * sizeof(cu_HashMap_Bucket));
 
   size_t old_cap = map->capacity;
   cu_HashMap_Bucket *old_buckets = map->buckets;
@@ -123,7 +124,7 @@ cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
     return cu_HashMap_result_error(CU_HASHMAP_ERROR_OOM);
   }
   cu_HashMap_Bucket *buckets = (cu_HashMap_Bucket *)mem.value.ptr;
-  memset(buckets, 0, cap * sizeof(cu_HashMap_Bucket));
+  cu_Memory_memset(buckets, 0, cap * sizeof(cu_HashMap_Bucket));
 
   cu_HashMap map;
   map.buckets = buckets;
@@ -184,7 +185,8 @@ cu_HashMap_Error_Optional cu_HashMap_insert(
   uint64_t hash = map->hash_fn(key, map->key_layout.elem_size);
   cu_HashMap_Bucket *slot = cu_HashMap_find_slot(map, key, hash);
   if (slot->used && !slot->deleted) {
-    memcpy(slot->value, value, map->value_layout.elem_size);
+    cu_Memory_memcpy(slot->value,
+        cu_Slice_create((void *)value, map->value_layout.elem_size));
     return cu_HashMap_Error_Optional_none();
   }
 
@@ -203,8 +205,10 @@ cu_HashMap_Error_Optional cu_HashMap_insert(
     cu_Allocator_Free(map->allocator, key_mem.value);
     return cu_HashMap_Error_Optional_some(CU_HASHMAP_ERROR_OOM);
   }
-  memcpy(key_mem.value.ptr, key, map->key_layout.elem_size);
-  memcpy(val_mem.value.ptr, value, map->value_layout.elem_size);
+  cu_Memory_memcpy(key_mem.value.ptr,
+      cu_Slice_create((void *)key, map->key_layout.elem_size));
+  cu_Memory_memcpy(val_mem.value.ptr,
+      cu_Slice_create((void *)value, map->value_layout.elem_size));
   slot->key = key_mem.value.ptr;
   slot->value = val_mem.value.ptr;
   map->length++;

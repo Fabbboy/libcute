@@ -1,11 +1,17 @@
 #include <gtest/gtest.h>
 extern "C" {
 #include "memory/allocator.h"
-#include "string/nostd.h"
+#include "memory/wasmallocator.h"
+#include "nostd.h"
+#include "string/string.h"
 }
 
 TEST(String, AppendAndSubstring) {
+#if CU_PLAT_WASM
+  cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#else
   cu_Allocator alloc = cu_Allocator_CAllocator();
+#endif
   cu_String_Result res = cu_String_from_cstr(alloc, "hello");
   ASSERT_TRUE(cu_String_result_is_ok(&res));
   cu_String str = res.value;
@@ -27,7 +33,11 @@ TEST(String, AppendAndSubstring) {
 }
 
 TEST(String, Clear) {
+#if CU_PLAT_WASM
+  cu_Allocator alloc = cu_Allocator_WasmAllocator();
+#else
   cu_Allocator alloc = cu_Allocator_CAllocator();
+#endif
   cu_String_Result res = cu_String_from_cstr(alloc, "data");
   ASSERT_TRUE(cu_String_result_is_ok(&res));
   cu_String str = res.value;

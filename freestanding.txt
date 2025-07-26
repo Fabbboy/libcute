@@ -12,5 +12,7 @@ cpu = 'wasm32'
 endian = 'little'
 
 [built-in options]
-c_args = ['--target=wasm32-unknown-unknown', '-nostdlib', '-DCU_NO_STD']
+c_args = ['--target=wasm32-unknown-unknown', '-nostdlib', '-DCU_FREESTANDING']
 c_link_args = ['--target=wasm32-unknown-unknown', '-nostdlib', '-Wl,--no-entry', '-Wl,--export-all']
+cpp_args = ['--target=wasm32-unknown-unknown', '-nostdlib', '-DCU_FREESTANDING']
+cpp_link_args = ['--target=wasm32-unknown-unknown', '-nostdlib', '-Wl,--no-entry', '-Wl,--export-all']

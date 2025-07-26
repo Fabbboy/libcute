@@ -1,6 +1,6 @@
 #include "string/fmt.h"
 #include <stdarg.h>
-#include <stdio.h>
+#include <nostd.h>
 
 cu_StrBuilder cu_StrBuilder_init(cu_Allocator allocator) {
   cu_StrBuilder builder;
@@ -20,7 +20,7 @@ cu_String_Error cu_StrBuilder_appendf(
     cu_StrBuilder *builder, const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  int needed = vsnprintf(NULL, 0, fmt, args);
+  int needed = cu_CString_vsnprintf(NULL, 0, fmt, args);
   va_end(args);
   if (needed < 0) {
     return CU_STRING_ERROR_OOM;
@@ -31,7 +31,7 @@ cu_String_Error cu_StrBuilder_appendf(
     return err;
   }
   va_start(args, fmt);
-  vsnprintf(
+  cu_CString_vsnprintf(
       builder->string.data + builder->string.length, needed + 1, fmt, args);
   va_end(args);
   builder->string.length = new_len;

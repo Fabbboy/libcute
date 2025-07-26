@@ -10,7 +10,7 @@ TEST(WasmAllocator, Basic) {
   cu_Slice_Result res = cu_Allocator_Alloc(alloc, 64, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&res));
   cu_Slice mem = res.value;
-  memset(mem.ptr, 0xAA, mem.length);
+  cu_Memory_memset(mem.ptr, 0xAA, mem.length);
   cu_Allocator_Free(alloc, mem);
 }
 #else

@@ -30,13 +30,10 @@ sources = [
   'lib/io/error.c',
 ]
 
-nostd = get_option('nostd')
+freestanding = get_option('freestanding')
 c_args = []
-if nostd.enabled()
-  c_args += ['-DCU_NO_STD']
-  message(
-    'Tests are deactivated for now but we will adjust the builds and conditionally add new and remove stdlib depended',
-  )
+if freestanding.enabled()
+  c_args += ['-DCU_FREESTANDING']
 endif
 
 cute_lib = library(
@@ -51,11 +48,13 @@ cute_dep = declare_dependency(
   link_with: cute_lib,
 )
 
-if get_option('tests').enabled() and not nostd.enabled()
+if get_option('tests').enabled()
   subdir('tests')
 endif
 
-subdir('examples')
+if not freestanding.enabled()
+  subdir('examples')
+endif
 
 doxygen = find_program('doxygen', required: false)
 if doxygen.found()
