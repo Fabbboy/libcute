@@ -1,3 +1,4 @@
+# Always build tests for the host, never with freestanding flags
 gtest_dep = dependency('gtest')
 gtest_main = dependency('gtest_main')
 
@@ -24,9 +25,14 @@ test_files = [
 
 foreach test_file : test_files
   test_name = test_file.split('.')[0]
-  exe = executable(test_name, test_file,
-    dependencies : [cute_dep, gtest_dep, gtest_main],
-    include_directories : includes,
+  exe = executable(
+    test_name,
+    test_file,
+    dependencies: [cute_dep, gtest_dep, gtest_main],
+    include_directories: includes,
+    # Ensure no freestanding flags are used for tests
+    c_args: [],
+    cpp_args: [],
   )
   test(test_name, exe)
 endforeach
