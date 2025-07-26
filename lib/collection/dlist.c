@@ -1,6 +1,5 @@
 #include "collection/dlist.h"
 #include <nostd.h>
-#include "string/nostd.h"
 #include <stdalign.h>
 
 CU_RESULT_IMPL(cu_DList, cu_DList, cu_DList_Error)
@@ -44,7 +43,8 @@ static cu_DList_Error_Optional cu_DList_alloc_node(
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_OOM);
   }
   cu_DList_Node *node = (cu_DList_Node *)mem.value.ptr;
-  memcpy(node->data, elem, list->layout.elem_size);
+  cu_Memory_memcpy(node->data,
+      cu_Slice_create((void *)elem, list->layout.elem_size));
   node->prev = NULL;
   node->next = NULL;
   *out_node = node;
@@ -108,7 +108,8 @@ cu_DList_Error_Optional cu_DList_pop_front(cu_DList *list, void *out_elem) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_EMPTY);
   }
   cu_DList_Node *node = list->head;
-  memcpy(out_elem, node->data, list->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(node->data, list->layout.elem_size));
   list->head = node->next;
   if (list->head) {
     list->head->prev = NULL;
@@ -132,7 +133,8 @@ cu_DList_Error_Optional cu_DList_pop_back(cu_DList *list, void *out_elem) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_EMPTY);
   }
   cu_DList_Node *node = list->tail;
-  memcpy(out_elem, node->data, list->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(node->data, list->layout.elem_size));
   list->tail = node->prev;
   if (list->tail) {
     list->tail->next = NULL;

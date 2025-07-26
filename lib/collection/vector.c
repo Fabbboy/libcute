@@ -1,12 +1,10 @@
 #include "collection/vector.h"
 #include "macro.h"
 #include "memory/allocator.h"
-#include "nostd.h"
+#include <nostd.h>
 #include "object/optional.h"
 #include "object/result.h"
 #include "utility.h"
-#include <nostd.h>
-#include "string/nostd.h"
 #include <stdalign.h>
 #include <stddef.h>
 
@@ -133,7 +131,8 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
 
   void *dest = (unsigned char *)vector->data.value.ptr +
                vector->length * vector->layout.elem_size;
-  memcpy(dest, elem, vector->layout.elem_size);
+  cu_Memory_memcpy(dest,
+      cu_Slice_create((void *)elem, vector->layout.elem_size));
   vector->length++;
   return cu_Vector_Error_Optional_none();
 }
@@ -154,7 +153,8 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
   vector->length--;
   void *src = (unsigned char *)vector->data.value.ptr +
               vector->length * vector->layout.elem_size;
-  memcpy(out_elem, src, vector->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(src, vector->layout.elem_size));
 
   if (vector->length == 0) {
     cu_Vector_shrink_to_fit(vector);
@@ -181,10 +181,12 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
 
   void *dest =
       (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
-  memmove(
-      dest, vector->data.value.ptr, vector->length * vector->layout.elem_size);
+  cu_Memory_memmove(dest,
+      cu_Slice_create(vector->data.value.ptr,
+          vector->length * vector->layout.elem_size));
 
-  memcpy(vector->data.value.ptr, elem, vector->layout.elem_size);
+  cu_Memory_memcpy(vector->data.value.ptr,
+      cu_Slice_create((void *)elem, vector->layout.elem_size));
   vector->length++;
   return cu_Vector_Error_Optional_none();
 }
@@ -204,11 +206,13 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
   }
 
   void *src = vector->data.value.ptr;
-  memcpy(out_elem, src, vector->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(src, vector->layout.elem_size));
 
   void *dest =
       (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
-  memmove(dest, src, (vector->length - 1) * vector->layout.elem_size);
+  cu_Memory_memmove(dest,
+      cu_Slice_create(src, (vector->length - 1) * vector->layout.elem_size));
 
   vector->length--;
   if (vector->length == 0) {
@@ -232,7 +236,8 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
 
   if (src->length > 0) {
     size_t size = src->length * src->layout.elem_size;
-    memcpy(result.value.data.value.ptr, src->data.value.ptr, size);
+    cu_Memory_memcpy(result.value.data.value.ptr,
+        cu_Slice_create(src->data.value.ptr, size));
     result.value.length = src->length;
   }
 

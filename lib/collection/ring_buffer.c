@@ -1,7 +1,6 @@
 #include "collection/ring_buffer.h"
 #include "utility.h"
 #include <nostd.h>
-#include "string/nostd.h"
 
 CU_RESULT_IMPL(cu_RingBuffer, cu_RingBuffer, cu_RingBuffer_Error)
 CU_OPTIONAL_IMPL(cu_RingBuffer_Error, cu_RingBuffer_Error)
@@ -61,7 +60,8 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_push(cu_RingBuffer *rb, void *elem) {
   size_t tail = (rb->head + rb->length) % rb->capacity;
   void *dest =
       (unsigned char *)rb->data.value.ptr + tail * rb->layout.elem_size;
-  memcpy(dest, elem, rb->layout.elem_size);
+  cu_Memory_memcpy(dest,
+      cu_Slice_create((void *)elem, rb->layout.elem_size));
   rb->length++;
   return cu_RingBuffer_Error_Optional_none();
 }
@@ -80,7 +80,8 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_pop(
   }
   void *src =
       (unsigned char *)rb->data.value.ptr + rb->head * rb->layout.elem_size;
-  memcpy(out_elem, src, rb->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(src, rb->layout.elem_size));
   rb->head = (rb->head + 1) % rb->capacity;
   rb->length--;
   return cu_RingBuffer_Error_Optional_none();

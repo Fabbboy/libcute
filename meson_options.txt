@@ -1,7 +1,7 @@
 option('tests', type: 'feature', value: 'disabled', description: 'Build tests')
 option(
-    'nostd',
+    'freestanding',
     type: 'feature',
     value: 'disabled',
-    description: 'Do not link against the standard C library',
+    description: 'Disable C allocator and page allocator',
 )

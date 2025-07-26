@@ -1,8 +1,9 @@
 #include "nostd.h"
-#include "macro.h"
 #include "io/error.h"
+#include "macro.h"
+#include <stdarg.h>
 
-void cu_memmove(void *dest, cu_Slice src) {
+void cu_Memory_memmove(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
   unsigned char *s = (unsigned char *)src.ptr;
   size_t n = src.length;
@@ -23,7 +24,7 @@ void cu_memmove(void *dest, cu_Slice src) {
   }
 }
 
-void cu_memcpy(void *dest, cu_Slice src) {
+void cu_Memory_memcpy(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
   unsigned char *s = (unsigned char *)src.ptr;
   size_t n = src.length;
@@ -36,7 +37,7 @@ void cu_memcpy(void *dest, cu_Slice src) {
   }
 }
 
-void cu_memset(void *dest, int value, size_t size) {
+void cu_Memory_memset(void *dest, int value, size_t size) {
   unsigned char *d = (unsigned char *)dest;
 
   CU_IF_NULL(d) return;
@@ -46,18 +47,18 @@ void cu_memset(void *dest, int value, size_t size) {
   }
 }
 
-size_t cu_strlen(const char *str) {
-  const char *s = str;
+size_t cu_CString_length(const char *cstr) {
+  const char *s = cstr;
 
   CU_IF_NULL(s) return 0;
 
   while (*s) {
     s++;
   }
-  return s - str;
+  return s - cstr;
 }
 
-bool cu_memcmp(cu_Slice a, cu_Slice b) {
+bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
   if (a.length != b.length)
     return false;
 
@@ -77,31 +78,158 @@ bool cu_memcmp(cu_Slice a, cu_Slice b) {
   return true;
 }
 
-#ifdef CU_NO_STD
-void *memcpy(void *dest, const void *src, size_t n) {
-  cu_memcpy(dest, cu_Slice_create((void *)src, n));
-  return dest;
+int cu_CString_vsnprintf(
+    char *dst, size_t size, const char *fmt, va_list args) {
+  size_t pos = 0;
+  size_t total = 0;
+  const char *p = fmt;
+  while (*p) {
+    if (*p == '%') {
+      ++p;
+      if (*p == 'd') {
+        int val = va_arg(args, int);
+        char numbuf[32];
+        int blen = 0;
+        bool neg = false;
+        unsigned int u = (unsigned int)val;
+        if (val < 0) {
+          neg = true;
+          u = (unsigned int)(-val);
+        }
+        char tmp[32];
+        int t = 0;
+        do {
+          tmp[t++] = (char)('0' + (u % 10));
+          u /= 10;
+        } while (u > 0);
+        if (neg)
+          numbuf[blen++] = '-';
+        while (t-- > 0)
+          numbuf[blen++] = tmp[t];
+        for (int i = 0; i < blen; ++i) {
+          if (dst && pos + 1 < size)
+            dst[pos] = numbuf[i];
+          if (pos + 1 < SIZE_MAX)
+            pos++;
+          total++;
+        }
+      } else if (*p == 's') {
+        const char *s = va_arg(args, const char *);
+        size_t len = cu_CString_length(s);
+        for (size_t i = 0; i < len; ++i) {
+          if (dst && pos + 1 < size)
+            dst[pos] = s[i];
+          if (pos + 1 < SIZE_MAX)
+            pos++;
+          total++;
+        }
+      } else if (*p == '%') {
+        if (dst && pos + 1 < size)
+          dst[pos] = '%';
+        if (pos + 1 < SIZE_MAX)
+          pos++;
+        total++;
+      }
+      ++p;
+    } else {
+      if (dst && pos + 1 < size)
+        dst[pos] = *p;
+      if (pos + 1 < SIZE_MAX)
+        pos++;
+      ++p;
+      total++;
+    }
+  }
+  if (size > 0) {
+    if (pos >= size)
+      pos = size - 1;
+    if (dst)
+      dst[pos] = '\0';
+  }
+  return (int)total;
 }
 
-void *memmove(void *dest, const void *src, size_t n) {
-  cu_memmove(dest, cu_Slice_create((void *)src, n));
-  return dest;
+int cu_CString_snprintf(char *dst, size_t size, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  int r = cu_CString_vsnprintf(dst, size, fmt, args);
+  va_end(args);
+  return r;
 }
 
-void *memset(void *dest, int c, size_t n) {
-  cu_memset(dest, c, n);
-  return dest;
+int cu_CString_vsprintf(char *dst, const char *fmt, va_list args) {
+  return cu_CString_vsnprintf(dst, SIZE_MAX, fmt, args);
 }
 
-int memcmp(const void *s1, const void *s2, size_t n) {
-  return cu_memcmp(cu_Slice_create((void *)s1, n),
-                   cu_Slice_create((void *)s2, n))
-             ? 0
-             : 1;
+int cu_CString_sprintf(char *dst, const char *fmt, ...) {
+  va_list args;
+  va_start(args, fmt);
+  int r = cu_CString_vsnprintf(dst, SIZE_MAX, fmt, args);
+  va_end(args);
+  return r;
 }
 
-size_t strlen(const char *s) { return cu_strlen(s); }
-#endif
+void cu_abort(void) { __builtin_trap(); }
+
+void cu_panic_handler(const char *format, ...) {
+  (void)format;
+  cu_abort();
+}
+
+unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
+  const char *s = nptr;
+  while (*s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' || *s == '\f' ||
+         *s == '\v')
+    s++;
+
+  bool neg = false;
+  if (*s == '+') {
+    s++;
+  } else if (*s == '-') {
+    neg = true;
+    s++;
+  }
+
+  if (base == 0) {
+    if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+      base = 16;
+      s += 2;
+    } else if (s[0] == '0') {
+      base = 8;
+      s += 1;
+    } else {
+      base = 10;
+    }
+  } else if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+    s += 2;
+  }
+
+  unsigned long result = 0;
+  while (*s) {
+    char c = *s;
+    int digit;
+    if (c >= '0' && c <= '9') {
+      digit = c - '0';
+    } else if (c >= 'a' && c <= 'f') {
+      digit = c - 'a' + 10;
+    } else if (c >= 'A' && c <= 'F') {
+      digit = c - 'A' + 10;
+    } else {
+      break;
+    }
+    if (digit >= base)
+      break;
+    result = result * (unsigned long)base + (unsigned long)digit;
+    s++;
+  }
+
+  if (endptr != NULL)
+    *endptr = (char *)s;
+
+  if (neg)
+    return (unsigned long)(-(long)result);
+  return result;
+}
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {
   cu_Slice slice;

@@ -1,9 +1,7 @@
 #include "memory/fixedallocator.h"
-#include "macro.h"
-#include "nostd.h"
-#include "string/nostd.h"
-#include <nostd.h>
 #include "io/error.h"
+#include "macro.h"
+#include <nostd.h>
 
 static void cu_fixed_free(void *self, cu_Slice mem);
 
@@ -39,9 +37,7 @@ static cu_Slice_Result cu_fixed_alloc(
 static cu_Slice_Result cu_fixed_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
-  if (mem.ptr == NULL) {
-    return cu_fixed_alloc(self, size, alignment);
-  }
+  CU_IF_NULL(mem.ptr) { return cu_fixed_alloc(self, size, alignment); }
   if (size == 0) {
     cu_fixed_free(self, mem);
     cu_Io_Error err = {
@@ -66,7 +62,8 @@ static cu_Slice_Result cu_fixed_resize(
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }
-  memcpy(new_mem.value.ptr, mem.ptr, mem.length < size ? mem.length : size);
+  cu_Memory_memcpy(new_mem.value.ptr,
+      cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
   // adjust used to release old memory
   alloc->used = hdr->prev_offset;
   return new_mem;
@@ -74,9 +71,7 @@ static cu_Slice_Result cu_fixed_resize(
 
 static void cu_fixed_free(void *self, cu_Slice mem) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
-  if (mem.ptr == NULL) {
-    return;
-  }
+  CU_IF_NULL(mem.ptr) { return; }
   const size_t header_size = sizeof(struct cu_FixedAllocator_Header);
   struct cu_FixedAllocator_Header *hdr =
       (struct cu_FixedAllocator_Header *)((unsigned char *)mem.ptr -

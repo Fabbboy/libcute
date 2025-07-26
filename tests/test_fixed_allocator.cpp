@@ -14,7 +14,7 @@ TEST(FixedAllocator, Basic) {
   cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, 16, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&a_res));
   cu_Slice a = a_res.value;
-  memset(a.ptr, 0xAA, a.length);
+  cu_Memory_memset(a.ptr, 0xAA, a.length);
 
   cu_Allocator_Free(alloc, a);
   cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, 16, 8);

@@ -1,6 +1,5 @@
 #include "collection/list.h"
 #include <nostd.h>
-#include "string/nostd.h"
 #include <stdalign.h>
 
 CU_RESULT_IMPL(cu_List, cu_List, cu_List_Error)
@@ -49,7 +48,8 @@ cu_List_Error_Optional cu_List_push_front(cu_List *list, void *elem) {
   }
   cu_List_Node *node = (cu_List_Node *)mem.value.ptr;
   node->next = list->head;
-  memcpy(node->data, elem, list->layout.elem_size);
+  cu_Memory_memcpy(node->data,
+      cu_Slice_create((void *)elem, list->layout.elem_size));
   list->head = node;
   list->length++;
   return cu_List_Error_Optional_none();
@@ -66,7 +66,8 @@ cu_List_Error_Optional cu_List_pop_front(cu_List *list, void *out_elem) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_EMPTY);
   }
   cu_List_Node *node = list->head;
-  memcpy(out_elem, node->data, list->layout.elem_size);
+  cu_Memory_memcpy(out_elem,
+      cu_Slice_create(node->data, list->layout.elem_size));
   list->head = node->next;
   list->length--;
   cu_Allocator_Free(list->allocator,
@@ -91,7 +92,8 @@ cu_List_Error_Optional cu_List_insert_after(
   }
 
   cu_List_Node *node = (cu_List_Node *)mem.value.ptr;
-  memcpy(node->data, elem, list->layout.elem_size);
+  cu_Memory_memcpy(node->data,
+      cu_Slice_create((void *)elem, list->layout.elem_size));
 
   if (!pos) {
     node->next = list->head;

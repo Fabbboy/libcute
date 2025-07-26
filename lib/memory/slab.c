@@ -1,10 +1,9 @@
 #include "memory/slab.h"
 #include "collection/bitmap.h"
-#include "macro.h"
-#include "nostd.h"
-#include "string/nostd.h"
-#include <nostd.h>
 #include "io/error.h"
+#include "macro.h"
+#include "memory/wasmallocator.h"
+#include <nostd.h>
 #include <stdalign.h>
 
 #define CU_DIV_CEIL(x, y) (((x) + (y) - 1) / (y))
@@ -149,9 +148,7 @@ static cu_Slice_Result cu_slab_alloc(
 static cu_Slice_Result cu_slab_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
-  if (mem.ptr == NULL) {
-    return cu_slab_alloc(self, size, alignment);
-  }
+  CU_IF_NULL(mem.ptr) { return cu_slab_alloc(self, size, alignment); }
   if (size == 0) {
     cu_slab_free(self, mem);
     cu_Io_Error err = {
@@ -174,16 +171,15 @@ static cu_Slice_Result cu_slab_resize(
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }
-  memcpy(new_mem.value.ptr, mem.ptr, mem.length < size ? mem.length : size);
+  cu_Memory_memcpy(new_mem.value.ptr,
+      cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
   cu_slab_free(self, mem);
   return new_mem;
 }
 
 static void cu_slab_free(void *self, cu_Slice mem) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
-  if (mem.ptr == NULL) {
-    return;
-  }
+  CU_IF_NULL(mem.ptr) { return; }
   struct cu_SlabAllocator_Header *hdr =
       (struct cu_SlabAllocator_Header *)((unsigned char *)mem.ptr -
                                          sizeof(
@@ -201,7 +197,11 @@ cu_Allocator cu_Allocator_SlabAllocator(
   if (cu_Allocator_Optional_is_some(&cfg.backingAllocator)) {
     alloc->backingAllocator = cfg.backingAllocator.value;
   } else {
+#if CU_PLAT_WASM || CU_FREESTANDING
+    alloc->backingAllocator = cu_Allocator_WasmAllocator();
+#else
     alloc->backingAllocator = cu_Allocator_CAllocator();
+#endif
   }
   alloc->slabs = NULL;
   alloc->current = NULL;

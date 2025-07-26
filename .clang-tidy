@@ -1,0 +1,23 @@
+Checks: '-*,readability-identifier-naming'
+WarningsAsErrors: ''
+HeaderFilterRegex: '.*'
+FormatStyle: none
+CheckOptions:
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.GlobalFunctionPrefix
+    value: cu_
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: cu_
+  - key: readability-identifier-naming.TypePrefix
+    value: cu_

@@ -2,7 +2,7 @@
 
 #include "cute.h"
 #include <stdint.h>
-#ifndef CU_NO_STD
+#ifndef CU_FREESTANDING
 
 /**\@file 6502.h Simple 6502 CPU emulator using libcute types. */
 

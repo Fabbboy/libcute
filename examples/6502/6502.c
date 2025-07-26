@@ -1,10 +1,10 @@
 
 #include "6502.h"
 
-#ifndef CU_NO_STD
 #include "macro.h"
+#include <fcntl.h>
 #include <nostd.h>
-#include <stdio.h>
+#include <unistd.h>
 
 #define FLAG_CARRY 0x01
 #define FLAG_ZERO 0x02
@@ -57,25 +57,27 @@ void cu_6502_load(cu_6502 *cpu, cu_Slice program, uint16_t addr) {
   if (addr + program.length > cpu->memory.length) {
     return;
   }
-  memcpy((uint8_t *)cpu->memory.data.value.ptr + addr, program.ptr,
-      program.length);
+  cu_Memory_memcpy((uint8_t *)cpu->memory.data.value.ptr + addr,
+      cu_Slice_create(program.ptr, program.length));
   cpu->pc = addr;
 }
 
 bool cu_6502_load_file(cu_6502 *cpu, const char *path, uint16_t addr) {
-  FILE *f = fopen(path, "rb");
-  if (!f) {
+  int fd = open(path, O_RDONLY);
+  if (fd < 0) {
     return false;
   }
-  fseek(f, 0, SEEK_END);
-  long sz = ftell(f);
-  rewind(f);
+  long sz = lseek(fd, 0, SEEK_END);
+  lseek(fd, 0, SEEK_SET);
   if (addr + (uint16_t)sz > cpu->memory.length) {
-    fclose(f);
+    close(fd);
     return false;
   }
-  fread((uint8_t *)cpu->memory.data.value.ptr + addr, 1, (size_t)sz, f);
-  fclose(f);
+  ssize_t r =
+      read(fd, (uint8_t *)cpu->memory.data.value.ptr + addr, (size_t)sz);
+  close(fd);
+  if (r != sz)
+    return false;
   cpu->pc = addr;
   return true;
 }
@@ -135,4 +137,3 @@ void cu_6502_run(cu_6502 *cpu) {
     cu_6502_step(cpu);
   }
 }
-#endif

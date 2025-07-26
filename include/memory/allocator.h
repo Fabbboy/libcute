@@ -42,9 +42,7 @@ static inline void cu_Allocator_Free(cu_Allocator allocator, cu_Slice mem) {
   allocator.freeFn(allocator.self, mem);
 }
 
-#ifndef CU_NO_STD
-
-/** Standard allocator backed by malloc and free. */
+/** System allocator backed by libc malloc/free. */
+#if !CU_FREESTANDING
 cu_Allocator cu_Allocator_CAllocator(void);
-
 #endif

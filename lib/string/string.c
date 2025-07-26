@@ -1,6 +1,5 @@
 #include "macro.h"
 #include "string/string.h"
-#include "string/nostd.h"
 #include <nostd.h>
 
 CU_RESULT_IMPL(cu_String, cu_String, cu_String_Error)
@@ -49,12 +48,12 @@ void cu_String_clear(cu_String *str) {
 
 cu_String_Result cu_String_from_cstr(cu_Allocator allocator, const char *cstr) {
   cu_String str = cu_String_init(allocator);
-  size_t len = cstr ? strlen(cstr) : 0;
+  size_t len = cstr ? cu_CString_length(cstr) : 0;
   if (cu_string_alloc(&str, len) != CU_STRING_ERROR_NONE) {
     return cu_String_result_error(CU_STRING_ERROR_OOM);
   }
   if (len > 0) {
-    memcpy(str.data, cstr, len);
+    cu_Memory_memcpy(str.data, cu_Slice_create((void *)cstr, len));
   }
   str.data[len] = '\0';
   str.length = len;
@@ -67,7 +66,7 @@ cu_String_Result cu_String_from_slice(cu_Allocator allocator, cu_Slice slice) {
     return cu_String_result_error(CU_STRING_ERROR_OOM);
   }
   if (slice.length > 0) {
-    memcpy(str.data, slice.ptr, slice.length);
+    cu_Memory_memcpy(str.data, cu_Slice_create(slice.ptr, slice.length));
   }
   str.data[slice.length] = '\0';
   str.length = slice.length;
@@ -98,7 +97,8 @@ cu_String_Error cu_String_append_slice(cu_String *str, cu_Slice slice) {
     }
   }
   if (slice.length > 0) {
-    memcpy(str->data + str->length, slice.ptr, slice.length);
+    cu_Memory_memcpy(str->data + str->length,
+        cu_Slice_create(slice.ptr, slice.length));
   }
   str->length = new_len;
   str->data[new_len] = '\0';
@@ -106,7 +106,7 @@ cu_String_Error cu_String_append_slice(cu_String *str, cu_Slice slice) {
 }
 
 cu_String_Error cu_String_append_cstr(cu_String *str, const char *cstr) {
-  size_t len = cstr ? strlen(cstr) : 0;
+  size_t len = cstr ? cu_CString_length(cstr) : 0;
   return cu_String_append_slice(str, cu_Slice_create((void *)cstr, len));
 }
 

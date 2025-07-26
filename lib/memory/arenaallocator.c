@@ -1,9 +1,8 @@
 #include "memory/arenaallocator.h"
-#include "macro.h"
-#include "nostd.h"
-#include "string/nostd.h"
-#include <nostd.h>
 #include "io/error.h"
+#include "macro.h"
+#include "memory/wasmallocator.h"
+#include <nostd.h>
 #include <stdalign.h>
 static void cu_arena_free(void *self, cu_Slice mem);
 
@@ -75,9 +74,7 @@ static cu_Slice_Result cu_arena_alloc(
 
 static cu_Slice_Result cu_arena_resize(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
-  if (mem.ptr == NULL) {
-    return cu_arena_alloc(self, size, alignment);
-  }
+  CU_IF_NULL(mem.ptr) { return cu_arena_alloc(self, size, alignment); }
   if (size == 0) {
     cu_arena_free(self, mem);
     cu_Io_Error err = {
@@ -108,16 +105,14 @@ static cu_Slice_Result cu_arena_resize(
     return new_mem;
   }
   size_t copy = mem.length < size ? mem.length : size;
-  memmove(new_mem.value.ptr, mem.ptr, copy);
+  cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
   cu_arena_free(self, mem);
   return new_mem;
 }
 
 static void cu_arena_free(void *self, cu_Slice mem) {
   CU_UNUSED(self);
-  if (mem.ptr == NULL) {
-    return;
-  }
+  CU_IF_NULL(mem.ptr) { return; }
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   struct cu_ArenaAllocator_Header *hdr =
       (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
@@ -143,7 +138,11 @@ cu_Allocator cu_Allocator_ArenaAllocator(
   if (cu_Allocator_Optional_is_some(&config.backingAllocator)) {
     arena->backingAllocator = config.backingAllocator.value;
   } else {
+#if CU_PLAT_WASM || CU_FREESTANDING
+    arena->backingAllocator = cu_Allocator_WasmAllocator();
+#else
     arena->backingAllocator = cu_Allocator_CAllocator();
+#endif
   }
   arena->chunkSize = config.chunkSize ? config.chunkSize : CU_ARENA_CHUNK_SIZE;
   arena->current = NULL;

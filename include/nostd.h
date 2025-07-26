@@ -1,7 +1,10 @@
 #pragma once
 
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -15,33 +18,24 @@ typedef struct cu_Slice {
 /** Create a slice from a pointer and length without allocating. */
 cu_Slice cu_Slice_create(void *ptr, size_t length);
 
-#include <object/result.h>
 #include <object/optional.h>
-#ifdef CU_NO_STD
+#include <object/result.h>
+
+void cu_abort(void);
 void cu_panic_handler(const char *format, ...);
-#else
-#include <stdio.h>
-#include <stdlib.h>
-#define cu_panic_handler(format, ...)                                          \
-  do {                                                                         \
-    fprintf(stderr, "Panic: " format "\n", __VA_ARGS__);                       \
-    exit(EXIT_FAILURE);                                                        \
-  } while (0)
-#endif
 
+void cu_Memory_memmove(void *dest, cu_Slice src);
+void cu_Memory_memcpy(void *dest, cu_Slice src);
+void cu_Memory_memset(void *dest, int value, size_t size);
+bool cu_Memory_memcmp(cu_Slice a, cu_Slice b);
 
-// NOTSTD is a header that works across all platforms it provides a very minimal
-// replacement for nostd.h
-// it is activly mixing libcute primitives like cu_Slice but also provides
-// normal apis but we prefer libcute primitives
-// we assume we only have access to stdbool.h, stddef.h and stdint.h
+size_t cu_CString_length(const char *cstr);
+int cu_CString_vsnprintf(char *buf, size_t size, const char *fmt, va_list args);
+int cu_CString_snprintf(char *buf, size_t size, const char *fmt, ...);
+int cu_CString_vsprintf(char *buf, const char *fmt, va_list args);
+int cu_CString_sprintf(char *buf, const char *fmt, ...);
+unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base);
 
-void cu_memmove(void *dest, cu_Slice src);
-void cu_memcpy(void *dest, cu_Slice src);
-void cu_memset(void *dest, int value, size_t size);
-bool cu_memcmp(cu_Slice a, cu_Slice b);
-
-size_t cu_strlen(const char *str);
 #ifdef __cplusplus
 }
 #endif
