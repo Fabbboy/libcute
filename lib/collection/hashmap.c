@@ -4,9 +4,9 @@
 #include "object/optional.h"
 #include "object/result.h"
 #include "utility.h"
+#include <nostd.h>
 #include <stdalign.h>
 #include <stddef.h>
-#include <string.h>
 
 CU_RESULT_IMPL(cu_HashMap, cu_HashMap, cu_HashMap_Error)
 CU_OPTIONAL_IMPL(cu_HashMap_Error, cu_HashMap_Error)

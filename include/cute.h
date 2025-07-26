@@ -27,7 +27,7 @@ extern "C" {
 #include "object/optional.h"
 #include "object/result.h"
 #include "string/fmt.h"
-#include "string/string.h"
+#include "string/nostd.h"
 
 #include "io/error.h"
 #include "io/file.h"

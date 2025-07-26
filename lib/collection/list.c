@@ -1,6 +1,6 @@
 #include "collection/list.h"
+#include <nostd.h>
 #include <stdalign.h>
-#include <string.h>
 
 CU_RESULT_IMPL(cu_List, cu_List, cu_List_Error)
 CU_OPTIONAL_IMPL(cu_List_Error, cu_List_Error)
@@ -75,7 +75,9 @@ cu_List_Error_Optional cu_List_pop_front(cu_List *list, void *out_elem) {
 
 cu_List_Error_Optional cu_List_insert_after(
     cu_List *list, cu_List_Node *pos, void *elem) {
-  CU_IF_NULL(list) { return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID); }
+  CU_IF_NULL(list) {
+    return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID);
+  }
   CU_LAYOUT_CHECK(list->layout) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID_LAYOUT);
   }
@@ -107,7 +109,9 @@ cu_List_Error_Optional cu_List_insert_before(
   if (!pos) {
     return cu_List_insert_after(list, NULL, elem);
   }
-  CU_IF_NULL(list) { return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID); }
+  CU_IF_NULL(list) {
+    return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID);
+  }
   CU_LAYOUT_CHECK(list->layout) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID_LAYOUT);
   }

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <string.h>
+#include <nostd.h>
 extern "C" {
 #include "memory/fixedallocator.h"
 #include "nostd.h"

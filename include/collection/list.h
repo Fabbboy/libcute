@@ -7,8 +7,8 @@
 #include "object/optional.h"
 #include "object/result.h"
 #include "utility.h"
+#include <nostd.h>
 #include <stddef.h>
-#include <string.h>
 
 typedef struct cu_List_Node {
   struct cu_List_Node *next;

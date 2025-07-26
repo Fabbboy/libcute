@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 extern "C" {
 #include "memory/allocator.h"
-#include "string/string.h"
+#include "string/nostd.h"
 }
 
 TEST(String, AppendAndSubstring) {

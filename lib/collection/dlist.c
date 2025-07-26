@@ -1,6 +1,6 @@
 #include "collection/dlist.h"
+#include <nostd.h>
 #include <stdalign.h>
-#include <string.h>
 
 CU_RESULT_IMPL(cu_DList, cu_DList, cu_DList_Error)
 CU_OPTIONAL_IMPL(cu_DList_Error, cu_DList_Error)
@@ -146,7 +146,9 @@ cu_DList_Error_Optional cu_DList_pop_back(cu_DList *list, void *out_elem) {
 
 cu_DList_Error_Optional cu_DList_insert_after(
     cu_DList *list, cu_DList_Node *pos, void *elem) {
-  CU_IF_NULL(list) { return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID); }
+  CU_IF_NULL(list) {
+    return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID);
+  }
   CU_LAYOUT_CHECK(list->layout) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
@@ -184,7 +186,9 @@ cu_DList_Error_Optional cu_DList_insert_before(
   if (!pos) {
     return cu_DList_insert_after(list, NULL, elem);
   }
-  CU_IF_NULL(list) { return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID); }
+  CU_IF_NULL(list) {
+    return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID);
+  }
   CU_LAYOUT_CHECK(list->layout) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }

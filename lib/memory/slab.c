@@ -2,8 +2,8 @@
 #include "collection/bitmap.h"
 #include "macro.h"
 #include "nostd.h"
+#include <nostd.h>
 #include <stdalign.h>
-#include <string.h>
 
 #define CU_DIV_CEIL(x, y) (((x) + (y) - 1) / (y))
 

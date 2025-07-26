@@ -3,7 +3,6 @@
 #include "nostd.h"
 #include <nostd.h>
 #include <stddef.h>
-#include <string.h>
 
 static inline void cu_CAllocator_Free(void *self, cu_Slice mem) {
   CU_UNUSED(self);

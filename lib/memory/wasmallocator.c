@@ -4,8 +4,8 @@
 
 #if CU_PLAT_WASM
 
+#include <nostd.h>
 #include <stdint.h>
-#include <string.h>
 
 struct cu_WasmAllocator_Header {
   size_t offset;

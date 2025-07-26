@@ -1,6 +1,6 @@
-#include "string/string.h"
 #include "macro.h"
-#include <string.h>
+#include "string/nostd.h"
+#include <nostd.h>
 
 CU_RESULT_IMPL(cu_String, cu_String, cu_String_Error)
 

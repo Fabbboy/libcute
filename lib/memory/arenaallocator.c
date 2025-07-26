@@ -1,8 +1,8 @@
 #include "memory/arenaallocator.h"
 #include "macro.h"
 #include "nostd.h"
+#include <nostd.h>
 #include <stdalign.h>
-#include <string.h>
 static void cu_arena_free(void *self, cu_Slice mem);
 
 static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(

@@ -1,9 +1,9 @@
 #include "memory/page.h"
 #include "macro.h"
 #include "nostd.h"
+#include <nostd.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 #if defined(__linux__) || defined(__APPLE__)
 #include <sys/mman.h>

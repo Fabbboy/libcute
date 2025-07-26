@@ -1,6 +1,6 @@
 #pragma once
 
-#include "string.h"
+#include "nostd.h"
 #include <stdarg.h>
 
 /** String builder for efficient string construction and formatting. */

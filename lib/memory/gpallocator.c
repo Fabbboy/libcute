@@ -1,7 +1,7 @@
 #include "memory/gpallocator.h"
 #include "macro.h"
 #include "utility.h"
-#include <string.h>
+#include <nostd.h>
 
 /* Helper forward declarations */
 static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);

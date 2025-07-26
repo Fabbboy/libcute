@@ -1,7 +1,7 @@
 #include "hash/hash.h"
+#include <nostd.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 
 /** Compute the 32-bit FNV-1a hash of a buffer. */
 uint32_t cu_Hash_FNV1a32(const void *data, size_t len) {

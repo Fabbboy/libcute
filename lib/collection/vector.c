@@ -5,9 +5,9 @@
 #include "object/optional.h"
 #include "object/result.h"
 #include "utility.h"
+#include <nostd.h>
 #include <stdalign.h>
 #include <stddef.h>
-#include <string.h>
 
 CU_RESULT_IMPL(cu_Vector, cu_Vector, cu_Vector_Error)
 CU_OPTIONAL_IMPL(cu_Vector_Error, cu_Vector_Error)

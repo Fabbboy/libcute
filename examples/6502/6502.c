@@ -1,7 +1,7 @@
 #include "6502.h"
 #include "macro.h"
+#include <nostd.h>
 #include <stdio.h>
-#include <string.h>
 
 #define FLAG_CARRY 0x01
 #define FLAG_ZERO 0x02
