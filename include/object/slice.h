@@ -2,9 +2,10 @@
 
 /** @file slice.h Non-owning memory slices. */
 
+#include "io/error.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include "io/error.h"
+#include <stdbool.h>
 #include <stddef.h>
 
 /** Non-owning memory view. */

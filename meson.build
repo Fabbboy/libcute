@@ -34,6 +34,9 @@ nostd = get_option('nostd')
 c_args = []
 if nostd.enabled()
   c_args += ['-DCU_NO_STD']
+  message(
+    'Tests are deactivated for now but we will adjust the builds and conditionally add new and remove stdlib depended',
+  )
 endif
 
 cute_lib = library(
@@ -48,7 +51,7 @@ cute_dep = declare_dependency(
   link_with: cute_lib,
 )
 
-if get_option('tests').enabled()
+if get_option('tests').enabled() and not nostd.enabled()
   subdir('tests')
 endif
 

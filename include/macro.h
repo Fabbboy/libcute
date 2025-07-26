@@ -2,7 +2,7 @@
 
 /** @file macro.h Common utility macros. */
 
-#include <stdio.h>
+#include "nostd.h"
 #include <stdlib.h>
 
 /** Execute the following block if @p expr is NULL. */
@@ -10,11 +10,7 @@
 /** Execute the following block if @p expr is not NULL. */
 #define CU_IF_NOT_NULL(expr) if ((expr) != NULL)
 /** Abort the program with an error message. */
-#define CU_DIE(msg)                                                            \
-  do {                                                                         \
-    fprintf(stderr, "Fatal error (%s:%d): %s\n", __FILE__, __LINE__, msg);     \
-    exit(EXIT_FAILURE);                                                        \
-  } while (0)
+#define CU_DIE(msg)     cu_panic_handler("Fatal error: %s", msg)
 
 /** Round @p x up to the nearest multiple of @p align. */
 #define CU_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
