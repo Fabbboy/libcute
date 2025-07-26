@@ -1,7 +1,7 @@
 compile_commands.json
 .cache/
 .vscode/
-build/
+build-*
 out/
 meson-1.8.2/
 meson-1.8.2.tar.gz
