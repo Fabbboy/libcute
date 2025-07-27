@@ -10,8 +10,11 @@
 /** Allocation function signature. */
 typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(
     void *self, size_t size, size_t alignment);
-/** Resize function signature. */
-typedef cu_Slice_Result (*cu_Allocator_ResizeFunc)(
+/** Grow function signature. */
+typedef cu_Slice_Result (*cu_Allocator_GrowFunc)(
+    void *self, cu_Slice mem, size_t size, size_t alignment);
+/** Shrink function signature. */
+typedef cu_Slice_Result (*cu_Allocator_ShrinkFunc)(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 /** Free function signature. */
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
@@ -20,7 +23,8 @@ typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
 typedef struct {
   void *self;                       /**< implementation specific data */
   cu_Allocator_AllocFunc allocFn;   /**< allocate memory */
-  cu_Allocator_ResizeFunc resizeFn; /**< resize previously allocated memory */
+  cu_Allocator_GrowFunc growFn;     /**< grow previously allocated memory */
+  cu_Allocator_ShrinkFunc shrinkFn; /**< shrink previously allocated memory */
   cu_Allocator_FreeFunc freeFn;     /**< free memory */
 } cu_Allocator;
 CU_OPTIONAL_DECL(cu_Allocator, cu_Allocator)
@@ -31,10 +35,16 @@ static inline cu_Slice_Result cu_Allocator_Alloc(
   return allocator.allocFn(allocator.self, size, alignment);
 }
 
-/** Resize a previously allocated block. */
-static inline cu_Slice_Result cu_Allocator_Resize(
+/** Grow a previously allocated block. */
+static inline cu_Slice_Result cu_Allocator_Grow(
     cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
-  return allocator.resizeFn(allocator.self, mem, size, alignment);
+  return allocator.growFn(allocator.self, mem, size, alignment);
+}
+
+/** Shrink a previously allocated block. */
+static inline cu_Slice_Result cu_Allocator_Shrink(
+    cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
+  return allocator.shrinkFn(allocator.self, mem, size, alignment);
 }
 
 /** Free memory obtained from this allocator. */

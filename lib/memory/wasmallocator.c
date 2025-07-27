@@ -13,7 +13,9 @@ struct cu_WasmAllocator_Header {
 };
 
 static cu_Slice_Result cu_wasm_alloc(void *self, size_t size, size_t alignment);
-static cu_Slice_Result cu_wasm_resize(
+static cu_Slice_Result cu_wasm_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment);
+static cu_Slice_Result cu_wasm_shrink(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_wasm_free(void *self, cu_Slice mem);
 
@@ -118,7 +120,7 @@ static cu_Slice_Result cu_wasm_alloc(
   return cu_Slice_result_ok(cu_Slice_create(base + user_offset, size));
 }
 
-static cu_Slice_Result cu_wasm_resize(
+static cu_Slice_Result cu_wasm_resize_internal(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_IF_NULL(mem.ptr) { return cu_wasm_alloc(self, size, alignment); }
   if (size == 0) {
@@ -152,6 +154,16 @@ static cu_Slice_Result cu_wasm_resize(
   return new_mem;
 }
 
+static cu_Slice_Result cu_wasm_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_wasm_resize_internal(self, mem, size, alignment);
+}
+
+static cu_Slice_Result cu_wasm_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_wasm_resize_internal(self, mem, size, alignment);
+}
+
 static void cu_wasm_free(void *self, cu_Slice mem) {
   CU_UNUSED(self);
   CU_IF_NULL(mem.ptr) { return; }
@@ -181,7 +193,8 @@ cu_Allocator cu_Allocator_WasmAllocator(void) {
   cu_Allocator a;
   a.self = NULL;
   a.allocFn = cu_wasm_alloc;
-  a.resizeFn = cu_wasm_resize;
+  a.growFn = cu_wasm_grow;
+  a.shrinkFn = cu_wasm_shrink;
   a.freeFn = cu_wasm_free;
   return a;
 }
