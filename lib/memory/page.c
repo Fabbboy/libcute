@@ -34,7 +34,7 @@ static cu_Slice_Result cu_PageAllocator_Alloc(
   return cu_Slice_result_ok(cu_Slice_create(ptr, aligned_size));
 }
 
-static cu_Slice_Result cu_PageAllocator_Resize(
+static cu_Slice_Result cu_PageAllocator_grow(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_UNUSED(alignment);
   if (size == 0) {
@@ -56,12 +56,18 @@ static cu_Slice_Result cu_PageAllocator_Resize(
   return cu_Slice_result_ok(cu_Slice_create(new_ptr, aligned_size));
 }
 
+static cu_Slice_Result cu_PageAllocator_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_PageAllocator_grow(self, mem, size, alignment);
+}
+
 cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
   allocator->pageSize = 4096;
   cu_Allocator alloc;
   alloc.self = allocator;
   alloc.allocFn = cu_PageAllocator_Alloc;
-  alloc.resizeFn = cu_PageAllocator_Resize;
+  alloc.growFn = cu_PageAllocator_grow;
+  alloc.shrinkFn = cu_PageAllocator_shrink;
   alloc.freeFn = cu_PageAllocator_Free;
   return alloc;
 }
