@@ -37,7 +37,7 @@ static cu_Slice_Result cu_fixed_alloc(
       cu_Slice_create((unsigned char *)alloc->buffer.ptr + start, size));
 }
 
-static cu_Slice_Result cu_fixed_resize(
+static cu_Slice_Result cu_fixed_resize_internal(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
   CU_IF_NULL(mem.ptr) { return cu_fixed_alloc(self, size, alignment); }
@@ -72,6 +72,16 @@ static cu_Slice_Result cu_fixed_resize(
   return new_mem;
 }
 
+static cu_Slice_Result cu_fixed_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_fixed_resize_internal(self, mem, size, alignment);
+}
+
+static cu_Slice_Result cu_fixed_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_fixed_resize_internal(self, mem, size, alignment);
+}
+
 static void cu_fixed_free(void *self, cu_Slice mem) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
   CU_IF_NULL(mem.ptr) { return; }
@@ -94,7 +104,8 @@ cu_Allocator cu_Allocator_FixedAllocator(
   cu_Allocator a;
   a.self = alloc;
   a.allocFn = cu_fixed_alloc;
-  a.resizeFn = cu_fixed_resize;
+  a.growFn = cu_fixed_grow;
+  a.shrinkFn = cu_fixed_shrink;
   a.freeFn = cu_fixed_free;
   return a;
 }

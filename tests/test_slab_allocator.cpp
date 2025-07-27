@@ -62,7 +62,7 @@ TEST(SlabAllocator, Resize) {
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xAA, mem.length);
 
-  cu_Slice_Result resized_res = cu_Allocator_Resize(alloc, mem, 128, 8);
+  cu_Slice_Result resized_res = cu_Allocator_Grow(alloc, mem, 128, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized_res));
   EXPECT_EQ(((unsigned char *)resized_res.value.ptr)[0], 0xAA);
 

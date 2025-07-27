@@ -47,7 +47,7 @@ static cu_Slice_Result cu_CAllocator_Alloc(
   return cu_Slice_result_ok(cu_Slice_create((void *)aligned_addr, size));
 }
 
-static cu_Slice_Result cu_CAllocator_Resize(
+static cu_Slice_Result cu_CAllocator_grow(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_UNUSED(self);
   CU_IF_NULL(mem.ptr) { return cu_CAllocator_Alloc(self, size, alignment); }
@@ -68,12 +68,18 @@ static cu_Slice_Result cu_CAllocator_Resize(
   return new_mem;
 }
 
+static cu_Slice_Result cu_CAllocator_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_CAllocator_grow(self, mem, size, alignment);
+}
+
 cu_Allocator cu_Allocator_CAllocator(void) {
   cu_CAllocator_init();
   cu_Allocator allocator;
   allocator.self = NULL;
   allocator.allocFn = cu_CAllocator_Alloc;
-  allocator.resizeFn = cu_CAllocator_Resize;
+  allocator.growFn = cu_CAllocator_grow;
+  allocator.shrinkFn = cu_CAllocator_shrink;
   allocator.freeFn = cu_CAllocator_Free;
   return allocator;
 }
@@ -92,7 +98,7 @@ static cu_Slice_Result cu_null_alloc(
   return cu_Slice_result_error(err);
 }
 
-static cu_Slice_Result cu_null_resize(
+static cu_Slice_Result cu_null_grow(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_UNUSED(self);
   CU_UNUSED(mem);
@@ -101,6 +107,11 @@ static cu_Slice_Result cu_null_resize(
   cu_Io_Error err = {
       .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
   return cu_Slice_result_error(err);
+}
+
+static cu_Slice_Result cu_null_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_null_grow(self, mem, size, alignment);
 }
 
 static void cu_null_free(void *self, cu_Slice mem) {
@@ -112,7 +123,8 @@ cu_Allocator cu_Allocator_NullAllocator(void) {
   cu_Allocator allocator;
   allocator.self = NULL;
   allocator.allocFn = cu_null_alloc;
-  allocator.resizeFn = cu_null_resize;
+  allocator.growFn = cu_null_grow;
+  allocator.shrinkFn = cu_null_shrink;
   allocator.freeFn = cu_null_free;
   return allocator;
 }

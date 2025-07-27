@@ -159,7 +159,7 @@ TEST(ArenaAllocator, ResizeGrowInPlace) {
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
 
-  cu_Slice_Result resized = cu_Allocator_Resize(alloc, block, 32, 8);
+  cu_Slice_Result resized = cu_Allocator_Grow(alloc, block, 32, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
@@ -183,7 +183,7 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
 
-  cu_Slice_Result resized = cu_Allocator_Resize(alloc, block, 16, 8);
+  cu_Slice_Result resized = cu_Allocator_Shrink(alloc, block, 16, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
@@ -210,7 +210,7 @@ TEST(ArenaAllocator, ResizeAllocNewBlock) {
   cu_Slice b = b_res.value;
   void *old_ptr = a.ptr;
 
-  cu_Slice_Result resized = cu_Allocator_Resize(alloc, a, 64, 8);
+  cu_Slice_Result resized = cu_Allocator_Grow(alloc, a, 64, 8);
   ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
   EXPECT_NE(resized.value.ptr, old_ptr);
 

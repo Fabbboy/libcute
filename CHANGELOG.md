@@ -13,12 +13,6 @@ All notable changes to this project will be documented in this file. See [conven
 - fixes test case, feat: interduces push pop methods - ([05993a1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05993a1fd1b0d8cafe1e5b7933ed1c743b60b282)) - Fabrice
 - some fixes - ([f02ca19](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f02ca19a63709948575507baaf15f5a745388d72)) - Fabrice
 - adjusted name - ([3e8ec20](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3e8ec20a5a070f784286564bcf7c80d54144ea78)) - Fabrice
-<<<<<<< ours
-- fix UB in bitmap bit operations and alignment in fixed allocator
-- keep backing allocators alive in ring buffer tests
-=======
-- fix freestanding tests by providing backing allocators
->>>>>>> theirs
 
 ### Documentation
 
@@ -64,6 +58,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Allocator
 
+- replace resize interface with grow/shrink functions
+
 - use optional for gpa backing - ([c77ca60](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c77ca60622080cc2688454f5c331889297a7d2d8)) - Fabrice
 - optimize small bucket performance - ([fc40724](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fc407241090ec0a39ba98901d0786ef3609b1b56)) - Fabrice
 - refine arena and add resize tests - ([67ad00f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/67ad00f27054ac18def1fe2ea09216c35ff338c9)) - Fabrice
@@ -79,6 +75,7 @@ All notable changes to this project will be documented in this file. See [conven
 ### Collection
 
 - add ring buffer container - ([5555350](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/55553500bdc85f506de28725cf9816dd939b3f39)) - Fabrice
+- remove ternary in vector capacity handling
 - extend list APIs - ([8788373](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/878837377a7c283cfe5b39355b43de0782e9b410)) - Fabrice
 
 ### Example

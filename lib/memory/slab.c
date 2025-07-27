@@ -29,7 +29,9 @@ struct cu_SlabAllocator_Slab {
 };
 
 static cu_Slice_Result cu_slab_alloc(void *self, size_t size, size_t alignment);
-static cu_Slice_Result cu_slab_resize(
+static cu_Slice_Result cu_slab_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment);
+static cu_Slice_Result cu_slab_shrink(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_slab_free(void *self, cu_Slice mem);
 
@@ -145,7 +147,7 @@ static cu_Slice_Result cu_slab_alloc(
   return cu_Slice_result_ok(cu_Slice_create(data + user_pos, size));
 }
 
-static cu_Slice_Result cu_slab_resize(
+static cu_Slice_Result cu_slab_resize_internal(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
   CU_IF_NULL(mem.ptr) { return cu_slab_alloc(self, size, alignment); }
@@ -175,6 +177,16 @@ static cu_Slice_Result cu_slab_resize(
       cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
   cu_slab_free(self, mem);
   return new_mem;
+}
+
+static cu_Slice_Result cu_slab_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_slab_resize_internal(self, mem, size, alignment);
+}
+
+static cu_Slice_Result cu_slab_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_slab_resize_internal(self, mem, size, alignment);
 }
 
 static void cu_slab_free(void *self, cu_Slice mem) {
@@ -212,7 +224,8 @@ cu_Allocator cu_Allocator_SlabAllocator(
   cu_Allocator a;
   a.self = alloc;
   a.allocFn = cu_slab_alloc;
-  a.resizeFn = cu_slab_resize;
+  a.growFn = cu_slab_grow;
+  a.shrinkFn = cu_slab_shrink;
   a.freeFn = cu_slab_free;
   return a;
 }
