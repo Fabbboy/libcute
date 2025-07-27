@@ -7,7 +7,9 @@
 
 /* Helper forward declarations */
 static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);
-static cu_Slice_Result cu_gpa_resize(
+static cu_Slice_Result cu_gpa_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment);
+static cu_Slice_Result cu_gpa_shrink(
     void *self, cu_Slice mem, size_t size, size_t alignment);
 static void cu_gpa_free(void *self, cu_Slice mem);
 static void cu_gpa_destroy_bucket(
@@ -189,7 +191,7 @@ static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment) {
 /* Resize and free */
 /* -------------------------------------------------------------------------- */
 
-static cu_Slice_Result cu_gpa_resize(
+static cu_Slice_Result cu_gpa_resize_internal(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
   CU_IF_NULL(mem.ptr) { return cu_gpa_alloc(self, size, alignment); }
@@ -210,8 +212,13 @@ static cu_Slice_Result cu_gpa_resize(
           .errnum = Size_Optional_none()};
       return cu_Slice_result_error(err);
     }
-    cu_Slice_Result resized = cu_Allocator_Resize(
-        gpa->backingAllocator, meta->slice, size, alignment);
+    cu_Slice_Result resized = size > meta->slice.length
+                                 ? cu_Allocator_Grow(
+                                       gpa->backingAllocator, meta->slice, size,
+                                       alignment)
+                                 : cu_Allocator_Shrink(
+                                       gpa->backingAllocator, meta->slice, size,
+                                       alignment);
     if (!cu_Slice_result_is_ok(&resized)) {
       return resized;
     }
@@ -232,6 +239,16 @@ static cu_Slice_Result cu_gpa_resize(
   cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
   cu_gpa_free(self, mem);
   return new_mem;
+}
+
+static cu_Slice_Result cu_gpa_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_gpa_resize_internal(self, mem, size, alignment);
+}
+
+static cu_Slice_Result cu_gpa_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_gpa_resize_internal(self, mem, size, alignment);
 }
 
 static void cu_gpa_free_small(cu_GPAllocator *gpa,
@@ -315,7 +332,8 @@ cu_Allocator cu_Allocator_GPAllocator(
   cu_Allocator a;
   a.self = alloc;
   a.allocFn = cu_gpa_alloc;
-  a.resizeFn = cu_gpa_resize;
+  a.growFn = cu_gpa_grow;
+  a.shrinkFn = cu_gpa_shrink;
   a.freeFn = cu_gpa_free;
   return a;
 }

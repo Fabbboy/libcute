@@ -72,7 +72,7 @@ static cu_Slice_Result cu_arena_alloc(
   return cu_Slice_result_ok(cu_Slice_create(chunk->data + start, size));
 }
 
-static cu_Slice_Result cu_arena_resize(
+static cu_Slice_Result cu_arena_resize_internal(
     void *self, cu_Slice mem, size_t size, size_t alignment) {
   CU_IF_NULL(mem.ptr) { return cu_arena_alloc(self, size, alignment); }
   if (size == 0) {
@@ -108,6 +108,16 @@ static cu_Slice_Result cu_arena_resize(
   cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
   cu_arena_free(self, mem);
   return new_mem;
+}
+
+static cu_Slice_Result cu_arena_grow(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_arena_resize_internal(self, mem, size, alignment);
+}
+
+static cu_Slice_Result cu_arena_shrink(
+    void *self, cu_Slice mem, size_t size, size_t alignment) {
+  return cu_arena_resize_internal(self, mem, size, alignment);
 }
 
 static void cu_arena_free(void *self, cu_Slice mem) {
@@ -152,7 +162,8 @@ cu_Allocator cu_Allocator_ArenaAllocator(
   cu_Allocator a;
   a.self = arena;
   a.allocFn = cu_arena_alloc;
-  a.resizeFn = cu_arena_resize;
+  a.growFn = cu_arena_grow;
+  a.shrinkFn = cu_arena_shrink;
   a.freeFn = cu_arena_free;
   return a;
 }
