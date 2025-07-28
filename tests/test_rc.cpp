@@ -1,10 +1,7 @@
-#include "io/error.h"
-#include "nostd.h"
-#include "utility.h"
 #include <gtest/gtest.h>
+
 extern "C" {
-#include "memory/allocator.h"
-#include "object/rc.h"
+#include "cute.h"
 }
 
 CU_RC_DECL(Int, int)
@@ -47,6 +44,8 @@ CU_RC_IMPL(Point, cu_Point)
 
 void destruct_point(cu_Point *point) {
 
+  drop_count++;
+
   if (point->y) {
     cu_Allocator_Free(point->alloc, cu_Slice_create(point->y, sizeof(int)));
     point->y = NULL;
@@ -69,10 +68,15 @@ TEST(Rc, Point) {
   EXPECT_EQ(rc.inner->item.x, 42);
   EXPECT_EQ(*rc.inner->item.y, 100);
   EXPECT_EQ(drop_count, 0);
+
   Point_Rc clone = cu_Point_Rc_clone(&rc);
   EXPECT_EQ(clone.inner->item.x, 42);
   EXPECT_EQ(*clone.inner->item.y, 100);
   EXPECT_EQ(drop_count, 0);
+
   cu_Point_Rc_destroy(&rc);
-  cu_Point_Rc_destroy(&rc);
+  EXPECT_EQ(drop_count, 0);
+
+  cu_Point_Rc_destroy(&clone);
+  EXPECT_EQ(drop_count, 1);
 }
