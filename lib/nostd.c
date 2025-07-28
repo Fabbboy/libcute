@@ -1,7 +1,10 @@
 #include "nostd.h"
 #include "io/error.h"
 #include "macro.h"
+#include <limits.h>
 #include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>
 
 void cu_Memory_memmove(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
@@ -12,10 +15,12 @@ void cu_Memory_memmove(void *dest, cu_Slice src) {
   CU_IF_NULL(s) return;
 
   if (d < s) {
+    // Forward copy when dest is before src
     while (n--) {
       *d++ = *s++;
     }
   } else {
+    // Backward copy when dest overlaps with src
     d += n;
     s += n;
     while (n--) {
@@ -32,6 +37,7 @@ void cu_Memory_memcpy(void *dest, cu_Slice src) {
   CU_IF_NULL(d) return;
   CU_IF_NULL(s) return;
 
+  // Note: memcpy assumes no overlap, but this is still safe
   while (n--) {
     *d++ = *s++;
   }
@@ -55,7 +61,7 @@ size_t cu_CString_length(const char *cstr) {
   while (*s) {
     s++;
   }
-  return s - cstr;
+  return (size_t)(s - cstr);
 }
 
 bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
@@ -65,87 +71,256 @@ bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
   unsigned char *p1 = (unsigned char *)a.ptr;
   unsigned char *p2 = (unsigned char *)b.ptr;
 
-  CU_IF_NULL(p1) return false;
-  CU_IF_NULL(p2) return false;
+  CU_IF_NULL(p1) return b.ptr == NULL;  // Both NULL should be equal
+  CU_IF_NULL(p2) return false;          // Only one NULL
 
-  while (a.length--) {
-    if (*p1 != *p2) {
+  for (size_t i = 0; i < a.length; i++) {
+    if (p1[i] != p2[i]) {
       return false;
     }
-    p1++;
-    p2++;
   }
   return true;
 }
 
-int cu_CString_vsnprintf(
-    char *dst, size_t size, const char *fmt, va_list args) {
+// Helper function to convert number to string
+static int format_number(char *buf, size_t bufsize, unsigned long long num, 
+                        bool is_signed, bool is_negative, int base, bool uppercase) {
+  if (bufsize == 0) return 0;
+  
+  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+  char temp[64];  // Enough for 64-bit number in any base
+  int temp_pos = 0;
+  int result_len = 0;
+  
+  // Handle zero specially
+  if (num == 0) {
+    temp[temp_pos++] = '0';
+  } else {
+    // Convert to string (reversed)
+    while (num > 0) {
+      temp[temp_pos++] = digits[num % base];
+      num /= base;
+    }
+  }
+  
+  // Add sign if needed
+  if (is_signed && is_negative) {
+    temp[temp_pos++] = '-';
+  }
+  
+  // Copy to buffer (reversing back to correct order)
+  for (int i = temp_pos - 1; i >= 0 && result_len < (int)bufsize - 1; i--) {
+    buf[result_len++] = temp[i];
+  }
+  
+  buf[result_len] = '\0';
+  return temp_pos;  // Return total length needed (for truncation detection)
+}
+
+int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) {
+  if (size == 0) return 0;
+  
   size_t pos = 0;
   size_t total = 0;
   const char *p = fmt;
+  
+  while (*p && pos < size - 1) {
+    if (*p == '%') {
+      ++p;
+      
+      // Parse format specifier
+      bool is_long = false;
+      bool is_long_long = false;
+      bool uppercase = false;
+      
+      // Handle modifiers
+      if (*p == 'l') {
+        is_long = true;
+        ++p;
+        if (*p == 'l') {
+          is_long_long = true;
+          ++p;
+        }
+      }
+      
+      if (*p == 'd' || *p == 'i') {
+        // Signed decimal integer
+        unsigned long long num;
+        bool negative = false;
+        
+        if (is_long_long) {
+          long long val = va_arg(args, long long);
+          if (val < 0) {
+            negative = true;
+            num = (unsigned long long)(-val);
+          } else {
+            num = (unsigned long long)val;
+          }
+        } else if (is_long) {
+          long val = va_arg(args, long);
+          if (val < 0) {
+            negative = true;
+            num = (unsigned long)(-val);
+          } else {
+            num = (unsigned long)val;
+          }
+        } else {
+          int val = va_arg(args, int);
+          if (val < 0) {
+            negative = true;
+            num = (unsigned int)(-val);
+          } else {
+            num = (unsigned int)val;
+          }
+        }
+        
+        char numbuf[64];
+        int len = format_number(numbuf, sizeof(numbuf), num, true, negative, 10, false);
+        
+        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
+          dst[pos++] = numbuf[i];
+        }
+        total += len;
+        
+      } else if (*p == 'u') {
+        // Unsigned decimal integer
+        unsigned long long num;
+        
+        if (is_long_long) {
+          num = va_arg(args, unsigned long long);
+        } else if (is_long) {
+          num = va_arg(args, unsigned long);
+        } else {
+          num = va_arg(args, unsigned int);
+        }
+        
+        char numbuf[64];
+        int len = format_number(numbuf, sizeof(numbuf), num, false, false, 10, false);
+        
+        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
+          dst[pos++] = numbuf[i];
+        }
+        total += len;
+        
+      } else if (*p == 'x' || *p == 'X') {
+        // Hexadecimal integer
+        uppercase = (*p == 'X');
+        unsigned long long num;
+        
+        if (is_long_long) {
+          num = va_arg(args, unsigned long long);
+        } else if (is_long) {
+          num = va_arg(args, unsigned long);
+        } else {
+          num = va_arg(args, unsigned int);
+        }
+        
+        char numbuf[64];
+        int len = format_number(numbuf, sizeof(numbuf), num, false, false, 16, uppercase);
+        
+        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
+          dst[pos++] = numbuf[i];
+        }
+        total += len;
+        
+      } else if (*p == 'c') {
+        // Character
+        int c = va_arg(args, int);
+        dst[pos++] = (char)c;
+        total++;
+        
+      } else if (*p == 's') {
+        // String
+        const char *s = va_arg(args, const char *);
+        if (s == NULL) {
+          s = "(null)";
+        }
+        
+        while (*s && pos < size - 1) {
+          dst[pos++] = *s++;
+          total++;
+        }
+        
+        // Count remaining characters even if we can't fit them
+        while (*s) {
+          s++;
+          total++;
+        }
+        
+      } else if (*p == 'p') {
+        // Pointer
+        void *ptr = va_arg(args, void *);
+        uintptr_t addr = (uintptr_t)ptr;
+        
+        // Add "0x" prefix
+        if (pos < size - 1) dst[pos++] = '0';
+        if (pos < size - 1) dst[pos++] = 'x';
+        total += 2;
+        
+        char numbuf[64];
+        int len = format_number(numbuf, sizeof(numbuf), (unsigned long long)addr, 
+                               false, false, 16, false);
+        
+        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
+          dst[pos++] = numbuf[i];
+        }
+        total += len;
+        
+      } else if (*p == '%') {
+        // Literal percent
+        dst[pos++] = '%';
+        total++;
+        
+      } else {
+        // Unknown format specifier - treat literally
+        dst[pos++] = '%';
+        if (pos < size - 1 && *p) {
+          dst[pos++] = *p;
+        }
+        total += 2;
+      }
+      
+      if (*p) ++p;
+      
+    } else {
+      // Regular character
+      dst[pos++] = *p++;
+      total++;
+    }
+  }
+  
+  // Null terminate
+  dst[pos] = '\0';
+  
+  // Count any remaining characters in format string
   while (*p) {
     if (*p == '%') {
       ++p;
-      if (*p == 'd') {
-        int val = va_arg(args, int);
-        char numbuf[32];
-        int blen = 0;
-        bool neg = false;
-        unsigned int u = (unsigned int)val;
-        if (val < 0) {
-          neg = true;
-          u = (unsigned int)(-val);
-        }
-        char tmp[32];
-        int t = 0;
-        do {
-          tmp[t++] = (char)('0' + (u % 10));
-          u /= 10;
-        } while (u > 0);
-        if (neg)
-          numbuf[blen++] = '-';
-        while (t-- > 0)
-          numbuf[blen++] = tmp[t];
-        for (int i = 0; i < blen; ++i) {
-          if (dst && pos + 1 < size)
-            dst[pos] = numbuf[i];
-          if (pos + 1 < SIZE_MAX)
-            pos++;
-          total++;
-        }
-      } else if (*p == 's') {
-        const char *s = va_arg(args, const char *);
-        size_t len = cu_CString_length(s);
-        for (size_t i = 0; i < len; ++i) {
-          if (dst && pos + 1 < size)
-            dst[pos] = s[i];
-          if (pos + 1 < SIZE_MAX)
-            pos++;
-          total++;
-        }
-      } else if (*p == '%') {
-        if (dst && pos + 1 < size)
-          dst[pos] = '%';
-        if (pos + 1 < SIZE_MAX)
-          pos++;
-        total++;
+      if (*p == 'l') {
+        ++p;
+        if (*p == 'l') ++p;
       }
-      ++p;
+      if (*p) {
+        if (*p == 'd' || *p == 'i') {
+          (void)va_arg(args, int);  // Consume argument
+        } else if (*p == 's') {
+          const char *s = va_arg(args, const char *);
+          if (s) {
+            while (*s) {
+              s++;
+              total++;
+            }
+          }
+        }
+        // Add handling for other format specifiers as needed
+        ++p;
+      }
     } else {
-      if (dst && pos + 1 < size)
-        dst[pos] = *p;
-      if (pos + 1 < SIZE_MAX)
-        pos++;
       ++p;
       total++;
     }
   }
-  if (size > 0) {
-    if (pos >= size)
-      pos = size - 1;
-    if (dst)
-      dst[pos] = '\0';
-  }
+  
   return (int)total;
 }
 
@@ -169,7 +344,9 @@ int cu_CString_sprintf(char *dst, const char *fmt, ...) {
   return r;
 }
 
-void cu_abort(void) { __builtin_trap(); }
+void cu_abort(void) { 
+  __builtin_trap(); 
+}
 
 void cu_panic_handler(const char *format, ...) {
   (void)format;
@@ -178,9 +355,17 @@ void cu_panic_handler(const char *format, ...) {
 
 unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   const char *s = nptr;
-  while (*s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' || *s == '\f' ||
-         *s == '\v')
+  
+  CU_IF_NULL(s) {
+    if (endptr) *endptr = (char *)nptr;
+    return 0;
+  }
+  
+  // Skip whitespace
+  while (*s == ' ' || *s == '\t' || *s == '\n' || 
+         *s == '\r' || *s == '\f' || *s == '\v') {
     s++;
+  }
 
   bool neg = false;
   if (*s == '+') {
@@ -190,6 +375,7 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
     s++;
   }
 
+  // Determine base
   if (base == 0) {
     if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
       base = 16;
@@ -203,32 +389,69 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   } else if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
     s += 2;
   }
+  
+  // Validate base
+  if (base < 2 || base > 36) {
+    if (endptr) *endptr = (char *)nptr;
+    return 0;
+  }
 
   unsigned long result = 0;
+  const char *start = s;
+  const unsigned long cutoff = ULONG_MAX / (unsigned long)base;
+  const int cutlim = (int)(ULONG_MAX % (unsigned long)base);
+  
   while (*s) {
     char c = *s;
     int digit;
+    
     if (c >= '0' && c <= '9') {
       digit = c - '0';
-    } else if (c >= 'a' && c <= 'f') {
+    } else if (c >= 'a' && c <= 'z') {
       digit = c - 'a' + 10;
-    } else if (c >= 'A' && c <= 'F') {
+    } else if (c >= 'A' && c <= 'Z') {
       digit = c - 'A' + 10;
     } else {
       break;
     }
-    if (digit >= base)
+    
+    if (digit >= base) {
       break;
+    }
+    
+    // Check for overflow
+    if (result > cutoff || (result == cutoff && digit > cutlim)) {
+      result = ULONG_MAX;
+      // Continue parsing to find the end
+      s++;
+      while (*s) {
+        c = *s;
+        if ((c >= '0' && c <= '9' && (c - '0') < base) ||
+            (c >= 'a' && c <= 'z' && (c - 'a' + 10) < base) ||
+            (c >= 'A' && c <= 'Z' && (c - 'A' + 10) < base)) {
+          s++;
+        } else {
+          break;
+        }
+      }
+      break;
+    }
+    
     result = result * (unsigned long)base + (unsigned long)digit;
     s++;
   }
 
-  if (endptr != NULL)
-    *endptr = (char *)s;
+  // If no digits were processed, return 0
+  if (s == start) {
+    if (endptr) *endptr = (char *)nptr;
+    return 0;
+  }
 
-  if (neg)
-    return (unsigned long)(-(long)result);
-  return result;
+  if (endptr) {
+    *endptr = (char *)s;
+  }
+
+  return neg ? (unsigned long)(-(long)result) : result;
 }
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {
