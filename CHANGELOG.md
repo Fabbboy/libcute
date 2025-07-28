@@ -88,6 +88,9 @@ All notable changes to this project will be documented in this file. See [conven
 ### Examples
 
 - restructure build - ([12e1a30](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/12e1a3039a1d0fbc68b6e6533f8b719b66df369a)) - Fabrice
+- add epoll based http server example
+- allocate request buffers from slab allocator for http example
+- fix content-length formatting in http example
 
 ### Fmt
 
@@ -152,4 +155,3 @@ All notable changes to this project will be documented in this file. See [conven
 - ensure aligned allocations in C allocator and use null-check macros
 
 - allow building tests with freestanding flags
-
