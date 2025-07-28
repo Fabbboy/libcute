@@ -1,19 +1,14 @@
 #if CU_FREESTANDING
-#include <gtest/gtest.h>
-TEST(HashMap, Unsupported) { SUCCEED(); }
+#include "test_common.h"
+static void HashMap_Unsupported(void) { }
 #else
-extern "C" {
 #include "collection/hashmap.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-}
-#include <algorithm>
-#include <gtest/gtest.h>
-#include <numeric>
-#include <random>
-#include <vector>
+#include "test_common.h"
+#include <stdlib.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -25,20 +20,20 @@ static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
   cu_PageAllocator page;
   cu_Allocator backing = cu_Allocator_PageAllocator(&page);
 #endif
-  cu_GPAllocator_Config cfg = {};
+  cu_GPAllocator_Config cfg = {0};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
   cfg.backingAllocator = cu_Allocator_Optional_some(backing);
   return cu_Allocator_GPAllocator(gpa, cfg);
 }
 
-TEST(HashMap, BasicInsertGet) {
+static void HashMap_BasicInsertGet(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(8), cu_HashMap_HashFn_Optional_none(),
       cu_HashMap_EqualsFn_Optional_none());
-  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   for (int i = 0; i < 10; ++i) {
@@ -47,24 +42,24 @@ TEST(HashMap, BasicInsertGet) {
 
   for (int i = 0; i < 10; ++i) {
     Ptr_Optional opt = cu_HashMap_get(&map, &i);
-    ASSERT_TRUE(Ptr_Optional_is_some(&opt));
+    TEST_ASSERT_TRUE(Ptr_Optional_is_some(&opt));
     int *val = (int *)Ptr_Optional_unwrap(&opt);
-    EXPECT_EQ(*val, i);
+    TEST_ASSERT_EQUAL(*val, i);
   }
 
   cu_HashMap_destroy(&map);
   cu_GPAllocator_destroy(&gpa);
 }
 
-static uint64_t int_hash(const void *key, size_t) {
+static uint64_t int_hash(const void *key, size_t unused) {
   return (uint64_t)*(const int *)key;
 }
 
-static bool int_eq(const void *a, const void *b, size_t) {
+static bool int_eq(const void *a, const void *b, size_t unused) {
   return *(const int *)a == *(const int *)b;
 }
 
-TEST(HashMap, CustomHashIter) {
+static void HashMap_CustomHashIter(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
@@ -72,7 +67,7 @@ TEST(HashMap, CustomHashIter) {
       cu_HashMap_create(alloc, CU_LAYOUT(int), CU_LAYOUT(int),
           Size_Optional_some(4), cu_HashMap_HashFn_Optional_some(int_hash),
           cu_HashMap_EqualsFn_Optional_some(int_eq));
-  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   for (int i = 0; i < 5; ++i) {
@@ -84,44 +79,65 @@ TEST(HashMap, CustomHashIter) {
   void *v;
   int sum = 0;
   while (cu_HashMap_iter(&map, &idx, &k, &v)) {
-    EXPECT_EQ(*(int *)k, *(int *)v);
+    TEST_ASSERT_EQUAL(*(int *)k, *(int *)v);
     sum += *(int *)k;
   }
-  EXPECT_EQ(sum, 10);
+  TEST_ASSERT_EQUAL(sum, 10);
 
   cu_HashMap_destroy(&map);
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(HashMap, StressRandomAccess) {
+static void HashMap_StressRandomAccess(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(128),
       cu_HashMap_HashFn_Optional_none(), cu_HashMap_EqualsFn_Optional_none());
-  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   const int count = 250;
   for (int i = 0; i < count; ++i) {
     cu_HashMap_Error_Optional err = cu_HashMap_insert(&map, &i, &i);
-    ASSERT_TRUE(cu_HashMap_Error_Optional_is_none(&err));
+    TEST_ASSERT_TRUE(cu_HashMap_Error_Optional_is_none(&err));
   }
 
-  std::vector<int> keys(count);
-  std::iota(keys.begin(), keys.end(), 0);
-  std::mt19937 rng(1234);
-  std::shuffle(keys.begin(), keys.end(), rng);
+    int *keys = malloc(sizeof(int) * count);
+    for (int i = 0; i < count; ++i) {
+        keys[i] = i;
+    }
+    srand(1234);
+    for (int i = count - 1; i > 0; --i) {
+        int j = rand() % (i + 1);
+        int tmp = keys[i];
+        keys[i] = keys[j];
+        keys[j] = tmp;
+    }
 
-  for (int k : keys) {
-    Ptr_Optional opt = cu_HashMap_get(&map, &k);
-    ASSERT_TRUE(Ptr_Optional_is_some(&opt));
-    int *val = (int *)Ptr_Optional_unwrap(&opt);
-    EXPECT_EQ(*val, k);
-  }
+    for (int i = 0; i < count; ++i) {
+        int k = keys[i];
+        Ptr_Optional opt = cu_HashMap_get(&map, &k);
+        TEST_ASSERT_TRUE(Ptr_Optional_is_some(&opt));
+        int *val = (int *)Ptr_Optional_unwrap(&opt);
+        TEST_ASSERT_EQUAL(*val, k);
+    }
+    free(keys);
 
   cu_HashMap_destroy(&map);
   cu_GPAllocator_destroy(&gpa);
 }
 #endif
+
+int main(void) {
+    UNITY_BEGIN();
+#if CU_FREESTANDING
+    RUN_TEST(HashMap_Unsupported);
+#else
+    RUN_TEST(HashMap_BasicInsertGet);
+    RUN_TEST(HashMap_CustomHashIter);
+    RUN_TEST(HashMap_StressRandomAccess);
+#endif
+    return UNITY_END();
+}

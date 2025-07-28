@@ -1,13 +1,11 @@
-#include <gtest/gtest.h>
-extern "C" {
+#include "test_common.h"
 #include "memory/allocator.h"
 #include "memory/wasmallocator.h"
 #include "memory/fixedallocator.h"
 #include "nostd.h"
 #include "string/string.h"
-}
 
-TEST(String, AppendAndSubstring) {
+static void String_AppendAndSubstring(void) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
 #elif CU_FREESTANDING
@@ -19,26 +17,26 @@ TEST(String, AppendAndSubstring) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
   cu_String_Result res = cu_String_from_cstr(alloc, "hello");
-  ASSERT_TRUE(cu_String_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_String_Result_is_ok(&res));
   cu_String str = res.value;
 
-  EXPECT_EQ(str.length, 5u);
-  EXPECT_STREQ(str.data, "hello");
+  TEST_ASSERT_EQUAL(str.length, 5u);
+  TEST_ASSERT_EQUAL_STRING(str.data, "hello");
 
-  EXPECT_EQ(CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
-  EXPECT_EQ(str.length, 12u);
-  EXPECT_STREQ(str.data, "hello, world");
+  TEST_ASSERT_EQUAL(CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
+  TEST_ASSERT_EQUAL(str.length, 12u);
+  TEST_ASSERT_EQUAL_STRING(str.data, "hello, world");
 
   cu_String_Result sub = cu_String_substring(&str, 7, 5);
-  ASSERT_TRUE(cu_String_Result_is_ok(&sub));
+  TEST_ASSERT_TRUE(cu_String_Result_is_ok(&sub));
   cu_String part = sub.value;
-  EXPECT_STREQ(part.data, "world");
+  TEST_ASSERT_EQUAL_STRING(part.data, "world");
 
   cu_String_destroy(&part);
   cu_String_destroy(&str);
 }
 
-TEST(String, Clear) {
+static void String_Clear(void) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
 #elif CU_FREESTANDING
@@ -50,11 +48,18 @@ TEST(String, Clear) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
   cu_String_Result res = cu_String_from_cstr(alloc, "data");
-  ASSERT_TRUE(cu_String_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_String_Result_is_ok(&res));
   cu_String str = res.value;
-  EXPECT_EQ(str.length, 4u);
+  TEST_ASSERT_EQUAL(str.length, 4u);
   cu_String_clear(&str);
-  EXPECT_EQ(str.length, 0u);
-  EXPECT_STREQ(str.data, "");
+  TEST_ASSERT_EQUAL(str.length, 0u);
+  TEST_ASSERT_EQUAL_STRING(str.data, "");
   cu_String_destroy(&str);
+}
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(String_AppendAndSubstring);
+    RUN_TEST(String_Clear);
+    return UNITY_END();
 }

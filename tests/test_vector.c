@@ -1,15 +1,13 @@
 #if CU_FREESTANDING
-#include <gtest/gtest.h>
-TEST(Vector, Unsupported) { SUCCEED(); }
+#include "test_common.h"
+static void Vector_Unsupported(void) { }
 #else
-extern "C" {
 #include "collection/vector.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-}
-#include <gtest/gtest.h>
+#include "test_common.h"
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -21,75 +19,75 @@ static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
   cu_PageAllocator page;
   cu_Allocator backing = cu_Allocator_PageAllocator(&page);
 #endif
-  cu_GPAllocator_Config cfg = {};
+  cu_GPAllocator_Config cfg = {0};
   cfg.bucketSize = CU_GPA_BUCKET_SIZE;
   cfg.backingAllocator = cu_Allocator_Optional_some(backing);
   return cu_Allocator_GPAllocator(gpa, cfg);
 }
 
-TEST(Vector, Create) {
+static void Vector_Create(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
       cu_Vector_create(alloc, layout, Size_Optional_some(10));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vec = cu_Vector_Result_unwrap(&res);
-  EXPECT_EQ(vec.length, 0u);
-  EXPECT_EQ(vec.capacity, 10u);
+  TEST_ASSERT_EQUAL(vec.length, 0u);
+  TEST_ASSERT_EQUAL(vec.capacity, 10u);
 
   cu_Vector_destroy(&vec);
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(Vector, Resize) {
+static void Vector_Resize(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
       cu_Vector_create(alloc, layout, Size_Optional_some(10));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   cu_Vector_Error_Optional err = cu_Vector_resize(&vector, 20);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_EQ(cu_Vector_capacity(&vector), 20u);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 20u);
 
   err = cu_Vector_resize(&vector, 5);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_EQ(cu_Vector_size(&vector), 5u);
-  EXPECT_GE(cu_Vector_capacity(&vector), 20u);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 5u);
+  TEST_ASSERT_TRUE((cu_Vector_capacity(&vector)) >= (20u));
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(Vector, PushBack) {
+static void Vector_PushBack(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   int v = 42;
   cu_Vector_Error_Optional err = cu_Vector_push_back(&vector, &v);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_EQ(cu_Vector_size(&vector), 1u);
-  EXPECT_EQ(*(int *)((unsigned char *)vector.data.value.ptr), 42);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 1u);
+  TEST_ASSERT_EQUAL(*(int *)((unsigned char *)vector.data.value.ptr), 42);
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(Vector, PopBack) {
+static void Vector_PopBack(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   int a = 1, b = 2, out = 0;
@@ -97,43 +95,43 @@ TEST(Vector, PopBack) {
   cu_Vector_push_back(&vector, &b);
 
   cu_Vector_Error_Optional err = cu_Vector_pop_back(&vector, &out);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_EQ(out, 2);
-  EXPECT_EQ(cu_Vector_size(&vector), 1u);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_EQUAL(out, 2);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 1u);
 
   err = cu_Vector_pop_back(&vector, &out);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_EQ(out, 1);
-  EXPECT_EQ(cu_Vector_size(&vector), 0u);
-  EXPECT_EQ(cu_Vector_capacity(&vector), 0u);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_EQUAL(out, 1);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 0u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 0u);
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(Vector, Copy) {
+static void Vector_Copy(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
 
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   for (int i = 0; i < 5; ++i) {
     cu_Vector_push_back(&vector, &i);
   }
-  ASSERT_EQ(cu_Vector_size(&vector), 5u);
-  ASSERT_EQ(cu_Vector_capacity(&vector), 5u);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 5u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 5u);
 
   cu_Vector_Result copy_res = cu_Vector_copy(&vector);
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&copy_res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&copy_res));
   cu_Vector copy = cu_Vector_Result_unwrap(&copy_res);
 
-  ASSERT_EQ(cu_Vector_size(&copy), 5u);
-  ASSERT_EQ(cu_Vector_capacity(&copy), 5u);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&copy), 5u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&copy), 5u);
   for (int i = 0; i < 5; ++i) {
-    EXPECT_EQ(*CU_VECTOR_AT_AS(&copy, int, i), i);
+    TEST_ASSERT_EQUAL(*CU_VECTOR_AT_AS(&copy, int, i), i);
   }
 
   cu_Vector_destroy(&copy);
@@ -141,31 +139,46 @@ TEST(Vector, Copy) {
   cu_GPAllocator_destroy(&gpa);
 }
 
-TEST(Vector, ReserveClearAt) {
+static void Vector_ReserveClearAt(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   cu_Vector_Error_Optional err = cu_Vector_reserve(&vector, 10);
-  ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
-  EXPECT_GE(cu_Vector_capacity(&vector), 10u);
+  TEST_ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
+  TEST_ASSERT_TRUE((cu_Vector_capacity(&vector)) >= (10u));
 
   for (int i = 0; i < 5; ++i) {
     cu_Vector_push_back(&vector, &i);
   }
 
   int *val = CU_VECTOR_AT_AS(&vector, int, 2);
-  ASSERT_NE(val, nullptr);
-  EXPECT_EQ(*val, 2);
+  TEST_ASSERT_TRUE((val) != (NULL));
+  TEST_ASSERT_EQUAL(*val, 2);
 
   cu_Vector_clear(&vector);
-  EXPECT_EQ(cu_Vector_size(&vector), 0u);
-  EXPECT_EQ(cu_Vector_capacity(&vector), 0u);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 0u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 0u);
 
   cu_Vector_destroy(&vector);
   cu_GPAllocator_destroy(&gpa);
 }
 #endif
+
+int main(void) {
+    UNITY_BEGIN();
+#if CU_FREESTANDING
+    RUN_TEST(Vector_Unsupported);
+#else
+    RUN_TEST(Vector_Create);
+    RUN_TEST(Vector_Resize);
+    RUN_TEST(Vector_PushBack);
+    RUN_TEST(Vector_PopBack);
+    RUN_TEST(Vector_Copy);
+    RUN_TEST(Vector_ReserveClearAt);
+#endif
+    return UNITY_END();
+}

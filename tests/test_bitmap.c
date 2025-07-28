@@ -1,12 +1,10 @@
-#include <gtest/gtest.h>
-extern "C" {
+#include "test_common.h"
 #include "collection/bitmap.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/wasmallocator.h"
-}
 
-TEST(Bitmap, Basic) {
+static void Bitmap_Basic(void) {
 #if CU_PLAT_WASM
   cu_Allocator alloc = cu_Allocator_WasmAllocator();
 #elif CU_FREESTANDING
@@ -18,15 +16,21 @@ TEST(Bitmap, Basic) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
   cu_Bitmap_Optional opt = cu_Bitmap_create(alloc, 128);
-  ASSERT_TRUE(cu_Bitmap_Optional_is_some(&opt));
+  TEST_ASSERT_TRUE(cu_Bitmap_Optional_is_some(&opt));
   cu_Bitmap map = opt.value;
 
-  EXPECT_EQ(cu_Bitmap_size(&map), 128u);
-  EXPECT_FALSE(cu_Bitmap_get(&map, 5));
+  TEST_ASSERT_EQUAL(cu_Bitmap_size(&map), 128u);
+  TEST_ASSERT_FALSE(cu_Bitmap_get(&map, 5));
   cu_Bitmap_set(&map, 5);
-  EXPECT_TRUE(cu_Bitmap_get(&map, 5));
+  TEST_ASSERT_TRUE(cu_Bitmap_get(&map, 5));
   cu_Bitmap_clear(&map, 5);
-  EXPECT_FALSE(cu_Bitmap_get(&map, 5));
+  TEST_ASSERT_FALSE(cu_Bitmap_get(&map, 5));
 
   cu_Bitmap_destroy(&map);
+}
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(Bitmap_Basic);
+    return UNITY_END();
 }
