@@ -8,9 +8,11 @@ test:
   stage: test
   script:
     - apt-get update
-    - apt-get install -y clang clang-tools build-essential git ninja-build tar python3 curl wget
-    - tar -xf meson-1.8.2.tar.gz
-    - python3 meson-1.8.2/meson.py setup build -Dtests=enabled
+    - apt-get install -y clang clang-tools build-essential git ninja-build tar python3 curl wget python3-pip python3-venv
+    - python3 -m venv venv 
+    - source venv/bin/activate
+    - pip install meson
+    - meson setup build --buildtype=release -Dtests=enabled
     - ninja -C build
     - ninja -C build test
   tags:
