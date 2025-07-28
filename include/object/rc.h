@@ -12,10 +12,10 @@
 #define CU_RC_FN(NAME, SUFFIX) CU_CONCAT(CU_RC_NAME(NAME), SUFFIX)
 
 /** Container holding the value and reference count. */
-#define CU_RC_DESTRUCTOR_NAME(NAME) CU_RC_FN(NAME, Destructor)
+#define CU_RC_DESTRUCTOR_NAME(NAME) CU_RC_FN(NAME, _Destructor)
 #define CU_RC_CONTAINER(NAME, T)                                               \
   typedef void (*CU_RC_DESTRUCTOR_NAME(NAME))(T *);                            \
-  struct CU_RC_FN(NAME, Container) {                                           \
+  struct CU_RC_FN(NAME, _Container) {                                           \
     T item;                                                                    \
     size_t ref_count;                                                          \
     CU_RC_DESTRUCTOR_NAME(NAME) destructor;                                    \
@@ -36,7 +36,7 @@
 #define CU_RC_DECL(NAME, T)                                                    \
   CU_RC_CONTAINER(NAME, T)                                                     \
   typedef struct {                                                             \
-    struct CU_RC_FN(NAME, Container) * inner;                                  \
+    struct CU_RC_FN(NAME, _Container) * inner;                                  \
     cu_Allocator alloc;                                                        \
   } CU_RC_NAME(NAME);                                                          \
   CU_RESULT_DECL(CU_RC_NAME(NAME), CU_RC_NAME(NAME), cu_Io_Error)              \
@@ -49,13 +49,13 @@
   cu_##NAME##_Rc_create(                                                       \
       cu_Allocator alloc, T value, CU_RC_DESTRUCTOR_NAME(NAME) destructor) {   \
     cu_Slice_Result mem = cu_Allocator_Alloc(                                  \
-        alloc, CU_LAYOUT(struct CU_RC_FN(NAME, Container)));                   \
+        alloc, CU_LAYOUT(struct CU_RC_FN(NAME, _Container)));                   \
     if (!cu_Slice_Result_is_ok(&mem)) {                                        \
       return CU_RESULT_FN(CU_RC_NAME(NAME), _error)(                           \
           cu_Slice_Result_unwrap_error(&mem));                                 \
     }                                                                          \
-    struct CU_RC_FN(NAME, Container) *cont =                                   \
-        (struct CU_RC_FN(NAME, Container) *)cu_Slice_Result_unwrap(&mem).ptr;  \
+    struct CU_RC_FN(NAME, _Container) *cont =                                   \
+        (struct CU_RC_FN(NAME, _Container) *)cu_Slice_Result_unwrap(&mem).ptr;  \
     cont->item = value;                                                        \
     cont->ref_count = 1;                                                       \
     cont->destructor = destructor;                                             \
