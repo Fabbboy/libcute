@@ -4,6 +4,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#ifndef CU_FREESTANDING
+#include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +25,17 @@ cu_Slice cu_Slice_create(void *ptr, size_t length);
 #include <object/result.h>
 
 void cu_abort(void);
-void cu_panic_handler(const char *format, ...);
+#ifndef CU_FREESTANDING
+#define cu_panic_handler(...)                                                  \
+  do {                                                                         \
+    fprintf(stderr, "Panic: ");                                                \
+    fprintf(stderr, __VA_ARGS__);                                              \
+    fprintf(stderr, "\n");                                                     \
+    cu_abort();                                                                \
+  } while (0);
+  // intentionally NO else case if we are building for freestanding the user has to define their own panic handler
+  // like rusts #[panic_handler]
+#endif
 
 void cu_Memory_memmove(void *dest, cu_Slice src);
 void cu_Memory_memcpy(void *dest, cu_Slice src);

@@ -6,10 +6,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#ifndef CU_FREESTANDING
-#include <stdio.h>
-#endif
-
 void cu_Memory_memmove(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
   unsigned char *s = (unsigned char *)src.ptr;
@@ -368,19 +364,6 @@ int cu_CString_sprintf(char *dst, const char *fmt, ...) {
 }
 
 void cu_abort(void) { __builtin_trap(); }
-
-#ifndef CU_FREESTANDING
-#define cu_panic_handler(...)                                                  \
-  do {                                                                         \
-    fprintf(stderr, "Panic: ");                                                \
-    fprintf(stderr, __VA_ARGS__);                                              \
-    fprintf(stderr, "\n");                                                     \
-    cu_abort();                                                                \
-  } while (0);
-  // intentionally NO else case if we are building for freestanding the user has to define their own panic handler
-  // like rusts #[panic_handler]
-#endif
-
 
 unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   const char *s = nptr;
