@@ -29,8 +29,7 @@ void cu_Memory_memmove(void *dest, cu_Slice src) {
   }
 }
 
-
-void cu_Memory_smemmove(cu_Slice dest, cu_Slice src){
+void cu_Memory_smemmove(cu_Slice dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest.ptr;
   unsigned char *s = (unsigned char *)src.ptr;
   size_t n = src.length;
@@ -515,4 +514,3 @@ cu_Slice cu_Slice_create(void *ptr, size_t length) {
 }
 
 CU_OPTIONAL_IMPL(cu_Slice, cu_Slice)
-CU_RESULT_IMPL(cu_Slice, cu_Slice, cu_Io_Error)
