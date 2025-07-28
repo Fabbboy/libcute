@@ -29,9 +29,6 @@ static inline cu_Layout cu_Layout_create(size_t elem_size, size_t alignment) {
     return layout;
   }
 
-  if (elem_size % alignment != 0) {
-    return layout;
-  }
   layout.elem_size = elem_size;
   layout.alignment = alignment;
   return layout;
