@@ -1,2 +1,3 @@
-gtest/
-unity/
+packagecache/
+googletest-*/
+Unity-*/
