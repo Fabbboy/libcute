@@ -29,6 +29,7 @@ sources = [
   'lib/collection/vector.c',
   'lib/collection/hashmap.c',
   'lib/io/error.c',
+  'lib/io/file.c',
 ]
 
 freestanding = get_option('freestanding')
