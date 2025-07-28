@@ -1,3 +1,4 @@
+#include "io/error.h"
 #include "utility.h"
 #include <gtest/gtest.h>
 #include <vector>
@@ -59,21 +60,67 @@ TEST(Allocator, NormalAllocAndFree) {
   cu_GPAllocator_Config cfg = {0};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
- 
-  cu_Slice_Result res = cu_Allocator_Alloc(alloc, sizeof(cu_Point), alignof(cu_Point));
+
+  cu_Slice_Result res =
+      cu_Allocator_Alloc(alloc, sizeof(cu_Point), alignof(cu_Point));
   ASSERT_TRUE(cu_Slice_result_is_ok(&res));
 
   cu_Slice mem = res.value;
   ASSERT_TRUE(mem.ptr != NULL);
   ASSERT_EQ(mem.length, sizeof(cu_Point));
-    
+
   cu_Point *point = (cu_Point *)mem.ptr;
   point->x = 42;
   point->y = 84;
-  
+
   EXPECT_EQ(point->x, 42);
   EXPECT_EQ(point->y, 84);
 
   cu_Allocator_Free(alloc, mem);
   cu_GPAllocator_destroy(&gpa);
+}
+
+TEST(Allocator, DoubleFree) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
+  cu_GPAllocator gpa;
+  cu_GPAllocator_Config cfg = {0};
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
+  cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
+
+  cu_Slice_Result res =
+      cu_Allocator_Alloc(alloc, sizeof(cu_Point), alignof(cu_Point));
+  ASSERT_TRUE(cu_Slice_result_is_ok(&res));
+
+  cu_Slice mem = res.value;
+  ASSERT_TRUE(mem.ptr != NULL);
+
+  // Free the memory
+  cu_Allocator_Free(alloc, mem);
+
+  // Attempt to free it again (should not crash)
+  cu_Allocator_Free(alloc, mem);
+
+  cu_GPAllocator_destroy(&gpa);
+}
+
+TEST(Allocator, Exhaustion) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
+  cu_GPAllocator gpa;
+  cu_GPAllocator_Config cfg = {0};
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
+  cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
+
+  // Allocate a large block
+  size_t large_size = 512 * 1024 * 1024; // 100 MiB
+  cu_Slice_Result res =
+      cu_Allocator_Alloc(alloc, large_size, alignof(cu_Point));
+
+  ASSERT_FALSE(cu_Slice_result_is_ok(&res));
+  EXPECT_EQ(cu_Slice_result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
 }
