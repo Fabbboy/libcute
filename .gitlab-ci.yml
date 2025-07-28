@@ -22,9 +22,11 @@ pages:
   stage: deploy
   script:
     - apt-get update
-    - apt-get install -y doxygen graphviz ninja-build python3 tar
-    - tar -xf meson-1.8.2.tar.gz
-    - python3 meson-1.8.2/meson.py setup build
+    - apt-get install -y doxygen graphviz ninja-build python3 tar python3-pip python3-venv
+    - python3 -m venv venv
+    - source venv/bin/activate
+    - pip install meson
+    - meson setup build --buildtype=release 
     - ninja -C build docs
     - mv build/docs/html public
   artifacts:
