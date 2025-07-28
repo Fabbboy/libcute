@@ -136,13 +136,19 @@ static int format_number(char *buf, size_t bufsize, unsigned long long num,
 }
 
 int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) {
-  if (size == 0) return 0;
+  bool measuring = dst == NULL;
+  if (measuring) {
+    dst = NULL;
+    size = 0;
+  } else if (size == 0) {
+    return 0;
+  }
   
   size_t pos = 0;
   size_t total = 0;
   const char *p = fmt;
   
-  while (*p && pos < size - 1) {
+  while (*p) {
     if (*p == '%') {
       ++p;
       
@@ -195,8 +201,9 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         char numbuf[64];
         int len = format_number(numbuf, sizeof(numbuf), num, true, negative, 10, false);
         
-        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
-          dst[pos++] = numbuf[i];
+        for (int i = 0; numbuf[i]; i++) {
+          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          pos++;
         }
         total += len;
         
@@ -215,8 +222,9 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         char numbuf[64];
         int len = format_number(numbuf, sizeof(numbuf), num, false, false, 10, false);
         
-        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
-          dst[pos++] = numbuf[i];
+        for (int i = 0; numbuf[i]; i++) {
+          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          pos++;
         }
         total += len;
         
@@ -236,15 +244,17 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         char numbuf[64];
         int len = format_number(numbuf, sizeof(numbuf), num, false, false, 16, uppercase);
         
-        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
-          dst[pos++] = numbuf[i];
+        for (int i = 0; numbuf[i]; i++) {
+          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          pos++;
         }
         total += len;
         
       } else if (*p == 'c') {
         // Character
         int c = va_arg(args, int);
-        dst[pos++] = (char)c;
+        if (!measuring && pos < size - 1) dst[pos] = (char)c;
+        pos++;
         total++;
         
       } else if (*p == 's') {
@@ -254,13 +264,9 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
           s = "(null)";
         }
         
-        while (*s && pos < size - 1) {
-          dst[pos++] = *s++;
-          total++;
-        }
-        
-        // Count remaining characters even if we can't fit them
         while (*s) {
+          if (!measuring && pos < size - 1) dst[pos] = *s;
+          pos++;
           s++;
           total++;
         }
@@ -271,29 +277,35 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         uintptr_t addr = (uintptr_t)ptr;
         
         // Add "0x" prefix
-        if (pos < size - 1) dst[pos++] = '0';
-        if (pos < size - 1) dst[pos++] = 'x';
+        if (!measuring && pos < size - 1) dst[pos] = '0';
+        pos++;
+        if (!measuring && pos < size - 1) dst[pos] = 'x';
+        pos++;
         total += 2;
         
         char numbuf[64];
         int len = format_number(numbuf, sizeof(numbuf), (unsigned long long)addr, 
                                false, false, 16, false);
         
-        for (int i = 0; numbuf[i] && pos < size - 1; i++) {
-          dst[pos++] = numbuf[i];
+        for (int i = 0; numbuf[i]; i++) {
+          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          pos++;
         }
         total += len;
         
       } else if (*p == '%') {
         // Literal percent
-        dst[pos++] = '%';
+        if (!measuring && pos < size - 1) dst[pos] = '%';
+        pos++;
         total++;
         
       } else {
         // Unknown format specifier - treat literally
-        dst[pos++] = '%';
-        if (pos < size - 1 && *p) {
-          dst[pos++] = *p;
+        if (!measuring && pos < size - 1) dst[pos] = '%';
+        pos++;
+        if (*p) {
+          if (!measuring && pos < size - 1) dst[pos] = *p;
+          pos++;
         }
         total += 2;
       }
@@ -302,43 +314,18 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
       
     } else {
       // Regular character
-      dst[pos++] = *p++;
-      total++;
-    }
-  }
-  
-  // Null terminate
-  dst[pos] = '\0';
-  
-  // Count any remaining characters in format string
-  while (*p) {
-    if (*p == '%') {
-      ++p;
-      if (*p == 'l') {
-        ++p;
-        if (*p == 'l') ++p;
-      }
-      if (*p) {
-        if (*p == 'd' || *p == 'i') {
-          (void)va_arg(args, int);  // Consume argument
-        } else if (*p == 's') {
-          const char *s = va_arg(args, const char *);
-          if (s) {
-            while (*s) {
-              s++;
-              total++;
-            }
-          }
-        }
-        // Add handling for other format specifiers as needed
-        ++p;
-      }
-    } else {
+      if (!measuring && pos < size - 1) dst[pos] = *p;
+      pos++;
       ++p;
       total++;
     }
   }
   
+  if (!measuring && size > 0) {
+    size_t idx = pos < size ? pos : size - 1;
+    dst[idx] = '\0';
+  }
+
   return (int)total;
 }
 
