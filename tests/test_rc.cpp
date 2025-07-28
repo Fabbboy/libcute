@@ -8,29 +8,28 @@ CU_RC_DECL(Int, int)
 CU_RC_IMPL(Int, int)
 
 static int drop_count = 0;
-static void int_dtor(int *value) {
-  drop_count++;
-  CU_UNUSED(value);
-}
 
 TEST(Rc, Basic) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   drop_count = 0;
 
-  Int_Rc_Result result = cu_Int_Rc_create(alloc, 42, int_dtor);
+  Int_Rc_Result result =
+      Int_Rc_create(alloc, 42, Int_Rc_Destructor_Optional_none());
   ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
 
   Int_Rc rc = Int_Rc_Result_unwrap(&result);
-  EXPECT_EQ(*cu_Int_Rc_get(&rc), 42);
+  EXPECT_EQ(*Int_Rc_get(&rc), 42);
 
-  Int_Rc clone = cu_Int_Rc_clone(&rc);
-  EXPECT_EQ(*cu_Int_Rc_get(&clone), 42);
+  Int_Rc_Optional clone_opt = Int_Rc_clone(&rc);
+  ASSERT_TRUE(Int_Rc_Optional_is_some(&clone_opt));
+  Int_Rc clone = Int_Rc_Optional_unwrap(&clone_opt);
+  EXPECT_EQ(*Int_Rc_get(&clone), 42);
 
-  cu_Int_Rc_destroy(&rc);
-  EXPECT_EQ(*cu_Int_Rc_get(&clone), 42);
+  Int_Rc_destroy(&rc);
+  EXPECT_EQ(*Int_Rc_get(&clone), 42);
 
-  cu_Int_Rc_destroy(&clone);
-  EXPECT_EQ(drop_count, 1);
+  Int_Rc_destroy(&clone);
+  EXPECT_EQ(drop_count, 0);
 }
 
 typedef struct {
@@ -62,21 +61,38 @@ TEST(Rc, Point) {
   *y = 100;
 
   cu_Point point = {42, y, alloc};
-  Point_Rc_Result result = cu_Point_Rc_create(alloc, point, destruct_point);
+  Point_Rc_Result result = Point_Rc_create(
+      alloc, point, Point_Rc_Destructor_Optional_some(destruct_point));
   ASSERT_TRUE(Point_Rc_Result_is_ok(&result));
   Point_Rc rc = Point_Rc_Result_unwrap(&result);
   EXPECT_EQ(rc.inner->item.x, 42);
   EXPECT_EQ(*rc.inner->item.y, 100);
   EXPECT_EQ(drop_count, 0);
 
-  Point_Rc clone = cu_Point_Rc_clone(&rc);
+  Point_Rc_Optional clone_opt = Point_Rc_clone(&rc);
+  ASSERT_TRUE(Point_Rc_Optional_is_some(&clone_opt));
+  Point_Rc clone = Point_Rc_Optional_unwrap(&clone_opt);
   EXPECT_EQ(clone.inner->item.x, 42);
   EXPECT_EQ(*clone.inner->item.y, 100);
   EXPECT_EQ(drop_count, 0);
 
-  cu_Point_Rc_destroy(&rc);
+  Point_Rc_destroy(&rc);
   EXPECT_EQ(drop_count, 0);
 
-  cu_Point_Rc_destroy(&clone);
+  Point_Rc_destroy(&clone);
   EXPECT_EQ(drop_count, 1);
+}
+
+TEST(Rc, OptionalDestructor) {
+  cu_Allocator alloc = cu_Allocator_CAllocator();
+  drop_count = 0;
+
+  Int_Rc_Result result =
+      Int_Rc_create(alloc, 7, Int_Rc_Destructor_Optional_none());
+  ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
+  Int_Rc rc = Int_Rc_Result_unwrap(&result);
+  EXPECT_EQ(*Int_Rc_get(&rc), 7);
+
+  Int_Rc_destroy(&rc);
+  EXPECT_EQ(drop_count, 0);
 }

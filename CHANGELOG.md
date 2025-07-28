@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file. See [conven
 ## [unreleased]
 
 ### Bug Fixes
+- allow rc creation without destructor and remove cu_ prefix - (unreleased) - Codex
+- return optional from rc clone and use null-check macros - (unreleased) - Codex
+- use optional type for rc destructor and simplify creation - (unreleased) - Codex
 
 - fix rc test includes for c linkage - (unreleased) - Codex
 - correct rc point test expectations - (unreleased) - Codex
