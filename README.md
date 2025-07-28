@@ -51,6 +51,7 @@ collection-features:
       Bitmaps allocate their storage on the heap and are used for larger dynamic sets.
  - [x] linked and doubly linked
 - [x] ring buffer
+- [x] skip list
 
 method-features:
 

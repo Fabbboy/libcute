@@ -64,6 +64,24 @@ size_t cu_CString_length(const char *cstr) {
   return (size_t)(s - cstr);
 }
 
+int cu_CString_cmp(const char *a, const char *b) {
+  const unsigned char *p1 = (const unsigned char *)a;
+  const unsigned char *p2 = (const unsigned char *)b;
+
+  CU_IF_NULL(p1) {
+    return p2 ? -1 : 0;
+  }
+  CU_IF_NULL(p2) {
+    return p1 ? 1 : 0;
+  }
+
+  while (*p1 && *p1 == *p2) {
+    p1++;
+    p2++;
+  }
+  return (int)(*p1) - (int)(*p2);
+}
+
 bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
   if (a.length != b.length)
     return false;

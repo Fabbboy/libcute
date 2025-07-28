@@ -30,6 +30,7 @@ void cu_Memory_memset(void *dest, int value, size_t size);
 bool cu_Memory_memcmp(cu_Slice a, cu_Slice b);
 
 size_t cu_CString_length(const char *cstr);
+int cu_CString_cmp(const char *a, const char *b);
 int cu_CString_vsnprintf(char *buf, size_t size, const char *fmt, va_list args);
 int cu_CString_snprintf(char *buf, size_t size, const char *fmt, ...);
 int cu_CString_vsprintf(char *buf, const char *fmt, va_list args);
