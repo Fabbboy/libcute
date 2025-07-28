@@ -29,8 +29,8 @@ TEST(File, WriteAndRead) {
   const char lpath[] = "io_test.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
   cu_File_Result res = cu_File_open(path, options);
-  ASSERT_TRUE(cu_File_result_is_ok(&res));
-  cu_File file = cu_File_result_unwrap(&res);
+  ASSERT_TRUE(cu_File_Result_is_ok(&res));
+  cu_File file = cu_File_Result_unwrap(&res);
 
   const char data[] = "hello";
   cu_Slice data_slice = cu_Slice_create((void *)data, sizeof(data) - 1);
@@ -42,8 +42,8 @@ TEST(File, WriteAndRead) {
   cu_File_OpenOptions rd = {0};
   cu_File_OpenOptions_read(&rd);
   res = cu_File_open(path, rd);
-  ASSERT_TRUE(cu_File_result_is_ok(&res));
-  file = cu_File_result_unwrap(&res);
+  ASSERT_TRUE(cu_File_Result_is_ok(&res));
+  file = cu_File_Result_unwrap(&res);
 
   char buffer[6] = {0};
   cu_Slice buffer_slice = cu_Slice_create(buffer, sizeof(data) - 1);
@@ -60,5 +60,5 @@ TEST(File, InvalidOptions) {
   const char lpath[] = "invalid.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
   cu_File_Result res = cu_File_open(path, options);
-  EXPECT_FALSE(cu_File_result_is_ok(&res));
+  EXPECT_FALSE(cu_File_Result_is_ok(&res));
 }
