@@ -5,7 +5,7 @@ extern "C" {
 }
 
 TEST(File, OpenAndClose) {
-  cu_File_OpenOptions options = {0};
+  cu_File_OpenOptions options{};
   cu_File_OpenOptions_read(&options);
   cu_File_OpenOptions_create(&options);
 
@@ -21,7 +21,7 @@ TEST(File, OpenAndClose) {
 }
 
 TEST(File, WriteAndRead) {
-  cu_File_OpenOptions options = {0};
+  cu_File_OpenOptions options{};
   cu_File_OpenOptions_write(&options);
   cu_File_OpenOptions_create(&options);
   cu_File_OpenOptions_truncate(&options);
@@ -39,7 +39,7 @@ TEST(File, WriteAndRead) {
 
   cu_File_close(&file);
 
-  cu_File_OpenOptions rd = {0};
+  cu_File_OpenOptions rd{};
   cu_File_OpenOptions_read(&rd);
   res = cu_File_open(path, rd);
   ASSERT_TRUE(cu_File_Result_is_ok(&res));
@@ -56,7 +56,7 @@ TEST(File, WriteAndRead) {
 }
 
 TEST(File, InvalidOptions) {
-  cu_File_OpenOptions options = {0};
+  cu_File_OpenOptions options{};
   const char lpath[] = "invalid.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
   cu_File_Result res = cu_File_open(path, options);

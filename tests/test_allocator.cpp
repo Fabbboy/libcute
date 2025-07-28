@@ -13,7 +13,7 @@ TEST(Allocator, GPABasic) {
       cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buffer, sizeof(buffer)));
 
   cu_GPAllocator gpa;
-  cu_GPAllocator_Config cfg = {0};
+  cu_GPAllocator_Config cfg{};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cfg.bucketSize = 64;
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);

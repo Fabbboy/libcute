@@ -63,11 +63,11 @@ TEST(SkipListSST, SortedStrings) {
     const char *vv = *(const char **)v;
     ASSERT_LT(idx, 5);
     EXPECT_STREQ(kk, sorted[idx]);
-    if (cu_CString_cmp(kk, "apple") == 0) EXPECT_STREQ(vv, "A");
-    if (cu_CString_cmp(kk, "banana") == 0) EXPECT_STREQ(vv, "B");
-    if (cu_CString_cmp(kk, "cherry") == 0) EXPECT_STREQ(vv, "C");
-    if (cu_CString_cmp(kk, "date") == 0) EXPECT_STREQ(vv, "D");
-    if (cu_CString_cmp(kk, "elderberry") == 0) EXPECT_STREQ(vv, "E");
+    if (cu_CString_cmp(kk, "apple") == 0) { EXPECT_STREQ(vv, "A"); }
+    if (cu_CString_cmp(kk, "banana") == 0) { EXPECT_STREQ(vv, "B"); }
+    if (cu_CString_cmp(kk, "cherry") == 0) { EXPECT_STREQ(vv, "C"); }
+    if (cu_CString_cmp(kk, "date") == 0) { EXPECT_STREQ(vv, "D"); }
+    if (cu_CString_cmp(kk, "elderberry") == 0) { EXPECT_STREQ(vv, "E"); }
     ++idx;
   }
   EXPECT_EQ(idx, 5);

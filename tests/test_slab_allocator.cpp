@@ -13,7 +13,7 @@ TEST(SlabAllocator, Basic) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 64;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
@@ -37,7 +37,7 @@ TEST(SlabAllocator, BigAllocation) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 64;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
@@ -55,7 +55,7 @@ TEST(SlabAllocator, Resize) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 64;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
@@ -80,7 +80,7 @@ TEST(SlabAllocator, ManyAllocations) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 32;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
@@ -100,7 +100,7 @@ TEST(SlabAllocator, ReuseFreed) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 64;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
@@ -126,7 +126,7 @@ TEST(SlabAllocator, Alignment) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_SlabAllocator slab;
-  cu_SlabAllocator_Config cfg = {0};
+  cu_SlabAllocator_Config cfg{};
   cfg.slabSize = 64;
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);

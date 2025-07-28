@@ -16,7 +16,7 @@ TEST(Allocator, GPALargeAllocFree) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_GPAllocator gpa;
-  cu_GPAllocator_Config cfg = {0};
+  cu_GPAllocator_Config cfg{};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
@@ -59,7 +59,7 @@ TEST(Allocator, NormalAllocAndFree) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_GPAllocator gpa;
-  cu_GPAllocator_Config cfg = {0};
+  cu_GPAllocator_Config cfg{};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
@@ -89,7 +89,7 @@ TEST(Allocator, DoubleFree) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_GPAllocator gpa;
-  cu_GPAllocator_Config cfg = {0};
+  cu_GPAllocator_Config cfg{};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
@@ -116,7 +116,7 @@ TEST(Allocator, Exhaustion) {
       &fa, cu_Slice_create(backing, sizeof(backing)));
 
   cu_GPAllocator gpa;
-  cu_GPAllocator_Config cfg = {0};
+  cu_GPAllocator_Config cfg{};
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 

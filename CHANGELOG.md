@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file. See [conven
 
 - fix rc test includes for c linkage - (unreleased) - Codex
 - correct rc point test expectations - (unreleased) - Codex
+- silence c++ test warnings - (unreleased) - Codex
 - corrected gitlab ci file name - ([3d4237e](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3d4237e0ae7f51552ee8f305850866339f6eff85)) - Fabrice
 - adds propper ci tag - ([ed4ee7b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ed4ee7b0a9ce79ca91173fee9f0c0dc99537241c)) - Fabrice
 - use different tag - ([eb54093](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/eb54093b52dfbca882885f3a8c6744531477b06b)) - Fabrice
