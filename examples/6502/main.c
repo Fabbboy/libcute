@@ -4,7 +4,7 @@
 int main(int argc, char **argv) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   cu_6502_Result res = cu_6502_create(alloc);
-  if (!cu_6502_result_is_ok(&res)) {
+  if (!cu_6502_Result_is_ok(&res)) {
     return 1;
   }
   cu_6502 cpu = res.value;

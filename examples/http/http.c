@@ -80,7 +80,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
 
     cu_Slice_Result chunk_res =
         cu_Allocator_Alloc(server->slab_alloc, cu_Layout_create(CHUNK_SIZE, 1));
-    if (!cu_Slice_result_is_ok(&chunk_res)) {
+    if (!cu_Slice_Result_is_ok(&chunk_res)) {
       printf("DEBUG: Failed to allocate chunk\n");
       goto fail;
     }
@@ -96,7 +96,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
     // Allocate new buffer
     cu_Slice_Result resize_res = cu_Allocator_Alloc(
         server->slab_alloc, cu_Layout_create(total + r + 1, 1));
-    if (!cu_Slice_result_is_ok(&resize_res)) {
+    if (!cu_Slice_Result_is_ok(&resize_res)) {
       printf("DEBUG: Realloc fallback failed\n");
       cu_Allocator_Free(server->slab_alloc, chunk_res.value);
       goto fail;
@@ -167,7 +167,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
 
   cu_Slice_Result buf_res =
       cu_Allocator_Alloc(server->slab_alloc, cu_Layout_create(4096, 1));
-  if (!cu_Slice_result_is_ok(&buf_res)) {
+  if (!cu_Slice_Result_is_ok(&buf_res)) {
     printf("DEBUG: Failed to allocate file buffer\n");
     close(ffd);
     goto fail;
@@ -201,14 +201,14 @@ cu_HttpServer_Result cu_HttpServer_create(
     cu_Allocator allocator, uint16_t port) {
   cu_Vector_Result vec_res =
       cu_Vector_create(allocator, CU_LAYOUT(int), Size_Optional_some(16));
-  if (!cu_Vector_result_is_ok(&vec_res)) {
-    return cu_HttpServer_result_error(CU_HTTP_ERROR_EPOLL);
+  if (!cu_Vector_Result_is_ok(&vec_res)) {
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_EPOLL);
   }
 
   int sfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sfd < 0) {
     cu_Vector_destroy(&vec_res.value);
-    return cu_HttpServer_result_error(CU_HTTP_ERROR_SOCKET);
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
   set_nonblocking(sfd);
 
@@ -221,19 +221,19 @@ cu_HttpServer_Result cu_HttpServer_create(
   if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     close(sfd);
     cu_Vector_destroy(&vec_res.value);
-    return cu_HttpServer_result_error(CU_HTTP_ERROR_SOCKET);
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
   if (listen(sfd, 16) < 0) {
     close(sfd);
     cu_Vector_destroy(&vec_res.value);
-    return cu_HttpServer_result_error(CU_HTTP_ERROR_SOCKET);
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
 
   int epfd = epoll_create1(0);
   if (epfd < 0) {
     close(sfd);
     cu_Vector_destroy(&vec_res.value);
-    return cu_HttpServer_result_error(CU_HTTP_ERROR_EPOLL);
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_EPOLL);
   }
   struct epoll_event ev = {0};
   ev.events = EPOLLIN;
@@ -250,7 +250,7 @@ cu_HttpServer_Result cu_HttpServer_create(
   server.slab_alloc = cu_Allocator_SlabAllocator(&server.slab, scfg);
 
   printf("DEBUG: HTTP server created on port %d\n", port);
-  return cu_HttpServer_result_ok(server);
+  return cu_HttpServer_Result_ok(server);
 }
 
 void cu_HttpServer_destroy(cu_HttpServer *server) {

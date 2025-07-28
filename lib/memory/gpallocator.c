@@ -33,7 +33,7 @@ static struct cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
       sizeof(struct cu_GPAllocator_BucketHeader) + slot_count * obj_size;
   cu_Slice_Result mem = cu_Allocator_Alloc(
       gpa->backingAllocator, cu_Layout_create(total, obj_size));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return NULL;
   }
 
@@ -109,7 +109,7 @@ static cu_Slice_Result cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
     if (!bucket) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
           .errnum = Size_Optional_none()};
-      return cu_Slice_result_error(err);
+      return cu_Slice_Result_error(err);
     }
     bucket->prev = gpa->smallBucketTails[idx];
     bucket->next = NULL;
@@ -130,26 +130,26 @@ static cu_Slice_Result cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
   if (slot == bucket->objects.slotCount) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   cu_Bitmap_set(&bucket->objects.used, slot);
   bucket->objects.usedCount++;
   void *ptr = bucket->objects.data + slot * bucket->objects.objectSize;
   CU_UNUSED(alignment);
-  return cu_Slice_result_ok(cu_Slice_create(ptr, size));
+  return cu_Slice_Result_ok(cu_Slice_create(ptr, size));
 }
 
 static cu_Slice_Result cu_gpa_alloc_large(
     cu_GPAllocator *gpa, size_t size, size_t alignment) {
   cu_Slice_Result mem = cu_Allocator_Alloc(
       gpa->backingAllocator, cu_Layout_create(size, alignment));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return mem;
   }
   cu_Slice_Result meta_mem = cu_Allocator_Alloc(
       gpa->backingAllocator,
       cu_Layout_create(sizeof(struct cu_GPAllocator_LargeAlloc), sizeof(void *)));
-  if (!cu_Slice_result_is_ok(&meta_mem)) {
+  if (!cu_Slice_Result_is_ok(&meta_mem)) {
     cu_Allocator_Free(gpa->backingAllocator, mem.value);
     return meta_mem;
   }
@@ -162,7 +162,7 @@ static cu_Slice_Result cu_gpa_alloc_large(
     meta->next->prev = meta;
   }
   gpa->largeAllocs = meta;
-  return cu_Slice_result_ok(meta->slice);
+  return cu_Slice_Result_ok(meta->slice);
 }
 
 static cu_Slice_Result cu_gpa_alloc(void *self, cu_Layout layout) {
@@ -170,7 +170,7 @@ static cu_Slice_Result cu_gpa_alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -200,7 +200,7 @@ static cu_Slice_Result cu_gpa_resize(
     cu_gpa_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t size = layout.elem_size;
@@ -214,12 +214,12 @@ static cu_Slice_Result cu_gpa_resize(
     if (!meta) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
           .errnum = Size_Optional_none()};
-      return cu_Slice_result_error(err);
+      return cu_Slice_Result_error(err);
     }
     cu_Slice_Result resized = cu_Allocator_Resize(
         gpa->backingAllocator, meta->slice,
         cu_Layout_create(size, alignment));
-    if (!cu_Slice_result_is_ok(&resized)) {
+    if (!cu_Slice_Result_is_ok(&resized)) {
       return resized;
     }
     meta->slice = resized.value;
@@ -228,11 +228,11 @@ static cu_Slice_Result cu_gpa_resize(
 
   if (size <= bucket->objects.objectSize &&
       alignment <= bucket->objects.objectSize) {
-    return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
+    return cu_Slice_Result_ok(cu_Slice_create(mem.ptr, size));
   }
 
   cu_Slice_Result new_mem = cu_gpa_alloc(self, cu_Layout_create(size, alignment));
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   size_t copy = mem.length < size ? mem.length : size;

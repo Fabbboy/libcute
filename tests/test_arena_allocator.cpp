@@ -20,13 +20,13 @@ TEST(ArenaAllocator, LifoVectors) {
 
   cu_Vector_Result r1 =
       cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(4));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&r1));
-  cu_Vector v1 = cu_Vector_result_unwrap(&r1);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&r1));
+  cu_Vector v1 = cu_Vector_Result_unwrap(&r1);
 
   cu_Vector_Result r2 =
       cu_Vector_create(alloc, CU_LAYOUT(float), Size_Optional_some(4));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&r2));
-  cu_Vector v2 = cu_Vector_result_unwrap(&r2);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&r2));
+  cu_Vector v2 = cu_Vector_Result_unwrap(&r2);
 
   int i = 42;
   float f = 3.14f;
@@ -41,7 +41,7 @@ TEST(ArenaAllocator, LifoVectors) {
 
   cu_Slice_Result reallocation_slice =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 4));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&reallocation_slice));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&reallocation_slice));
   EXPECT_EQ(reallocation_slice.value.ptr, v2_ptr);
   cu_Allocator_Free(alloc, reallocation_slice.value);
 
@@ -62,18 +62,18 @@ TEST(ArenaAllocator, NonLifoAlloc) {
 
   cu_Slice_Result a_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&a_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
   cu_Slice_Result b_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&b_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
   cu_Slice b = b_res.value;
   void *first = a.ptr;
 
   cu_Allocator_Free(alloc, a);
   cu_Slice_Result c_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&c_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&c_res));
   cu_Slice c = c_res.value;
   EXPECT_NE(c.ptr, first);
 
@@ -94,7 +94,7 @@ TEST(ArenaAllocator, ChunkReuseStress) {
 
   cu_Slice_Result first_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&first_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&first_res));
   cu_Slice first = first_res.value;
   void *ptr = first.ptr;
   cu_Allocator_Free(alloc, first);
@@ -102,7 +102,7 @@ TEST(ArenaAllocator, ChunkReuseStress) {
   for (int i = 0; i < 1000; ++i) {
     cu_Slice_Result slice_res =
         cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-    ASSERT_TRUE(cu_Slice_result_is_ok(&slice_res));
+    ASSERT_TRUE(cu_Slice_Result_is_ok(&slice_res));
     cu_Slice slice = slice_res.value;
     EXPECT_EQ(slice.ptr, ptr);
     cu_Allocator_Free(alloc, slice);
@@ -124,7 +124,7 @@ TEST(ArenaAllocator, ReuseOldChunk) {
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
   cu_Slice_Result first_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&first_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&first_res));
   cu_Slice first = first_res.value;
   void *ptr = first.ptr;
 
@@ -133,7 +133,7 @@ TEST(ArenaAllocator, ReuseOldChunk) {
   for (int i = 0; i < 20; ++i) {
     blocks_res[i] =
         cu_Allocator_Alloc(alloc, cu_Layout_create(112, 8));
-    ASSERT_TRUE(cu_Slice_result_is_ok(&blocks_res[i]));
+    ASSERT_TRUE(cu_Slice_Result_is_ok(&blocks_res[i]));
     blocks[i] = blocks_res[i].value;
   }
 
@@ -141,7 +141,7 @@ TEST(ArenaAllocator, ReuseOldChunk) {
 
   cu_Slice_Result again_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&again_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&again_res));
   cu_Slice again = again_res.value;
   EXPECT_EQ(again.ptr, ptr);
 
@@ -165,13 +165,13 @@ TEST(ArenaAllocator, ResizeGrowInPlace) {
 
   cu_Slice_Result block_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&block_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&block_res));
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
 
   cu_Slice_Result resized =
       cu_Allocator_Resize(alloc, block, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
   cu_Allocator_Free(alloc, resized.value);
@@ -191,13 +191,13 @@ TEST(ArenaAllocator, ResizeShrinkInPlace) {
 
   cu_Slice_Result block_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&block_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&block_res));
   cu_Slice block = block_res.value;
   void *ptr = block.ptr;
 
   cu_Slice_Result resized =
       cu_Allocator_Resize(alloc, block, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&resized));
   EXPECT_EQ(resized.value.ptr, ptr);
 
   cu_Allocator_Free(alloc, resized.value);
@@ -217,17 +217,17 @@ TEST(ArenaAllocator, ResizeAllocNewBlock) {
 
   cu_Slice_Result a_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&a_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
   cu_Slice_Result b_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&b_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
   cu_Slice b = b_res.value;
   void *old_ptr = a.ptr;
 
   cu_Slice_Result resized =
       cu_Allocator_Resize(alloc, a, cu_Layout_create(64, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&resized));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&resized));
   EXPECT_NE(resized.value.ptr, old_ptr);
 
   cu_Allocator_Free(alloc, b);

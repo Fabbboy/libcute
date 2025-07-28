@@ -38,7 +38,7 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
   size_t node_sz = sizeof(cu_SkipList_Node) + fwd_sz;
   cu_Slice_Result mem = cu_Allocator_Alloc(
       list->allocator, cu_Layout_create(node_sz, alignof(cu_SkipList_Node)));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
   }
   cu_SkipList_Node *node = (cu_SkipList_Node *)mem.value.ptr;
@@ -51,7 +51,7 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
   cu_Slice_Result k = cu_Allocator_Alloc(list->allocator,
       cu_Layout_create(list->key_layout.elem_size,
           list->key_layout.alignment));
-  if (!cu_Slice_result_is_ok(&k)) {
+  if (!cu_Slice_Result_is_ok(&k)) {
     cu_Allocator_Free(list->allocator, mem.value);
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
   }
@@ -61,7 +61,7 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
   cu_Slice_Result v = cu_Allocator_Alloc(list->allocator,
       cu_Layout_create(list->value_layout.elem_size,
           list->value_layout.alignment));
-  if (!cu_Slice_result_is_ok(&v)) {
+  if (!cu_Slice_Result_is_ok(&v)) {
     cu_Allocator_Free(list->allocator, mem.value);
     cu_Allocator_Free(list->allocator, k.value);
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
@@ -78,20 +78,20 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout, size_t max_level,
     cu_SkipList_CmpFn_Optional cmp) {
   CU_LAYOUT_CHECK(key_layout) {
-    return cu_SkipList_result_error(CU_SKIPLIST_ERROR_INVALID_LAYOUT);
+    return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_INVALID_LAYOUT);
   }
   CU_LAYOUT_CHECK(value_layout) {
-    return cu_SkipList_result_error(CU_SKIPLIST_ERROR_INVALID_LAYOUT);
+    return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_INVALID_LAYOUT);
   }
   if (max_level == 0) {
-    return cu_SkipList_result_error(CU_SKIPLIST_ERROR_INVALID);
+    return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_INVALID);
   }
 
   size_t head_size = sizeof(cu_SkipList_Node) + max_level * sizeof(cu_SkipList_Node *);
   cu_Slice_Result mem = cu_Allocator_Alloc(
       allocator, cu_Layout_create(head_size, alignof(cu_SkipList_Node)));
-  if (!cu_Slice_result_is_ok(&mem)) {
-    return cu_SkipList_result_error(CU_SKIPLIST_ERROR_OOM);
+  if (!cu_Slice_Result_is_ok(&mem)) {
+    return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_OOM);
   }
   cu_SkipList_Node *head = (cu_SkipList_Node *)mem.value.ptr;
   head->forward = (cu_SkipList_Node **)((unsigned char *)head + sizeof(*head));
@@ -113,7 +113,7 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
   list.key_layout = key_layout;
   list.value_layout = value_layout;
   list.allocator = allocator;
-  return cu_SkipList_result_ok(list);
+  return cu_SkipList_Result_ok(list);
 }
 
 void cu_SkipList_destroy(cu_SkipList *list) {

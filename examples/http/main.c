@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
   }
   cu_Allocator alloc = cu_Allocator_CAllocator();
   cu_HttpServer_Result res = cu_HttpServer_create(alloc, port);
-  if (!cu_HttpServer_result_is_ok(&res)) {
+  if (!cu_HttpServer_Result_is_ok(&res)) {
     return 1;
   }
   cu_HttpServer server = res.value;

@@ -38,8 +38,8 @@ TEST(HashMap, BasicInsertGet) {
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(8), cu_HashMap_HashFn_Optional_none(),
       cu_HashMap_EqualsFn_Optional_none());
-  ASSERT_TRUE(cu_HashMap_result_is_ok(&res));
-  cu_HashMap map = cu_HashMap_result_unwrap(&res);
+  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   for (int i = 0; i < 10; ++i) {
     cu_HashMap_insert(&map, &i, &i);
@@ -72,8 +72,8 @@ TEST(HashMap, CustomHashIter) {
       cu_HashMap_create(alloc, CU_LAYOUT(int), CU_LAYOUT(int),
           Size_Optional_some(4), cu_HashMap_HashFn_Optional_some(int_hash),
           cu_HashMap_EqualsFn_Optional_some(int_eq));
-  ASSERT_TRUE(cu_HashMap_result_is_ok(&res));
-  cu_HashMap map = cu_HashMap_result_unwrap(&res);
+  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   for (int i = 0; i < 5; ++i) {
     cu_HashMap_insert(&map, &i, &i);
@@ -100,8 +100,8 @@ TEST(HashMap, StressRandomAccess) {
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(128),
       cu_HashMap_HashFn_Optional_none(), cu_HashMap_EqualsFn_Optional_none());
-  ASSERT_TRUE(cu_HashMap_result_is_ok(&res));
-  cu_HashMap map = cu_HashMap_result_unwrap(&res);
+  ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
+  cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
   const int count = 250;
   for (int i = 0; i < count; ++i) {

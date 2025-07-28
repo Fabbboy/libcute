@@ -39,8 +39,8 @@ TEST(SkipList, InsertFindRemove) {
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 8, cu_SkipList_CmpFn_Optional_some(int_cmp));
-  ASSERT_TRUE(cu_SkipList_result_is_ok(&res));
-  cu_SkipList list = cu_SkipList_result_unwrap(&res);
+  ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
+  cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
   for (int i = 0; i < 10; ++i) {
     cu_SkipList_Error_Optional err = cu_SkipList_insert(&list, &i, &i);
@@ -71,8 +71,8 @@ TEST(SkipList, Iteration) {
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 6, cu_SkipList_CmpFn_Optional_some(int_cmp));
-  ASSERT_TRUE(cu_SkipList_result_is_ok(&res));
-  cu_SkipList list = cu_SkipList_result_unwrap(&res);
+  ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
+  cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
   int sum = 0;
   for (int i = 0; i < 5; ++i) {

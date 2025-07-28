@@ -28,8 +28,8 @@ TEST(RingBuffer, PushPop) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_RingBuffer_Result res = cu_RingBuffer_create(alloc, CU_LAYOUT(int), 4);
-  ASSERT_TRUE(cu_RingBuffer_result_is_ok(&res));
-  cu_RingBuffer rb = cu_RingBuffer_result_unwrap(&res);
+  ASSERT_TRUE(cu_RingBuffer_Result_is_ok(&res));
+  cu_RingBuffer rb = cu_RingBuffer_Result_unwrap(&res);
 
   for (int i = 0; i < 4; ++i) {
     int v = i;

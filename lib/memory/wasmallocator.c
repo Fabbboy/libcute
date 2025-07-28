@@ -65,7 +65,7 @@ static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -93,7 +93,7 @@ static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
         if (addr == 0) {
           cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
               .errnum = Size_Optional_none()};
-          return cu_Slice_result_error(err);
+          return cu_Slice_Result_error(err);
         }
         next_addrs[class] = addr + slot_size;
       } else {
@@ -107,7 +107,7 @@ static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
     if (addr == 0) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
           .errnum = Size_Optional_none()};
-      return cu_Slice_result_error(err);
+      return cu_Slice_Result_error(err);
     }
   }
 
@@ -116,7 +116,7 @@ static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
       (struct cu_WasmAllocator_Header *)(base + user_offset - header_size);
   hdr->offset = user_offset - header_size;
   hdr->slot_size = slot_size;
-  return cu_Slice_result_ok(cu_Slice_create(base + user_offset, size));
+  return cu_Slice_Result_ok(cu_Slice_create(base + user_offset, size));
 }
 
 static cu_Slice_Result cu_wasm_resize(
@@ -126,7 +126,7 @@ static cu_Slice_Result cu_wasm_resize(
     cu_wasm_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -142,12 +142,12 @@ static cu_Slice_Result cu_wasm_resize(
   size_t offset = hdr->offset + sizeof(struct cu_WasmAllocator_Header);
   if (((uintptr_t)mem.ptr % alignment) == 0 &&
       offset + size + sizeof(size_t) <= slot_size) {
-    return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
+    return cu_Slice_Result_ok(cu_Slice_create(mem.ptr, size));
   }
 
   cu_Slice_Result new_mem =
       cu_wasm_alloc(self, cu_Layout_create(size, alignment));
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   cu_Memory_memcpy(new_mem.value.ptr,

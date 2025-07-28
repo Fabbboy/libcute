@@ -10,7 +10,7 @@ static cu_Slice_Result cu_fixed_alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -26,7 +26,7 @@ static cu_Slice_Result cu_fixed_alloc(void *self, cu_Layout layout) {
   if (start + size > alloc->buffer.length) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   struct cu_FixedAllocator_Header *hdr =
@@ -34,7 +34,7 @@ static cu_Slice_Result cu_fixed_alloc(void *self, cu_Layout layout) {
                                           start - header_size);
   hdr->prev_offset = alloc->used;
   alloc->used = start + size;
-  return cu_Slice_result_ok(
+  return cu_Slice_Result_ok(
       cu_Slice_create((unsigned char *)alloc->buffer.ptr + start, size));
 }
 
@@ -46,7 +46,7 @@ static cu_Slice_Result cu_fixed_resize(
     cu_fixed_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t size = layout.elem_size;
@@ -61,13 +61,13 @@ static cu_Slice_Result cu_fixed_resize(
     size_t avail = alloc->buffer.length - (alloc->used - mem.length);
     if (size <= mem.length + avail) {
       alloc->used = (alloc->used - mem.length) + size;
-      return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
+      return cu_Slice_Result_ok(cu_Slice_create(mem.ptr, size));
     }
   }
 
   cu_Slice_Result new_mem =
       cu_fixed_alloc(self, cu_Layout_create(size, alignment));
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   cu_Memory_memcpy(new_mem.value.ptr,

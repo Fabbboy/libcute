@@ -4,12 +4,16 @@ This document proposes the naming guidelines for libcute. All public symbols mus
 
 ## Prefix
 
-All exported types, functions and global variables begin with `cu_`. The prefix is followed by the subsystem or category name and then the actual identifier.
+All exported identifiers begin with `cu_`. The prefix is followed by a
+`Category` and optionally a `Type` name, both written in `PascalCase`. Function
+methods come last and use `lower_case`.
+
+The pattern is `cu_<Category>_<Type?>_<method>` where `<Type>` is omitted if not applicable.
 
 Examples:
 
-- `cu_Allocator_PageAllocator`
-- `cu_String_create`
+- `cu_File_open`
+- `cu_File_OpenOptions_write`
 
 ## Casing
 

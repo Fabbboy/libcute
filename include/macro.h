@@ -2,8 +2,6 @@
 
 /** @file macro.h Common utility macros. */
 
-#include <nostd.h>
-
 /** Execute the following block if @p expr is NULL. */
 #define CU_IF_NULL(expr) if ((expr) == NULL)
 /** Execute the following block if @p expr is not NULL. */
@@ -19,6 +17,12 @@
 #define CU_ARRAY_LEN(arr) (sizeof(arr) / sizeof((arr)[0]))
 /** Create a bit mask with bit @p x set. */
 #define CU_BIT(x) (1u << (x))
+
+/** Concatenate two tokens after expanding them. */
+#define CU_CONCAT_(a, b) a##b
+#define CU_CONCAT(a, b) CU_CONCAT_(a, b)
+
+#include <nostd.h>
 /** Platform detection macros */
 #if defined(_WIN32) || defined(_WIN64)
 #define CU_PLAT_WINDOWS 1

@@ -23,7 +23,7 @@ TEST(Allocator, GPALargeAllocFree) {
   const size_t big = 100 * 1024 * 1024; // 100 MiB
   cu_Slice_Result mem_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(big, 16));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&mem_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xCD, mem.length);
   cu_Allocator_Free(alloc, mem);
@@ -36,7 +36,7 @@ TEST(Allocator, GPALargeAllocFree) {
   for (size_t i = 0; i < count; ++i) {
     cu_Slice_Result s_res =
         cu_Allocator_Alloc(alloc, cu_Layout_create(small, 16));
-    ASSERT_TRUE(cu_Slice_result_is_ok(&s_res));
+    ASSERT_TRUE(cu_Slice_Result_is_ok(&s_res));
     cu_Slice s = s_res.value;
     cu_Memory_memset(s.ptr, 0xEF, s.length);
     blocks.push_back(s);
@@ -66,7 +66,7 @@ TEST(Allocator, NormalAllocAndFree) {
   cu_Slice_Result res =
       cu_Allocator_Alloc(alloc,
           cu_Layout_create(sizeof(cu_Point), alignof(cu_Point)));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&res));
 
   cu_Slice mem = res.value;
   ASSERT_TRUE(mem.ptr != NULL);
@@ -96,7 +96,7 @@ TEST(Allocator, DoubleFree) {
   cu_Slice_Result res =
       cu_Allocator_Alloc(alloc,
           cu_Layout_create(sizeof(cu_Point), alignof(cu_Point)));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&res));
 
   cu_Slice mem = res.value;
   ASSERT_TRUE(mem.ptr != NULL);
@@ -126,7 +126,7 @@ TEST(Allocator, Exhaustion) {
       cu_Allocator_Alloc(alloc,
           cu_Layout_create(large_size, alignof(cu_Point)));
 
-  ASSERT_FALSE(cu_Slice_result_is_ok(&res));
+  ASSERT_FALSE(cu_Slice_Result_is_ok(&res));
   EXPECT_EQ(
-      cu_Slice_result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
+      cu_Slice_Result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
 }
