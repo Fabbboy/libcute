@@ -28,9 +28,9 @@ struct cu_SlabAllocator_Slab {
   unsigned char data[];               /**< backing storage */
 };
 
-static cu_Slice_Result cu_slab_alloc(void *self, size_t size, size_t alignment);
+static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout);
 static cu_Slice_Result cu_slab_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment);
+    void *self, cu_Slice mem, cu_Layout layout);
 static void cu_slab_free(void *self, cu_Slice mem);
 
 static unsigned char *cu_slab_data(struct cu_SlabAllocator_Slab *slab) {
@@ -55,8 +55,9 @@ static size_t cu_find_run(struct cu_SlabAllocator_Slab *slab, size_t need) {
 static struct cu_SlabAllocator_Slab *cu_create_slab(
     cu_SlabAllocator *alloc, size_t count) {
   size_t total = sizeof(struct cu_SlabAllocator_Slab) + count * alloc->slabSize;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(alloc->backingAllocator, total, alignof(max_align_t));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      alloc->backingAllocator,
+      cu_Layout_create(total, alignof(max_align_t)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return NULL;
   }
@@ -74,14 +75,15 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
   return slab;
 }
 
-static cu_Slice_Result cu_slab_alloc(
-    void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -146,15 +148,18 @@ static cu_Slice_Result cu_slab_alloc(
 }
 
 static cu_Slice_Result cu_slab_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
+    void *self, cu_Slice mem, cu_Layout layout) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
-  CU_IF_NULL(mem.ptr) { return cu_slab_alloc(self, size, alignment); }
-  if (size == 0) {
+  CU_IF_NULL(mem.ptr) { return cu_slab_alloc(self, layout); }
+  if (layout.elem_size == 0) {
     cu_slab_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
 
   struct cu_SlabAllocator_Header *hdr =
       (struct cu_SlabAllocator_Header *)((unsigned char *)mem.ptr -
@@ -167,7 +172,8 @@ static cu_Slice_Result cu_slab_resize(
     return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }
 
-  cu_Slice_Result new_mem = cu_slab_alloc(self, size, alignment);
+  cu_Slice_Result new_mem =
+      cu_slab_alloc(self, cu_Layout_create(size, alignment));
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }

@@ -10,7 +10,8 @@ cu_Bitmap_Optional cu_Bitmap_create(
 
   size_t size = (bitCount + sizeof(size_t) * 8 - 1) / (sizeof(size_t) * 8);
   cu_Slice_Result mem = cu_Allocator_Alloc(
-      backingAllocator, size * sizeof(size_t), sizeof(size_t));
+      backingAllocator,
+      cu_Layout_create(size * sizeof(size_t), sizeof(size_t)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_Bitmap_Optional_none();
   }

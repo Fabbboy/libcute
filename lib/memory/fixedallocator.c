@@ -5,14 +5,15 @@
 
 static void cu_fixed_free(void *self, cu_Slice mem);
 
-static cu_Slice_Result cu_fixed_alloc(
-    void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_fixed_alloc(void *self, cu_Layout layout) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -38,15 +39,18 @@ static cu_Slice_Result cu_fixed_alloc(
 }
 
 static cu_Slice_Result cu_fixed_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
+    void *self, cu_Slice mem, cu_Layout layout) {
   cu_FixedAllocator *alloc = (cu_FixedAllocator *)self;
-  CU_IF_NULL(mem.ptr) { return cu_fixed_alloc(self, size, alignment); }
-  if (size == 0) {
+  CU_IF_NULL(mem.ptr) { return cu_fixed_alloc(self, layout); }
+  if (layout.elem_size == 0) {
     cu_fixed_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
 
   const size_t header_size = sizeof(struct cu_FixedAllocator_Header);
   struct cu_FixedAllocator_Header *hdr =
@@ -61,7 +65,8 @@ static cu_Slice_Result cu_fixed_resize(
     }
   }
 
-  cu_Slice_Result new_mem = cu_fixed_alloc(self, size, alignment);
+  cu_Slice_Result new_mem =
+      cu_fixed_alloc(self, cu_Layout_create(size, alignment));
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }

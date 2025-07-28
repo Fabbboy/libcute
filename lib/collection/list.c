@@ -41,8 +41,8 @@ cu_List_Error_Optional cu_List_push_front(cu_List *list, void *elem) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_INVALID_LAYOUT);
   }
   size_t size = sizeof(cu_List_Node) + list->layout.elem_size;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(list->allocator, size, alignof(cu_List_Node));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      list->allocator, cu_Layout_create(size, alignof(cu_List_Node)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_OOM);
   }
@@ -85,8 +85,8 @@ cu_List_Error_Optional cu_List_insert_after(
   }
 
   size_t size = sizeof(cu_List_Node) + list->layout.elem_size;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(list->allocator, size, alignof(cu_List_Node));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      list->allocator, cu_Layout_create(size, alignof(cu_List_Node)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_List_Error_Optional_some(CU_LIST_ERROR_OOM);
   }

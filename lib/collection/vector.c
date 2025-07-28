@@ -22,8 +22,9 @@ cu_Vector_Result cu_Vector_create(
   if (Size_Optional_is_some(&initial_capacity) &&
       Size_Optional_unwrap(&initial_capacity) > 0) {
     cap = Size_Optional_unwrap(&initial_capacity);
-    cu_Slice_Result r =
-        cu_Allocator_Alloc(allocator, cap * layout.elem_size, layout.alignment);
+    cu_Slice_Result r = cu_Allocator_Alloc(
+        allocator,
+        cu_Layout_create(cap * layout.elem_size, layout.alignment));
     if (!cu_Slice_result_is_ok(&r)) {
       return cu_Vector_result_error(CU_VECTOR_ERROR_OOM);
     }
@@ -65,8 +66,10 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
 
   if (cu_Slice_Optional_is_some(&vector->data)) {
     cu_Slice old_data = cu_Slice_Optional_unwrap(&vector->data);
-    cu_Slice_Result new_data = cu_Allocator_Resize(vector->allocator, old_data,
-        capacity * vector->layout.elem_size, vector->layout.alignment);
+    cu_Slice_Result new_data = cu_Allocator_Resize(
+        vector->allocator, old_data,
+        cu_Layout_create(capacity * vector->layout.elem_size,
+            vector->layout.alignment));
 
     if (!cu_Slice_result_is_ok(&new_data)) {
       return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
@@ -77,8 +80,10 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
     return cu_Vector_Error_Optional_none();
   }
 
-  cu_Slice_Result new_data_res = cu_Allocator_Alloc(vector->allocator,
-      capacity * vector->layout.elem_size, vector->layout.alignment);
+  cu_Slice_Result new_data_res = cu_Allocator_Alloc(
+      vector->allocator,
+      cu_Layout_create(capacity * vector->layout.elem_size,
+          vector->layout.alignment));
   if (!cu_Slice_result_is_ok(&new_data_res)) {
     return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
   }

@@ -36,8 +36,8 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
     size_t level, void *key, void *value, cu_SkipList_Node **out) {
   size_t fwd_sz = level * sizeof(cu_SkipList_Node *);
   size_t node_sz = sizeof(cu_SkipList_Node) + fwd_sz;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(list->allocator, node_sz, alignof(cu_SkipList_Node));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      list->allocator, cu_Layout_create(node_sz, alignof(cu_SkipList_Node)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
   }
@@ -49,7 +49,8 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
   }
 
   cu_Slice_Result k = cu_Allocator_Alloc(list->allocator,
-      list->key_layout.elem_size, list->key_layout.alignment);
+      cu_Layout_create(list->key_layout.elem_size,
+          list->key_layout.alignment));
   if (!cu_Slice_result_is_ok(&k)) {
     cu_Allocator_Free(list->allocator, mem.value);
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
@@ -58,7 +59,8 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
   node->key = k.value.ptr;
 
   cu_Slice_Result v = cu_Allocator_Alloc(list->allocator,
-      list->value_layout.elem_size, list->value_layout.alignment);
+      cu_Layout_create(list->value_layout.elem_size,
+          list->value_layout.alignment));
   if (!cu_Slice_result_is_ok(&v)) {
     cu_Allocator_Free(list->allocator, mem.value);
     cu_Allocator_Free(list->allocator, k.value);
@@ -86,7 +88,8 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
   }
 
   size_t head_size = sizeof(cu_SkipList_Node) + max_level * sizeof(cu_SkipList_Node *);
-  cu_Slice_Result mem = cu_Allocator_Alloc(allocator, head_size, alignof(cu_SkipList_Node));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      allocator, cu_Layout_create(head_size, alignof(cu_SkipList_Node)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_SkipList_result_error(CU_SKIPLIST_ERROR_OOM);
   }

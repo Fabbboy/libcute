@@ -10,7 +10,8 @@ TEST(PageAllocator, Unsupported) { SUCCEED(); }
 TEST(PageAllocator, Basic) {
   cu_PageAllocator palloc;
   cu_Allocator a = cu_Allocator_PageAllocator(&palloc);
-  cu_Slice_Result mem_res = cu_Allocator_Alloc(a, 4096, 4096);
+  cu_Slice_Result mem_res =
+      cu_Allocator_Alloc(a, cu_Layout_create(4096, 4096));
   ASSERT_TRUE(cu_Slice_result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0, mem.length);

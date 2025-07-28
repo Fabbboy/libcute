@@ -79,7 +79,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
     }
 
     cu_Slice_Result chunk_res =
-        cu_Allocator_Alloc(server->slab_alloc, CHUNK_SIZE, 1);
+        cu_Allocator_Alloc(server->slab_alloc, cu_Layout_create(CHUNK_SIZE, 1));
     if (!cu_Slice_result_is_ok(&chunk_res)) {
       printf("DEBUG: Failed to allocate chunk\n");
       goto fail;
@@ -94,8 +94,8 @@ static void handle_client(cu_HttpServer *server, int fd) {
     }
 
     // Allocate new buffer
-    cu_Slice_Result resize_res =
-        cu_Allocator_Alloc(server->slab_alloc, total + r + 1, 1);
+    cu_Slice_Result resize_res = cu_Allocator_Alloc(
+        server->slab_alloc, cu_Layout_create(total + r + 1, 1));
     if (!cu_Slice_result_is_ok(&resize_res)) {
       printf("DEBUG: Realloc fallback failed\n");
       cu_Allocator_Free(server->slab_alloc, chunk_res.value);
@@ -165,7 +165,8 @@ static void handle_client(cu_HttpServer *server, int fd) {
   printf("DEBUG: Sending header: %s", header);
   write(fd, header, (size_t)header_len);
 
-  cu_Slice_Result buf_res = cu_Allocator_Alloc(server->slab_alloc, 4096, 1);
+  cu_Slice_Result buf_res =
+      cu_Allocator_Alloc(server->slab_alloc, cu_Layout_create(4096, 1));
   if (!cu_Slice_result_is_ok(&buf_res)) {
     printf("DEBUG: Failed to allocate file buffer\n");
     close(ffd);

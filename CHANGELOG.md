@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file. See [conven
 - some fixes - ([f02ca19](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f02ca19a63709948575507baaf15f5a745388d72)) - Fabrice
 - adjusted name - ([3e8ec20](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3e8ec20a5a070f784286564bcf7c80d54144ea78)) - Fabrice
 
+### API
+
+- allocator: accept layout instead of size and alignment
+
 ### Documentation
 
 - expand header documentation - ([22b0a64](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/22b0a6400a4931f70115d747c39ae4ae03c654e7)) - Fabrice

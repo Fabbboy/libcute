@@ -37,8 +37,8 @@ void cu_DList_destroy(cu_DList *list) {
 static cu_DList_Error_Optional cu_DList_alloc_node(
     cu_DList *list, void *elem, cu_DList_Node **out_node) {
   size_t size = sizeof(cu_DList_Node) + list->layout.elem_size;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(list->allocator, size, alignof(cu_DList_Node));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      list->allocator, cu_Layout_create(size, alignof(cu_DList_Node)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_OOM);
   }
