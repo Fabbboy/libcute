@@ -32,8 +32,8 @@ TEST(List, PushPop) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_List_Result res = cu_List_create(alloc, CU_LAYOUT(int));
-  ASSERT_TRUE(cu_List_result_is_ok(&res));
-  cu_List list = cu_List_result_unwrap(&res);
+  ASSERT_TRUE(cu_List_Result_is_ok(&res));
+  cu_List list = cu_List_Result_unwrap(&res);
 
   for (int i = 0; i < 4; ++i) {
     cu_List_Error_Optional err = cu_List_push_front(&list, &i);
@@ -58,8 +58,8 @@ TEST(List, InsertIter) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_List_Result r = cu_List_create(alloc, CU_LAYOUT(int));
-  ASSERT_TRUE(cu_List_result_is_ok(&r));
-  cu_List list = cu_List_result_unwrap(&r);
+  ASSERT_TRUE(cu_List_Result_is_ok(&r));
+  cu_List list = cu_List_Result_unwrap(&r);
 
   for (int i = 0; i < 3; ++i) {
     cu_List_push_front(&list, &i); // 2,1,0

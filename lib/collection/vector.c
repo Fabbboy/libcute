@@ -14,7 +14,7 @@ CU_OPTIONAL_IMPL(cu_Vector_Error, cu_Vector_Error)
 cu_Vector_Result cu_Vector_create(
     cu_Allocator allocator, cu_Layout layout, Size_Optional initial_capacity) {
   CU_LAYOUT_CHECK(layout) {
-    return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   size_t cap = 0;
@@ -25,8 +25,8 @@ cu_Vector_Result cu_Vector_create(
     cu_Slice_Result r = cu_Allocator_Alloc(
         allocator,
         cu_Layout_create(cap * layout.elem_size, layout.alignment));
-    if (!cu_Slice_result_is_ok(&r)) {
-      return cu_Vector_result_error(CU_VECTOR_ERROR_OOM);
+    if (!cu_Slice_Result_is_ok(&r)) {
+      return cu_Vector_Result_error(CU_VECTOR_ERROR_OOM);
     }
     data = cu_Slice_Optional_some(r.value);
   }
@@ -38,7 +38,7 @@ cu_Vector_Result cu_Vector_create(
   vector.layout = layout;
   vector.allocator = allocator;
 
-  return cu_Vector_result_ok(vector);
+  return cu_Vector_Result_ok(vector);
 }
 
 static cu_Vector_Error_Optional cu_Vector_set_capacity(
@@ -71,7 +71,7 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
         cu_Layout_create(capacity * vector->layout.elem_size,
             vector->layout.alignment));
 
-    if (!cu_Slice_result_is_ok(&new_data)) {
+    if (!cu_Slice_Result_is_ok(&new_data)) {
       return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
     }
 
@@ -84,7 +84,7 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
       vector->allocator,
       cu_Layout_create(capacity * vector->layout.elem_size,
           vector->layout.alignment));
-  if (!cu_Slice_result_is_ok(&new_data_res)) {
+  if (!cu_Slice_Result_is_ok(&new_data_res)) {
     return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
   }
   vector->data = cu_Slice_Optional_some(new_data_res.value);
@@ -227,15 +227,15 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
 }
 
 cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
-  CU_IF_NULL(src) { return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID); }
+  CU_IF_NULL(src) { return cu_Vector_Result_error(CU_VECTOR_ERROR_INVALID); }
 
   CU_LAYOUT_CHECK(src->layout) {
-    return cu_Vector_result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
+    return cu_Vector_Result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
   cu_Vector_Result result = cu_Vector_create(
       src->allocator, src->layout, Size_Optional_some(src->capacity));
-  if (!cu_Vector_result_is_ok(&result)) {
+  if (!cu_Vector_Result_is_ok(&result)) {
     return result;
   }
 

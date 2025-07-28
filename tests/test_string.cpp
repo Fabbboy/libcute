@@ -19,7 +19,7 @@ TEST(String, AppendAndSubstring) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
   cu_String_Result res = cu_String_from_cstr(alloc, "hello");
-  ASSERT_TRUE(cu_String_result_is_ok(&res));
+  ASSERT_TRUE(cu_String_Result_is_ok(&res));
   cu_String str = res.value;
 
   EXPECT_EQ(str.length, 5u);
@@ -30,7 +30,7 @@ TEST(String, AppendAndSubstring) {
   EXPECT_STREQ(str.data, "hello, world");
 
   cu_String_Result sub = cu_String_substring(&str, 7, 5);
-  ASSERT_TRUE(cu_String_result_is_ok(&sub));
+  ASSERT_TRUE(cu_String_Result_is_ok(&sub));
   cu_String part = sub.value;
   EXPECT_STREQ(part.data, "world");
 
@@ -50,7 +50,7 @@ TEST(String, Clear) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
 #endif
   cu_String_Result res = cu_String_from_cstr(alloc, "data");
-  ASSERT_TRUE(cu_String_result_is_ok(&res));
+  ASSERT_TRUE(cu_String_Result_is_ok(&res));
   cu_String str = res.value;
   EXPECT_EQ(str.length, 4u);
   cu_String_clear(&str);

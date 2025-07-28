@@ -11,7 +11,7 @@ static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(
   size_t total = sizeof(struct cu_ArenaAllocator_Chunk) + size;
   cu_Slice_Result mem = cu_Allocator_Alloc(
       arena->backingAllocator, cu_Layout_create(total, alignof(max_align_t)));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return NULL;
   }
   struct cu_ArenaAllocator_Chunk *chunk =
@@ -27,7 +27,7 @@ static cu_Slice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -56,7 +56,7 @@ static cu_Slice_Result cu_arena_alloc(void *self, cu_Layout layout) {
     if (!target) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
           .errnum = Size_Optional_none()};
-      return cu_Slice_result_error(err);
+      return cu_Slice_Result_error(err);
     }
     target->prev = arena->current;
     arena->current = target;
@@ -70,7 +70,7 @@ static cu_Slice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   hdr->chunk = chunk;
   hdr->prev_offset = chunk->used;
   chunk->used = start + size;
-  return cu_Slice_result_ok(cu_Slice_create(chunk->data + start, size));
+  return cu_Slice_Result_ok(cu_Slice_create(chunk->data + start, size));
 }
 
 static cu_Slice_Result cu_arena_resize(
@@ -80,7 +80,7 @@ static cu_Slice_Result cu_arena_resize(
     cu_arena_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -92,19 +92,19 @@ static cu_Slice_Result cu_arena_resize(
   if (!chunk) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   if ((unsigned char *)mem.ptr + mem.length == chunk->data + chunk->used) {
     size_t avail = chunk->size - (chunk->used - mem.length);
     if (size <= mem.length + avail) {
       chunk->used = (chunk->used - mem.length) + size;
-      return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
+      return cu_Slice_Result_ok(cu_Slice_create(mem.ptr, size));
     }
     // not enough space, fall through
   }
 
   cu_Slice_Result new_mem = cu_arena_alloc(self, layout);
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   size_t copy = mem.length < size ? mem.length : size;

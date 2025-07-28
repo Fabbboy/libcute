@@ -8,48 +8,53 @@
 #include "macro.h"
 #include <nostd.h>
 
+/** Build the concrete optional type name for a category. */
+#define CU_OPTIONAL_NAME(NAME) NAME##_Optional
+/** Construct an optional helper function name. */
+#define CU_OPTIONAL_FN(NAME, SUFFIX) CU_CONCAT(CU_OPTIONAL_NAME(NAME), SUFFIX)
+
 /** Declare optional helper functions for a given type. */
 #define CU_OPTIONAL_HEADER(NAME, T)                                            \
-  NAME##_Optional NAME##_Optional_some(T value);                               \
-  NAME##_Optional NAME##_Optional_none(void);                                  \
-  bool NAME##_Optional_is_some(const NAME##_Optional *opt);                    \
-  bool NAME##_Optional_is_none(const NAME##_Optional *opt);                    \
-  T NAME##_Optional_unwrap(NAME##_Optional *opt);
+  CU_OPTIONAL_NAME(NAME) CU_OPTIONAL_FN(NAME, _some)(T value);                \
+  CU_OPTIONAL_NAME(NAME) CU_OPTIONAL_FN(NAME, _none)(void);                   \
+  bool CU_OPTIONAL_FN(NAME, _is_some)(const CU_OPTIONAL_NAME(NAME) * opt);    \
+  bool CU_OPTIONAL_FN(NAME, _is_none)(const CU_OPTIONAL_NAME(NAME) * opt);    \
+  T CU_OPTIONAL_FN(NAME, _unwrap)(CU_OPTIONAL_NAME(NAME) * opt);
 
 /** Declare the optional struct and associated functions. */
 #define CU_OPTIONAL_DECL(NAME, T)                                              \
   typedef struct {                                                             \
     T value;                                                                   \
     bool isSome;                                                               \
-  } NAME##_Optional;                                                           \
+  } CU_OPTIONAL_NAME(NAME);                                                    \
   CU_OPTIONAL_HEADER(NAME, T)
 
 /** Define the implementation of the optional helpers. */
 #define CU_OPTIONAL_IMPL(NAME, T)                                              \
-  NAME##_Optional NAME##_Optional_some(T value) {                              \
-    NAME##_Optional opt;                                                      \
-    cu_Memory_memset(&opt, 0, sizeof(opt));                                   \
+  CU_OPTIONAL_NAME(NAME) CU_OPTIONAL_FN(NAME, _some)(T value) {               \
+    CU_OPTIONAL_NAME(NAME) opt;                                                \
+    cu_Memory_memset(&opt, 0, sizeof(opt));                                    \
     opt.value = value;                                                         \
     opt.isSome = true;                                                         \
     return opt;                                                                \
   }                                                                            \
                                                                                \
-  NAME##_Optional NAME##_Optional_none(void) {                                 \
-    NAME##_Optional opt;                                                      \
-    cu_Memory_memset(&opt, 0, sizeof(opt));                                   \
+  CU_OPTIONAL_NAME(NAME) CU_OPTIONAL_FN(NAME, _none)(void) {                  \
+    CU_OPTIONAL_NAME(NAME) opt;                                                \
+    cu_Memory_memset(&opt, 0, sizeof(opt));                                    \
     opt.isSome = false;                                                        \
     return opt;                                                                \
   }                                                                            \
                                                                                \
-  bool NAME##_Optional_is_some(const NAME##_Optional *opt) {                   \
+  bool CU_OPTIONAL_FN(NAME, _is_some)(const CU_OPTIONAL_NAME(NAME) * opt) {    \
     return opt->isSome;                                                        \
   }                                                                            \
                                                                                \
-  bool NAME##_Optional_is_none(const NAME##_Optional *opt) {                   \
+  bool CU_OPTIONAL_FN(NAME, _is_none)(const CU_OPTIONAL_NAME(NAME) * opt) {    \
     return !opt->isSome;                                                       \
   }                                                                            \
                                                                                \
-  T NAME##_Optional_unwrap(NAME##_Optional *opt) {                             \
+  T CU_OPTIONAL_FN(NAME, _unwrap)(CU_OPTIONAL_NAME(NAME) * opt) {              \
     if (!opt->isSome) {                                                        \
       CU_DIE("Attempted to unwrap a None optional");                           \
     }                                                                          \

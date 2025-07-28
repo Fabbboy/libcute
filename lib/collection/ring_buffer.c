@@ -8,7 +8,7 @@ CU_OPTIONAL_IMPL(cu_RingBuffer_Error, cu_RingBuffer_Error)
 cu_RingBuffer_Result cu_RingBuffer_create(
     cu_Allocator allocator, cu_Layout layout, size_t capacity) {
   CU_LAYOUT_CHECK(layout) {
-    return cu_RingBuffer_result_error(CU_RINGBUFFER_ERROR_INVALID_LAYOUT);
+    return cu_RingBuffer_Result_error(CU_RINGBUFFER_ERROR_INVALID_LAYOUT);
   }
 
   cu_Slice_Optional data = cu_Slice_Optional_none();
@@ -16,8 +16,8 @@ cu_RingBuffer_Result cu_RingBuffer_create(
     cu_Slice_Result r = cu_Allocator_Alloc(
         allocator,
         cu_Layout_create(capacity * layout.elem_size, layout.alignment));
-    if (!cu_Slice_result_is_ok(&r)) {
-      return cu_RingBuffer_result_error(CU_RINGBUFFER_ERROR_OOM);
+    if (!cu_Slice_Result_is_ok(&r)) {
+      return cu_RingBuffer_Result_error(CU_RINGBUFFER_ERROR_OOM);
     }
     data = cu_Slice_Optional_some(r.value);
   }
@@ -30,7 +30,7 @@ cu_RingBuffer_Result cu_RingBuffer_create(
   rb.layout = layout;
   rb.allocator = allocator;
 
-  return cu_RingBuffer_result_ok(rb);
+  return cu_RingBuffer_Result_ok(rb);
 }
 
 void cu_RingBuffer_destroy(cu_RingBuffer *rb) {

@@ -23,7 +23,7 @@ static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
         cu_Slice_create(str->data, str->capacity + 1),
         cu_Layout_create(cap + 1, 1));
   }
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return CU_STRING_ERROR_OOM;
   }
   str->data = mem.value.ptr;
@@ -52,27 +52,27 @@ cu_String_Result cu_String_from_cstr(cu_Allocator allocator, const char *cstr) {
   cu_String str = cu_String_init(allocator);
   size_t len = cstr ? cu_CString_length(cstr) : 0;
   if (cu_string_alloc(&str, len) != CU_STRING_ERROR_NONE) {
-    return cu_String_result_error(CU_STRING_ERROR_OOM);
+    return cu_String_Result_error(CU_STRING_ERROR_OOM);
   }
   if (len > 0) {
     cu_Memory_memcpy(str.data, cu_Slice_create((void *)cstr, len));
   }
   str.data[len] = '\0';
   str.length = len;
-  return cu_String_result_ok(str);
+  return cu_String_Result_ok(str);
 }
 
 cu_String_Result cu_String_from_slice(cu_Allocator allocator, cu_Slice slice) {
   cu_String str = cu_String_init(allocator);
   if (cu_string_alloc(&str, slice.length) != CU_STRING_ERROR_NONE) {
-    return cu_String_result_error(CU_STRING_ERROR_OOM);
+    return cu_String_Result_error(CU_STRING_ERROR_OOM);
   }
   if (slice.length > 0) {
     cu_Memory_memcpy(str.data, cu_Slice_create(slice.ptr, slice.length));
   }
   str.data[slice.length] = '\0';
   str.length = slice.length;
-  return cu_String_result_ok(str);
+  return cu_String_Result_ok(str);
 }
 
 cu_String_Result cu_String_copy(cu_Allocator allocator, const cu_String *src) {

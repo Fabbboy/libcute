@@ -30,6 +30,7 @@ All notable changes to this project will be documented in this file. See [conven
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
 - adds changelog - ([18a2468](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/18a24688ea8d9afe6c99cba593fbc1bf2b9207f4)) - Fabrice
 - designing the gpa - ([fe09ec3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe09ec368895dfed564d7664363d68f1f8b55525)) - Fabrice
+- document revised naming scheme - Codex
 - updated changelog - ([fe8eea2](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe8eea2dd4ec72a762e4dd7927d9c46a783b4d2e)) - Fabrice
 - clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
 - adds changelog - ([0bc1278](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0bc1278bbbce8395fe775b69a17c5577cae5f2db)) - Fabrice
@@ -122,6 +123,8 @@ All notable changes to this project will be documented in this file. See [conven
 ### Macro
 
 - add wasm platform macro - ([c3c4cb6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c3c4cb66f54a36485732cfc44be3de07ca48d307)) - Fabrice
+- add CU_OPTIONAL_NAME and CU_RESULT_NAME macros - Codex
+- unify result naming and apply CU_*_NAME to function names - Codex
 
 ### Merge
 

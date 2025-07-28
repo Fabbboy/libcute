@@ -34,20 +34,20 @@ static void update_zn(cu_6502 *cpu, uint8_t value) {
 cu_6502_Result cu_6502_create(cu_Allocator allocator) {
   cu_Vector_Result vec_res = cu_Vector_create(
       allocator, CU_LAYOUT(uint8_t), Size_Optional_some(0x10000));
-  if (!cu_Vector_result_is_ok(&vec_res)) {
-    return cu_6502_result_error(CU_6502_ERROR_OOM);
+  if (!cu_Vector_Result_is_ok(&vec_res)) {
+    return cu_6502_Result_error(CU_6502_ERROR_OOM);
   }
   cu_Vector_Error_Optional err = cu_Vector_resize(&vec_res.value, 0x10000);
   if (cu_Vector_Error_Optional_is_some(&err)) {
     cu_Vector_destroy(&vec_res.value);
-    return cu_6502_result_error(CU_6502_ERROR_OOM);
+    return cu_6502_Result_error(CU_6502_ERROR_OOM);
   }
 
   cu_6502 cpu = {0};
   cpu.memory = vec_res.value;
   cpu.sp = 0xFD;
   cpu.status = FLAG_UNUSED;
-  return cu_6502_result_ok(cpu);
+  return cu_6502_Result_ok(cpu);
 }
 
 void cu_6502_destroy(cu_6502 *cpu) { cu_Vector_destroy(&cpu->memory); }

@@ -41,8 +41,8 @@ TEST(SkipListSST, SortedStrings) {
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(const char *),
       CU_LAYOUT(const char *), 6, cu_SkipList_CmpFn_Optional_some(cstring_cmp));
-  ASSERT_TRUE(cu_SkipList_result_is_ok(&res));
-  cu_SkipList list = cu_SkipList_result_unwrap(&res);
+  ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
+  cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
   const char *keys[] = {"cherry", "apple", "date", "banana", "elderberry"};
   const char *values[] = {"C", "A", "D", "B", "E"};

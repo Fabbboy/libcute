@@ -58,7 +58,7 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
   cu_Slice_Result mem = cu_Allocator_Alloc(
       alloc->backingAllocator,
       cu_Layout_create(total, alignof(max_align_t)));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return NULL;
   }
   cu_Bitmap_Optional bits = cu_Bitmap_create(alloc->backingAllocator, count);
@@ -80,7 +80,7 @@ static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
@@ -90,7 +90,7 @@ static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout) {
   if (alignment > alloc->slabSize) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t needed = alignment - 1 + size + sizeof(struct cu_SlabAllocator_Header);
@@ -119,7 +119,7 @@ static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout) {
     if (!slab) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
           .errnum = Size_Optional_none()};
-      return cu_Slice_result_error(err);
+      return cu_Slice_Result_error(err);
     }
     slab->next = alloc->slabs;
     alloc->slabs = slab;
@@ -144,7 +144,7 @@ static cu_Slice_Result cu_slab_alloc(void *self, cu_Layout layout) {
   hdr->slab = slab;
   hdr->index = index;
   hdr->count = need;
-  return cu_Slice_result_ok(cu_Slice_create(data + user_pos, size));
+  return cu_Slice_Result_ok(cu_Slice_create(data + user_pos, size));
 }
 
 static cu_Slice_Result cu_slab_resize(
@@ -155,7 +155,7 @@ static cu_Slice_Result cu_slab_resize(
     cu_slab_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t size = layout.elem_size;
@@ -169,12 +169,12 @@ static cu_Slice_Result cu_slab_resize(
   size_t prefix = (unsigned char *)mem.ptr - base;
   size_t current = hdr->count * alloc->slabSize - prefix;
   if (size <= current && alignment <= alloc->slabSize) {
-    return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
+    return cu_Slice_Result_ok(cu_Slice_create(mem.ptr, size));
   }
 
   cu_Slice_Result new_mem =
       cu_slab_alloc(self, cu_Layout_create(size, alignment));
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   cu_Memory_memcpy(new_mem.value.ptr,

@@ -84,7 +84,7 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
         .errnum = Size_Optional_none(),
     };
-    return cu_File_result_error(error);
+    return cu_File_Result_error(error);
   }
 
   // Convert path to null-terminated string
@@ -107,7 +107,7 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
 
   handle = open(lpath, flags, mode);
   if (handle == -1) {
-    return cu_File_result_error(cu_Io_Error_from_errno(errno));
+    return cu_File_Result_error(cu_Io_Error_from_errno(errno));
   }
 #else
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
@@ -118,12 +118,12 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
       creation, attributes, NULL);
 
   if (handle == INVALID_HANDLE_VALUE) {
-    return cu_File_result_error(cu_Io_Error_from_win32(GetLastError()));
+    return cu_File_Result_error(cu_Io_Error_from_win32(GetLastError()));
   }
 #endif
 
   cu_File file = {.handle = handle};
-  return cu_File_result_ok(file);
+  return cu_File_Result_ok(file);
 }
 
 void cu_File_close(cu_File *file) {

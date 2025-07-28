@@ -24,7 +24,7 @@ static cu_Slice_Result cu_CAllocator_Alloc(void *self, cu_Layout layout) {
   if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t size = layout.elem_size;
@@ -36,7 +36,7 @@ static cu_Slice_Result cu_CAllocator_Alloc(void *self, cu_Layout layout) {
   if (raw == NULL) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   uintptr_t aligned_addr = ((uintptr_t)raw + sizeof(void *) + alignment - 1) &
@@ -44,7 +44,7 @@ static cu_Slice_Result cu_CAllocator_Alloc(void *self, cu_Layout layout) {
   void **store = (void **)aligned_addr - 1;
   *store = raw;
 
-  return cu_Slice_result_ok(cu_Slice_create((void *)aligned_addr, size));
+  return cu_Slice_Result_ok(cu_Slice_create((void *)aligned_addr, size));
 }
 
 static cu_Slice_Result cu_CAllocator_Resize(
@@ -55,14 +55,14 @@ static cu_Slice_Result cu_CAllocator_Resize(
     cu_CAllocator_Free(NULL, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_Slice_result_error(err);
+    return cu_Slice_Result_error(err);
   }
 
   size_t size = layout.elem_size;
   size_t alignment = layout.alignment;
 
   cu_Slice_Result new_mem = cu_CAllocator_Alloc(self, layout);
-  if (!cu_Slice_result_is_ok(&new_mem)) {
+  if (!cu_Slice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
   size_t copy = mem.length < size ? mem.length : size;
@@ -90,7 +90,7 @@ static cu_Slice_Result cu_null_alloc(void *self, cu_Layout layout) {
   CU_UNUSED(layout);
   cu_Io_Error err = {
       .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
-  return cu_Slice_result_error(err);
+  return cu_Slice_Result_error(err);
 }
 
 static cu_Slice_Result cu_null_resize(
@@ -100,7 +100,7 @@ static cu_Slice_Result cu_null_resize(
   CU_UNUSED(layout);
   cu_Io_Error err = {
       .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
-  return cu_Slice_result_error(err);
+  return cu_Slice_Result_error(err);
 }
 
 static void cu_null_free(void *self, cu_Slice mem) {

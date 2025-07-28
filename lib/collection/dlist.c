@@ -7,7 +7,7 @@ CU_OPTIONAL_IMPL(cu_DList_Error, cu_DList_Error)
 
 cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout) {
   CU_LAYOUT_CHECK(layout) {
-    return cu_DList_result_error(CU_DLIST_ERROR_INVALID_LAYOUT);
+    return cu_DList_Result_error(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
   cu_DList list = {0};
   list.head = NULL;
@@ -15,7 +15,7 @@ cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout) {
   list.length = 0;
   list.layout = layout;
   list.allocator = allocator;
-  return cu_DList_result_ok(list);
+  return cu_DList_Result_ok(list);
 }
 
 void cu_DList_destroy(cu_DList *list) {
@@ -39,7 +39,7 @@ static cu_DList_Error_Optional cu_DList_alloc_node(
   size_t size = sizeof(cu_DList_Node) + list->layout.elem_size;
   cu_Slice_Result mem = cu_Allocator_Alloc(
       list->allocator, cu_Layout_create(size, alignof(cu_DList_Node)));
-  if (!cu_Slice_result_is_ok(&mem)) {
+  if (!cu_Slice_Result_is_ok(&mem)) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_OOM);
   }
   cu_DList_Node *node = (cu_DList_Node *)mem.value.ptr;

@@ -34,8 +34,8 @@ TEST(Vector, Create) {
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
       cu_Vector_create(alloc, layout, Size_Optional_some(10));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
-  cu_Vector vec = cu_Vector_result_unwrap(&res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vec = cu_Vector_Result_unwrap(&res);
   EXPECT_EQ(vec.length, 0u);
   EXPECT_EQ(vec.capacity, 10u);
 
@@ -50,8 +50,8 @@ TEST(Vector, Resize) {
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
       cu_Vector_create(alloc, layout, Size_Optional_some(10));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
-  cu_Vector vector = cu_Vector_result_unwrap(&res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   cu_Vector_Error_Optional err = cu_Vector_resize(&vector, 20);
   ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));
@@ -71,8 +71,8 @@ TEST(Vector, PushBack) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
-  cu_Vector vector = cu_Vector_result_unwrap(&res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   int v = 42;
   cu_Vector_Error_Optional err = cu_Vector_push_back(&vector, &v);
@@ -89,8 +89,8 @@ TEST(Vector, PopBack) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
-  cu_Vector vector = cu_Vector_result_unwrap(&res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   int a = 1, b = 2, out = 0;
   cu_Vector_push_back(&vector, &a);
@@ -116,9 +116,9 @@ TEST(Vector, Copy) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
 
-  cu_Vector vector = cu_Vector_result_unwrap(&res);
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   for (int i = 0; i < 5; ++i) {
     cu_Vector_push_back(&vector, &i);
@@ -127,8 +127,8 @@ TEST(Vector, Copy) {
   ASSERT_EQ(cu_Vector_capacity(&vector), 5u);
 
   cu_Vector_Result copy_res = cu_Vector_copy(&vector);
-  ASSERT_TRUE(cu_Vector_result_is_ok(&copy_res));
-  cu_Vector copy = cu_Vector_result_unwrap(&copy_res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&copy_res));
+  cu_Vector copy = cu_Vector_Result_unwrap(&copy_res);
 
   ASSERT_EQ(cu_Vector_size(&copy), 5u);
   ASSERT_EQ(cu_Vector_capacity(&copy), 5u);
@@ -146,8 +146,8 @@ TEST(Vector, ReserveClearAt) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
-  ASSERT_TRUE(cu_Vector_result_is_ok(&res));
-  cu_Vector vector = cu_Vector_result_unwrap(&res);
+  ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
   cu_Vector_Error_Optional err = cu_Vector_reserve(&vector, 10);
   ASSERT_TRUE(cu_Vector_Error_Optional_is_none(&err));

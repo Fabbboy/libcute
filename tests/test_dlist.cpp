@@ -32,8 +32,8 @@ TEST(DList, PushPop) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
-  ASSERT_TRUE(cu_DList_result_is_ok(&res));
-  cu_DList list = cu_DList_result_unwrap(&res);
+  ASSERT_TRUE(cu_DList_Result_is_ok(&res));
+  cu_DList list = cu_DList_Result_unwrap(&res);
 
   for (int i = 0; i < 3; ++i) {
     cu_DList_Error_Optional err = cu_DList_push_back(&list, &i);
@@ -59,8 +59,8 @@ TEST(DList, InsertIter) {
   cu_Allocator alloc = create_allocator(&gpa);
 
   cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
-  ASSERT_TRUE(cu_DList_result_is_ok(&res));
-  cu_DList list = cu_DList_result_unwrap(&res);
+  ASSERT_TRUE(cu_DList_Result_is_ok(&res));
+  cu_DList list = cu_DList_Result_unwrap(&res);
 
   for (int i = 0; i < 2; ++i) {
     cu_DList_push_back(&list, &i); // 0,1

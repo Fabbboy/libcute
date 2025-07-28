@@ -20,7 +20,7 @@ TEST(Allocator, GPABasic) {
 
   cu_Slice_Result mem_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(32, 8));
-  ASSERT_TRUE(cu_Slice_result_is_ok(&mem_res));
+  ASSERT_TRUE(cu_Slice_Result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xAA, mem.length);
   cu_Allocator_Free(alloc, mem);
