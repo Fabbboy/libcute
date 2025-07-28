@@ -19,6 +19,7 @@ extern "C" {
 #include "collection/hashmap.h"
 #include "collection/list.h"
 #include "collection/ring_buffer.h"
+#include "collection/skip_list.h"
 #include "collection/vector.h"
 
 #include "hash/hash.h"

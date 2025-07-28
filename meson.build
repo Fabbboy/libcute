@@ -25,6 +25,7 @@ sources = [
   'lib/collection/ring_buffer.c',
   'lib/collection/list.c',
   'lib/collection/dlist.c',
+  'lib/collection/skip_list.c',
   'lib/collection/vector.c',
   'lib/collection/hashmap.c',
   'lib/io/error.c',

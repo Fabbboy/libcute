@@ -21,6 +21,8 @@ test_files = [
   'test_fmt.cpp',
   'test_fixed_allocator.cpp',
   'test_wasm_allocator.cpp',
+  'test_skip_list.cpp',
+  'test_skip_list_sst.cpp',
 ]
 
 foreach test_file : test_files
