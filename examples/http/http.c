@@ -3,11 +3,11 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <nostd.h>
+#include <string.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <string.h>
 
 #ifndef CU_FREESTANDING
 
@@ -46,16 +46,23 @@ static void send_simple(int fd, int code, const char *msg) {
 }
 
 static void handle_client(cu_HttpServer *server, int fd) {
-  char req[1024];
-  ssize_t r = read(fd, req, sizeof(req) - 1);
+  cu_Slice_Result req_res = cu_Allocator_Alloc(server->slab_alloc, 1025, 1);
+  if (!cu_Slice_result_is_ok(&req_res)) {
+    close_client(server, fd);
+    return;
+  }
+  char *req = (char *)req_res.value.ptr;
+  ssize_t r = read(fd, req, req_res.value.length - 1);
   if (r <= 0) {
     close_client(server, fd);
+    cu_Allocator_Free(server->slab_alloc, req_res.value);
     return;
   }
   req[r] = '\0';
   if (strncmp(req, "GET ", 4) != 0) {
     send_simple(fd, 400, "Bad Request");
     close_client(server, fd);
+    cu_Allocator_Free(server->slab_alloc, req_res.value);
     return;
   }
   char *path = req + 4;
@@ -63,6 +70,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
   if (!end) {
     send_simple(fd, 400, "Bad Request");
     close_client(server, fd);
+    cu_Allocator_Free(server->slab_alloc, req_res.value);
     return;
   }
   *end = '\0';
@@ -72,6 +80,7 @@ static void handle_client(cu_HttpServer *server, int fd) {
   if (ffd < 0) {
     send_simple(fd, 404, "Not Found");
     close_client(server, fd);
+    cu_Allocator_Free(server->slab_alloc, req_res.value);
     return;
   }
   struct stat st;
@@ -80,18 +89,28 @@ static void handle_client(cu_HttpServer *server, int fd) {
   int len = cu_CString_snprintf(header, sizeof(header),
       "HTTP/1.0 200 OK\r\nContent-Length: %lld\r\n\r\n", (long long)st.st_size);
   write(fd, header, (size_t)len);
-  char buf[4096];
+  cu_Slice_Result buf_res = cu_Allocator_Alloc(server->slab_alloc, 4096, 1);
+  if (!cu_Slice_result_is_ok(&buf_res)) {
+    close(ffd);
+    close_client(server, fd);
+    cu_Allocator_Free(server->slab_alloc, req_res.value);
+    return;
+  }
+  char *buf = (char *)buf_res.value.ptr;
   ssize_t n;
-  while ((n = read(ffd, buf, sizeof(buf))) > 0) {
+  while ((n = read(ffd, buf, buf_res.value.length)) > 0) {
     write(fd, buf, (size_t)n);
   }
   close(ffd);
   close_client(server, fd);
+  cu_Allocator_Free(server->slab_alloc, buf_res.value);
+  cu_Allocator_Free(server->slab_alloc, req_res.value);
 }
 
-cu_HttpServer_Result cu_HttpServer_create(cu_Allocator allocator, uint16_t port) {
-  cu_Vector_Result vec_res = cu_Vector_create(
-      allocator, CU_LAYOUT(int), Size_Optional_some(16));
+cu_HttpServer_Result cu_HttpServer_create(
+    cu_Allocator allocator, uint16_t port) {
+  cu_Vector_Result vec_res =
+      cu_Vector_create(allocator, CU_LAYOUT(int), Size_Optional_some(16));
   if (!cu_Vector_result_is_ok(&vec_res)) {
     return cu_HttpServer_result_error(CU_HTTP_ERROR_EPOLL);
   }
@@ -135,6 +154,10 @@ cu_HttpServer_Result cu_HttpServer_create(cu_Allocator allocator, uint16_t port)
   server.listen_fd = sfd;
   server.epoll_fd = epfd;
   server.clients = vec_res.value;
+  cu_SlabAllocator_Config scfg = {0};
+  scfg.slabSize = 4096;
+  scfg.backingAllocator = cu_Allocator_Optional_some(allocator);
+  server.slab_alloc = cu_Allocator_SlabAllocator(&server.slab, scfg);
   return cu_HttpServer_result_ok(server);
 }
 
@@ -146,6 +169,7 @@ void cu_HttpServer_destroy(cu_HttpServer *server) {
     close(*fd);
   }
   cu_Vector_destroy(&server->clients);
+  cu_SlabAllocator_destroy(&server->slab);
 }
 
 void cu_HttpServer_run(cu_HttpServer *server) {
@@ -155,8 +179,8 @@ void cu_HttpServer_run(cu_HttpServer *server) {
     for (int i = 0; i < n; ++i) {
       int fd = events[i].data.fd;
       if (fd == server->listen_fd) {
-       int cfd = accept(server->listen_fd, NULL, NULL);
-       if (cfd >= 0) {
+        int cfd = accept(server->listen_fd, NULL, NULL);
+        if (cfd >= 0) {
           set_nonblocking(cfd);
           struct epoll_event ev = {0};
           ev.events = EPOLLIN;
