@@ -6,6 +6,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#ifndef CU_FREESTANDING
+#include <stdio.h>
+#endif
+
 void cu_Memory_memmove(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
   unsigned char *s = (unsigned char *)src.ptr;
@@ -68,12 +72,8 @@ int cu_CString_cmp(const char *a, const char *b) {
   const unsigned char *p1 = (const unsigned char *)a;
   const unsigned char *p2 = (const unsigned char *)b;
 
-  CU_IF_NULL(p1) {
-    return p2 ? -1 : 0;
-  }
-  CU_IF_NULL(p2) {
-    return p1 ? 1 : 0;
-  }
+  CU_IF_NULL(p1) { return p2 ? -1 : 0; }
+  CU_IF_NULL(p2) { return p1 ? 1 : 0; }
 
   while (*p1 && *p1 == *p2) {
     p1++;
@@ -89,8 +89,8 @@ bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
   unsigned char *p1 = (unsigned char *)a.ptr;
   unsigned char *p2 = (unsigned char *)b.ptr;
 
-  CU_IF_NULL(p1) return b.ptr == NULL;  // Both NULL should be equal
-  CU_IF_NULL(p2) return false;          // Only one NULL
+  CU_IF_NULL(p1) return b.ptr == NULL; // Both NULL should be equal
+  CU_IF_NULL(p2) return false;         // Only one NULL
 
   for (size_t i = 0; i < a.length; i++) {
     if (p1[i] != p2[i]) {
@@ -101,15 +101,16 @@ bool cu_Memory_memcmp(cu_Slice a, cu_Slice b) {
 }
 
 // Helper function to convert number to string
-static int format_number(char *buf, size_t bufsize, unsigned long long num, 
-                        bool is_signed, bool is_negative, int base, bool uppercase) {
-  if (bufsize == 0) return 0;
-  
+static int format_number(char *buf, size_t bufsize, unsigned long long num,
+    bool is_signed, bool is_negative, int base, bool uppercase) {
+  if (bufsize == 0)
+    return 0;
+
   const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
-  char temp[64];  // Enough for 64-bit number in any base
+  char temp[64]; // Enough for 64-bit number in any base
   int temp_pos = 0;
   int result_len = 0;
-  
+
   // Handle zero specially
   if (num == 0) {
     temp[temp_pos++] = '0';
@@ -120,22 +121,23 @@ static int format_number(char *buf, size_t bufsize, unsigned long long num,
       num /= base;
     }
   }
-  
+
   // Add sign if needed
   if (is_signed && is_negative) {
     temp[temp_pos++] = '-';
   }
-  
+
   // Copy to buffer (reversing back to correct order)
   for (int i = temp_pos - 1; i >= 0 && result_len < (int)bufsize - 1; i--) {
     buf[result_len++] = temp[i];
   }
-  
+
   buf[result_len] = '\0';
-  return temp_pos;  // Return total length needed (for truncation detection)
+  return temp_pos; // Return total length needed (for truncation detection)
 }
 
-int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) {
+int cu_CString_vsnprintf(
+    char *dst, size_t size, const char *fmt, va_list args) {
   bool measuring = dst == NULL;
   if (measuring) {
     dst = NULL;
@@ -143,20 +145,20 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
   } else if (size == 0) {
     return 0;
   }
-  
+
   size_t pos = 0;
   size_t total = 0;
   const char *p = fmt;
-  
+
   while (*p) {
     if (*p == '%') {
       ++p;
-      
+
       // Parse format specifier
       bool is_long = false;
       bool is_long_long = false;
       bool uppercase = false;
-      
+
       // Handle modifiers
       if (*p == 'l') {
         is_long = true;
@@ -166,12 +168,12 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
           ++p;
         }
       }
-      
+
       if (*p == 'd' || *p == 'i') {
         // Signed decimal integer
         unsigned long long num;
         bool negative = false;
-        
+
         if (is_long_long) {
           long long val = va_arg(args, long long);
           if (val < 0) {
@@ -197,20 +199,22 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
             num = (unsigned int)val;
           }
         }
-        
+
         char numbuf[64];
-        int len = format_number(numbuf, sizeof(numbuf), num, true, negative, 10, false);
-        
+        int len = format_number(
+            numbuf, sizeof(numbuf), num, true, negative, 10, false);
+
         for (int i = 0; numbuf[i]; i++) {
-          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          if (!measuring && pos < size - 1)
+            dst[pos] = numbuf[i];
           pos++;
         }
         total += len;
-        
+
       } else if (*p == 'u') {
         // Unsigned decimal integer
         unsigned long long num;
-        
+
         if (is_long_long) {
           num = va_arg(args, unsigned long long);
         } else if (is_long) {
@@ -218,21 +222,23 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         } else {
           num = va_arg(args, unsigned int);
         }
-        
+
         char numbuf[64];
-        int len = format_number(numbuf, sizeof(numbuf), num, false, false, 10, false);
-        
+        int len =
+            format_number(numbuf, sizeof(numbuf), num, false, false, 10, false);
+
         for (int i = 0; numbuf[i]; i++) {
-          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          if (!measuring && pos < size - 1)
+            dst[pos] = numbuf[i];
           pos++;
         }
         total += len;
-        
+
       } else if (*p == 'x' || *p == 'X') {
         // Hexadecimal integer
         uppercase = (*p == 'X');
         unsigned long long num;
-        
+
         if (is_long_long) {
           num = va_arg(args, unsigned long long);
         } else if (is_long) {
@@ -240,87 +246,99 @@ int cu_CString_vsnprintf(char *dst, size_t size, const char *fmt, va_list args) 
         } else {
           num = va_arg(args, unsigned int);
         }
-        
+
         char numbuf[64];
-        int len = format_number(numbuf, sizeof(numbuf), num, false, false, 16, uppercase);
-        
+        int len = format_number(
+            numbuf, sizeof(numbuf), num, false, false, 16, uppercase);
+
         for (int i = 0; numbuf[i]; i++) {
-          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          if (!measuring && pos < size - 1)
+            dst[pos] = numbuf[i];
           pos++;
         }
         total += len;
-        
+
       } else if (*p == 'c') {
         // Character
         int c = va_arg(args, int);
-        if (!measuring && pos < size - 1) dst[pos] = (char)c;
+        if (!measuring && pos < size - 1)
+          dst[pos] = (char)c;
         pos++;
         total++;
-        
+
       } else if (*p == 's') {
         // String
         const char *s = va_arg(args, const char *);
         if (s == NULL) {
           s = "(null)";
         }
-        
+
         while (*s) {
-          if (!measuring && pos < size - 1) dst[pos] = *s;
+          if (!measuring && pos < size - 1)
+            dst[pos] = *s;
           pos++;
           s++;
           total++;
         }
-        
+
       } else if (*p == 'p') {
         // Pointer
         void *ptr = va_arg(args, void *);
         uintptr_t addr = (uintptr_t)ptr;
-        
+
         // Add "0x" prefix
-        if (!measuring && pos < size - 1) dst[pos] = '0';
+        if (!measuring && pos < size - 1)
+          dst[pos] = '0';
         pos++;
-        if (!measuring && pos < size - 1) dst[pos] = 'x';
+        if (!measuring && pos < size - 1)
+          dst[pos] = 'x';
         pos++;
         total += 2;
-        
+
         char numbuf[64];
-        int len = format_number(numbuf, sizeof(numbuf), (unsigned long long)addr, 
-                               false, false, 16, false);
-        
+        int len = format_number(numbuf, sizeof(numbuf),
+            (unsigned long long)addr, false, false, 16, false);
+
         for (int i = 0; numbuf[i]; i++) {
-          if (!measuring && pos < size - 1) dst[pos] = numbuf[i];
+          if (!measuring && pos < size - 1)
+            dst[pos] = numbuf[i];
           pos++;
         }
         total += len;
-        
+
       } else if (*p == '%') {
         // Literal percent
-        if (!measuring && pos < size - 1) dst[pos] = '%';
+        if (!measuring && pos < size - 1)
+          dst[pos] = '%';
         pos++;
         total++;
-        
+
       } else {
         // Unknown format specifier - treat literally
-        if (!measuring && pos < size - 1) dst[pos] = '%';
+        if (!measuring && pos < size - 1)
+          dst[pos] = '%';
         pos++;
         if (*p) {
-          if (!measuring && pos < size - 1) dst[pos] = *p;
+          if (!measuring && pos < size - 1)
+            dst[pos] = *p;
           pos++;
         }
         total += 2;
       }
-      
-      if (*p) ++p;
-      
+
+      if (*p)
+        ++p;
+
     } else {
       // Regular character
-      if (!measuring && pos < size - 1) dst[pos] = *p;
+      if (!measuring && pos < size - 1)
+        dst[pos] = *p;
       pos++;
       ++p;
       total++;
     }
   }
-  
+
   if (!measuring && size > 0) {
     size_t idx = pos < size ? pos : size - 1;
     dst[idx] = '\0';
@@ -349,26 +367,30 @@ int cu_CString_sprintf(char *dst, const char *fmt, ...) {
   return r;
 }
 
-void cu_abort(void) { 
-  __builtin_trap(); 
-}
+void cu_abort(void) { __builtin_trap(); }
 
-void cu_panic_handler(const char *format, ...) {
-  (void)format;
-  cu_abort();
-}
+#ifndef CU_FREESTANDING
+#define cu_panic_handler(...)                                                  \
+  do {                                                                         \
+    fprintf(stderr, "Panic: ");                                                \
+    fprintf(stderr, __VA_ARGS__);                                              \
+    fprintf(stderr, "\n");                                                     \
+    cu_abort();                                                                \
+  } while (0);
+#endif
 
 unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   const char *s = nptr;
-  
+
   CU_IF_NULL(s) {
-    if (endptr) *endptr = (char *)nptr;
+    if (endptr)
+      *endptr = (char *)nptr;
     return 0;
   }
-  
+
   // Skip whitespace
-  while (*s == ' ' || *s == '\t' || *s == '\n' || 
-         *s == '\r' || *s == '\f' || *s == '\v') {
+  while (*s == ' ' || *s == '\t' || *s == '\n' || *s == '\r' || *s == '\f' ||
+         *s == '\v') {
     s++;
   }
 
@@ -394,10 +416,11 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   } else if (base == 16 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
     s += 2;
   }
-  
+
   // Validate base
   if (base < 2 || base > 36) {
-    if (endptr) *endptr = (char *)nptr;
+    if (endptr)
+      *endptr = (char *)nptr;
     return 0;
   }
 
@@ -405,11 +428,11 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   const char *start = s;
   const unsigned long cutoff = ULONG_MAX / (unsigned long)base;
   const int cutlim = (int)(ULONG_MAX % (unsigned long)base);
-  
+
   while (*s) {
     char c = *s;
     int digit;
-    
+
     if (c >= '0' && c <= '9') {
       digit = c - '0';
     } else if (c >= 'a' && c <= 'z') {
@@ -419,11 +442,11 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
     } else {
       break;
     }
-    
+
     if (digit >= base) {
       break;
     }
-    
+
     // Check for overflow
     if (result > cutoff || (result == cutoff && digit > cutlim)) {
       result = ULONG_MAX;
@@ -441,14 +464,15 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
       }
       break;
     }
-    
+
     result = result * (unsigned long)base + (unsigned long)digit;
     s++;
   }
 
   // If no digits were processed, return 0
   if (s == start) {
-    if (endptr) *endptr = (char *)nptr;
+    if (endptr)
+      *endptr = (char *)nptr;
     return 0;
   }
 
