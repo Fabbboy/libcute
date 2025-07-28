@@ -7,9 +7,10 @@ extern "C" {
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
+#include "nostd.h"
 }
 #include <gtest/gtest.h>
-#include <string.h>
+#include <nostd.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -30,7 +31,7 @@ static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 static int cstring_cmp(const void *a, const void *b) {
   const char *sa = *(const char *const *)a;
   const char *sb = *(const char *const *)b;
-  return strcmp(sa, sb);
+  return cu_CString_cmp(sa, sb);
 }
 
 TEST(SkipListSST, SortedStrings) {
@@ -61,11 +62,11 @@ TEST(SkipListSST, SortedStrings) {
     const char *vv = *(const char **)v;
     ASSERT_LT(idx, 5);
     EXPECT_STREQ(kk, sorted[idx]);
-    if (strcmp(kk, "apple") == 0) EXPECT_STREQ(vv, "A");
-    if (strcmp(kk, "banana") == 0) EXPECT_STREQ(vv, "B");
-    if (strcmp(kk, "cherry") == 0) EXPECT_STREQ(vv, "C");
-    if (strcmp(kk, "date") == 0) EXPECT_STREQ(vv, "D");
-    if (strcmp(kk, "elderberry") == 0) EXPECT_STREQ(vv, "E");
+    if (cu_CString_cmp(kk, "apple") == 0) EXPECT_STREQ(vv, "A");
+    if (cu_CString_cmp(kk, "banana") == 0) EXPECT_STREQ(vv, "B");
+    if (cu_CString_cmp(kk, "cherry") == 0) EXPECT_STREQ(vv, "C");
+    if (cu_CString_cmp(kk, "date") == 0) EXPECT_STREQ(vv, "D");
+    if (cu_CString_cmp(kk, "elderberry") == 0) EXPECT_STREQ(vv, "E");
     ++idx;
   }
   EXPECT_EQ(idx, 5);

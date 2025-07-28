@@ -82,6 +82,7 @@ All notable changes to this project will be documented in this file. See [conven
 - extend list APIs - ([8788373](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/878837377a7c283cfe5b39355b43de0782e9b410)) - Fabrice
 - add skip list container -
 - add skip list sorted string table test -
+- add cu_CString_cmp for freestanding strcmp replacement -
 
 ### Example
 
