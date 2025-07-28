@@ -126,7 +126,7 @@ cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
   cu_HashMap_Bucket *buckets = (cu_HashMap_Bucket *)mem.value.ptr;
   cu_Memory_memset(buckets, 0, cap * sizeof(cu_HashMap_Bucket));
 
-  cu_HashMap map;
+  cu_HashMap map = {0};
   map.buckets = buckets;
   map.capacity = cap;
   map.length = 0;

@@ -99,7 +99,7 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
   head->key = NULL;
   head->value = NULL;
 
-  cu_SkipList list;
+  cu_SkipList list = {0};
   list.head = head;
   list.level = 1;
   list.max_level = max_level;

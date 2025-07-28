@@ -312,7 +312,7 @@ cu_Allocator cu_Allocator_GPAllocator(
   }
   alloc->largeAllocs = NULL;
 
-  cu_Allocator a;
+  cu_Allocator a = {0};
   a.self = alloc;
   a.allocFn = cu_gpa_alloc;
   a.resizeFn = cu_gpa_resize;

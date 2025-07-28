@@ -91,7 +91,7 @@ cu_Allocator cu_Allocator_FixedAllocator(
   alloc->buffer = buffer;
   alloc->used = 0;
 
-  cu_Allocator a;
+  cu_Allocator a = {0};
   a.self = alloc;
   a.allocFn = cu_fixed_alloc;
   a.resizeFn = cu_fixed_resize;

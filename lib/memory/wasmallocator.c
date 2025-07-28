@@ -178,7 +178,7 @@ static void cu_wasm_free(void *self, cu_Slice mem) {
 }
 
 cu_Allocator cu_Allocator_WasmAllocator(void) {
-  cu_Allocator a;
+  cu_Allocator a = {0};
   a.self = NULL;
   a.allocFn = cu_wasm_alloc;
   a.resizeFn = cu_wasm_resize;

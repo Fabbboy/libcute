@@ -70,7 +70,7 @@ static cu_Slice_Result cu_CAllocator_Resize(
 
 cu_Allocator cu_Allocator_CAllocator(void) {
   cu_CAllocator_init();
-  cu_Allocator allocator;
+  cu_Allocator allocator = {0};
   allocator.self = NULL;
   allocator.allocFn = cu_CAllocator_Alloc;
   allocator.resizeFn = cu_CAllocator_Resize;
@@ -109,7 +109,7 @@ static void cu_null_free(void *self, cu_Slice mem) {
 }
 
 cu_Allocator cu_Allocator_NullAllocator(void) {
-  cu_Allocator allocator;
+  cu_Allocator allocator = {0};
   allocator.self = NULL;
   allocator.allocFn = cu_null_alloc;
   allocator.resizeFn = cu_null_resize;

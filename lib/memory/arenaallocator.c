@@ -149,7 +149,7 @@ cu_Allocator cu_Allocator_ArenaAllocator(
   arena->chunkSize = config.chunkSize ? config.chunkSize : CU_ARENA_CHUNK_SIZE;
   arena->current = NULL;
 
-  cu_Allocator a;
+  cu_Allocator a = {0};
   a.self = arena;
   a.allocFn = cu_arena_alloc;
   a.resizeFn = cu_arena_resize;

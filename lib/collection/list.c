@@ -10,7 +10,7 @@ cu_List_Result cu_List_create(cu_Allocator allocator, cu_Layout layout) {
     return cu_List_result_error(CU_LIST_ERROR_INVALID_LAYOUT);
   }
 
-  cu_List list;
+  cu_List list = {0};
   list.head = NULL;
   list.length = 0;
   list.layout = layout;

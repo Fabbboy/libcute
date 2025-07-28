@@ -209,7 +209,7 @@ cu_Allocator cu_Allocator_SlabAllocator(
   alloc->current = NULL;
   alloc->slabSize = cfg.slabSize ? cfg.slabSize : CU_SLAB_DEFAULT_SIZE;
 
-  cu_Allocator a;
+  cu_Allocator a = {0};
   a.self = alloc;
   a.allocFn = cu_slab_alloc;
   a.resizeFn = cu_slab_resize;

@@ -58,7 +58,7 @@ static cu_Slice_Result cu_PageAllocator_Resize(
 
 cu_Allocator cu_Allocator_PageAllocator(cu_PageAllocator *allocator) {
   allocator->pageSize = 4096;
-  cu_Allocator alloc;
+  cu_Allocator alloc = {0};
   alloc.self = allocator;
   alloc.allocFn = cu_PageAllocator_Alloc;
   alloc.resizeFn = cu_PageAllocator_Resize;

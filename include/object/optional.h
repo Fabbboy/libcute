@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "macro.h"
+#include <nostd.h>
 
 /** Declare optional helper functions for a given type. */
 #define CU_OPTIONAL_HEADER(NAME, T)                                            \
@@ -26,14 +27,16 @@
 /** Define the implementation of the optional helpers. */
 #define CU_OPTIONAL_IMPL(NAME, T)                                              \
   NAME##_Optional NAME##_Optional_some(T value) {                              \
-    NAME##_Optional opt;                                                       \
+    NAME##_Optional opt;                                                      \
+    cu_Memory_memset(&opt, 0, sizeof(opt));                                   \
     opt.value = value;                                                         \
     opt.isSome = true;                                                         \
     return opt;                                                                \
   }                                                                            \
                                                                                \
   NAME##_Optional NAME##_Optional_none(void) {                                 \
-    NAME##_Optional opt;                                                       \
+    NAME##_Optional opt;                                                      \
+    cu_Memory_memset(&opt, 0, sizeof(opt));                                   \
     opt.isSome = false;                                                        \
     return opt;                                                                \
   }                                                                            \

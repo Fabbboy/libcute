@@ -30,7 +30,7 @@ cu_Vector_Result cu_Vector_create(
     data = cu_Slice_Optional_some(r.value);
   }
 
-  cu_Vector vector;
+  cu_Vector vector = {0};
   vector.data = data;
   vector.length = 0;
   vector.capacity = cap;

@@ -21,7 +21,7 @@ cu_RingBuffer_Result cu_RingBuffer_create(
     data = cu_Slice_Optional_some(r.value);
   }
 
-  cu_RingBuffer rb;
+  cu_RingBuffer rb = {0};
   rb.data = data;
   rb.capacity = capacity;
   rb.head = 0;

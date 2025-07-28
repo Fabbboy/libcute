@@ -9,7 +9,7 @@ cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout) {
   CU_LAYOUT_CHECK(layout) {
     return cu_DList_result_error(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
-  cu_DList list;
+  cu_DList list = {0};
   list.head = NULL;
   list.tail = NULL;
   list.length = 0;
