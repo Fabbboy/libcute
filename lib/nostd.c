@@ -377,7 +377,10 @@ void cu_abort(void) { __builtin_trap(); }
     fprintf(stderr, "\n");                                                     \
     cu_abort();                                                                \
   } while (0);
+  // intentionally NO else case if we are building for freestanding the user has to define their own panic handler
+  // like rusts #[panic_handler]
 #endif
+
 
 unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
   const char *s = nptr;
