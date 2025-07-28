@@ -21,7 +21,8 @@ TEST(Allocator, GPALargeAllocFree) {
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   const size_t big = 100 * 1024 * 1024; // 100 MiB
-  cu_Slice_Result mem_res = cu_Allocator_Alloc(alloc, big, 16);
+  cu_Slice_Result mem_res =
+      cu_Allocator_Alloc(alloc, cu_Layout_create(big, 16));
   ASSERT_TRUE(cu_Slice_result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xCD, mem.length);
@@ -33,7 +34,8 @@ TEST(Allocator, GPALargeAllocFree) {
   std::vector<cu_Slice> blocks;
   blocks.reserve(count);
   for (size_t i = 0; i < count; ++i) {
-    cu_Slice_Result s_res = cu_Allocator_Alloc(alloc, small, 16);
+    cu_Slice_Result s_res =
+        cu_Allocator_Alloc(alloc, cu_Layout_create(small, 16));
     ASSERT_TRUE(cu_Slice_result_is_ok(&s_res));
     cu_Slice s = s_res.value;
     cu_Memory_memset(s.ptr, 0xEF, s.length);
@@ -62,7 +64,8 @@ TEST(Allocator, NormalAllocAndFree) {
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   cu_Slice_Result res =
-      cu_Allocator_Alloc(alloc, sizeof(cu_Point), alignof(cu_Point));
+      cu_Allocator_Alloc(alloc,
+          cu_Layout_create(sizeof(cu_Point), alignof(cu_Point)));
   ASSERT_TRUE(cu_Slice_result_is_ok(&res));
 
   cu_Slice mem = res.value;
@@ -91,7 +94,8 @@ TEST(Allocator, DoubleFree) {
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   cu_Slice_Result res =
-      cu_Allocator_Alloc(alloc, sizeof(cu_Point), alignof(cu_Point));
+      cu_Allocator_Alloc(alloc,
+          cu_Layout_create(sizeof(cu_Point), alignof(cu_Point)));
   ASSERT_TRUE(cu_Slice_result_is_ok(&res));
 
   cu_Slice mem = res.value;
@@ -119,7 +123,8 @@ TEST(Allocator, Exhaustion) {
   // Allocate a large block
   size_t large_size = 512 * 1024 * 1024; // 100 MiB
   cu_Slice_Result res =
-      cu_Allocator_Alloc(alloc, large_size, alignof(cu_Point));
+      cu_Allocator_Alloc(alloc,
+          cu_Layout_create(large_size, alignof(cu_Point)));
 
   ASSERT_FALSE(cu_Slice_result_is_ok(&res));
   EXPECT_EQ(

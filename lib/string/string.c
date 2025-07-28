@@ -16,10 +16,12 @@ cu_String cu_String_init(cu_Allocator allocator) {
 static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
   cu_Slice_Result mem;
   if (str->data == NULL) {
-    mem = cu_Allocator_Alloc(str->allocator, cap + 1, 1);
+    mem =
+        cu_Allocator_Alloc(str->allocator, cu_Layout_create(cap + 1, 1));
   } else {
     mem = cu_Allocator_Resize(str->allocator,
-        cu_Slice_create(str->data, str->capacity + 1), cap + 1, 1);
+        cu_Slice_create(str->data, str->capacity + 1),
+        cu_Layout_create(cap + 1, 1));
   }
   if (!cu_Slice_result_is_ok(&mem)) {
     return CU_STRING_ERROR_OOM;

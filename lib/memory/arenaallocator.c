@@ -9,8 +9,8 @@ static void cu_arena_free(void *self, cu_Slice mem);
 static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(
     cu_ArenaAllocator *arena, size_t size) {
   size_t total = sizeof(struct cu_ArenaAllocator_Chunk) + size;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(arena->backingAllocator, total, alignof(max_align_t));
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      arena->backingAllocator, cu_Layout_create(total, alignof(max_align_t)));
   if (!cu_Slice_result_is_ok(&mem)) {
     return NULL;
   }
@@ -22,14 +22,15 @@ static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(
   return chunk;
 }
 
-static cu_Slice_Result cu_arena_alloc(
-    void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   cu_ArenaAllocator *arena = (cu_ArenaAllocator *)self;
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -73,14 +74,16 @@ static cu_Slice_Result cu_arena_alloc(
 }
 
 static cu_Slice_Result cu_arena_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
-  CU_IF_NULL(mem.ptr) { return cu_arena_alloc(self, size, alignment); }
-  if (size == 0) {
+    void *self, cu_Slice mem, cu_Layout layout) {
+  CU_IF_NULL(mem.ptr) { return cu_arena_alloc(self, layout); }
+  if (layout.elem_size == 0) {
     cu_arena_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   struct cu_ArenaAllocator_Header *hdr =
       (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
@@ -100,7 +103,7 @@ static cu_Slice_Result cu_arena_resize(
     // not enough space, fall through
   }
 
-  cu_Slice_Result new_mem = cu_arena_alloc(self, size, alignment);
+  cu_Slice_Result new_mem = cu_arena_alloc(self, layout);
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }

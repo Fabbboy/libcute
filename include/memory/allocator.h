@@ -6,13 +6,13 @@
 
 #include "io/error.h"
 #include "nostd.h"
+#include "utility.h"
 
 /** Allocation function signature. */
-typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(
-    void *self, size_t size, size_t alignment);
+typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(void *self, cu_Layout layout);
 /** Resize function signature. */
 typedef cu_Slice_Result (*cu_Allocator_ResizeFunc)(
-    void *self, cu_Slice mem, size_t size, size_t alignment);
+    void *self, cu_Slice mem, cu_Layout layout);
 /** Free function signature. */
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
 
@@ -27,14 +27,14 @@ CU_OPTIONAL_DECL(cu_Allocator, cu_Allocator)
 
 /** Allocate memory using the allocator. */
 static inline cu_Slice_Result cu_Allocator_Alloc(
-    cu_Allocator allocator, size_t size, size_t alignment) {
-  return allocator.allocFn(allocator.self, size, alignment);
+    cu_Allocator allocator, cu_Layout layout) {
+  return allocator.allocFn(allocator.self, layout);
 }
 
 /** Resize a previously allocated block. */
 static inline cu_Slice_Result cu_Allocator_Resize(
-    cu_Allocator allocator, cu_Slice mem, size_t size, size_t alignment) {
-  return allocator.resizeFn(allocator.self, mem, size, alignment);
+    cu_Allocator allocator, cu_Slice mem, cu_Layout layout) {
+  return allocator.resizeFn(allocator.self, mem, layout);
 }
 
 /** Free memory obtained from this allocator. */

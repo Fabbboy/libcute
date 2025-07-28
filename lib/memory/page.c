@@ -14,16 +14,14 @@ static void cu_PageAllocator_Free(void *self, cu_Slice mem) {
   CU_IF_NOT_NULL(mem.ptr) { free(mem.ptr); }
 }
 
-static cu_Slice_Result cu_PageAllocator_Alloc(
-    void *self, size_t size, size_t alignment) {
-  CU_UNUSED(alignment);
+static cu_Slice_Result cu_PageAllocator_Alloc(void *self, cu_Layout layout) {
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
-
+  size_t size = layout.elem_size;
   size_t aligned_size = CU_ALIGN_UP(size, allocator->pageSize);
   void *ptr = malloc(aligned_size);
   if (ptr == NULL) {
@@ -35,14 +33,15 @@ static cu_Slice_Result cu_PageAllocator_Alloc(
 }
 
 static cu_Slice_Result cu_PageAllocator_Resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
-  CU_UNUSED(alignment);
-  if (size == 0) {
+    void *self, cu_Slice mem, cu_Layout layout) {
+  if (layout.elem_size == 0) {
     cu_PageAllocator_Free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+
+  size_t size = layout.elem_size;
 
   cu_PageAllocator *allocator = (cu_PageAllocator *)self;
   size_t aligned_size = CU_ALIGN_UP(size, allocator->pageSize);

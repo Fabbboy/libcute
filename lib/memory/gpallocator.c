@@ -6,9 +6,9 @@
 #include <nostd.h>
 
 /* Helper forward declarations */
-static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment);
+static cu_Slice_Result cu_gpa_alloc(void *self, cu_Layout layout);
 static cu_Slice_Result cu_gpa_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment);
+    void *self, cu_Slice mem, cu_Layout layout);
 static void cu_gpa_free(void *self, cu_Slice mem);
 static void cu_gpa_destroy_bucket(
     cu_GPAllocator *gpa, struct cu_GPAllocator_BucketHeader *bucket);
@@ -31,8 +31,8 @@ static struct cu_GPAllocator_BucketHeader *cu_gpa_create_bucket(
   size_t slot_count = cu_gpa_calc_slot_count(gpa, obj_size);
   size_t total =
       sizeof(struct cu_GPAllocator_BucketHeader) + slot_count * obj_size;
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(gpa->backingAllocator, total, obj_size);
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      gpa->backingAllocator, cu_Layout_create(total, obj_size));
   if (!cu_Slice_result_is_ok(&mem)) {
     return NULL;
   }
@@ -141,13 +141,14 @@ static cu_Slice_Result cu_gpa_alloc_small(cu_GPAllocator *gpa, size_t size,
 
 static cu_Slice_Result cu_gpa_alloc_large(
     cu_GPAllocator *gpa, size_t size, size_t alignment) {
-  cu_Slice_Result mem =
-      cu_Allocator_Alloc(gpa->backingAllocator, size, alignment);
+  cu_Slice_Result mem = cu_Allocator_Alloc(
+      gpa->backingAllocator, cu_Layout_create(size, alignment));
   if (!cu_Slice_result_is_ok(&mem)) {
     return mem;
   }
-  cu_Slice_Result meta_mem = cu_Allocator_Alloc(gpa->backingAllocator,
-      sizeof(struct cu_GPAllocator_LargeAlloc), sizeof(void *));
+  cu_Slice_Result meta_mem = cu_Allocator_Alloc(
+      gpa->backingAllocator,
+      cu_Layout_create(sizeof(struct cu_GPAllocator_LargeAlloc), sizeof(void *)));
   if (!cu_Slice_result_is_ok(&meta_mem)) {
     cu_Allocator_Free(gpa->backingAllocator, mem.value);
     return meta_mem;
@@ -164,13 +165,15 @@ static cu_Slice_Result cu_gpa_alloc_large(
   return cu_Slice_result_ok(meta->slice);
 }
 
-static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_gpa_alloc(void *self, cu_Layout layout) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -190,15 +193,18 @@ static cu_Slice_Result cu_gpa_alloc(void *self, size_t size, size_t alignment) {
 /* -------------------------------------------------------------------------- */
 
 static cu_Slice_Result cu_gpa_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
+    void *self, cu_Slice mem, cu_Layout layout) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
-  CU_IF_NULL(mem.ptr) { return cu_gpa_alloc(self, size, alignment); }
-  if (size == 0) {
+  CU_IF_NULL(mem.ptr) { return cu_gpa_alloc(self, layout); }
+  if (layout.elem_size == 0) {
     cu_gpa_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
 
   size_t slot;
   struct cu_GPAllocator_BucketHeader *bucket =
@@ -211,7 +217,8 @@ static cu_Slice_Result cu_gpa_resize(
       return cu_Slice_result_error(err);
     }
     cu_Slice_Result resized = cu_Allocator_Resize(
-        gpa->backingAllocator, meta->slice, size, alignment);
+        gpa->backingAllocator, meta->slice,
+        cu_Layout_create(size, alignment));
     if (!cu_Slice_result_is_ok(&resized)) {
       return resized;
     }
@@ -224,7 +231,7 @@ static cu_Slice_Result cu_gpa_resize(
     return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }
 
-  cu_Slice_Result new_mem = cu_gpa_alloc(self, size, alignment);
+  cu_Slice_Result new_mem = cu_gpa_alloc(self, cu_Layout_create(size, alignment));
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }

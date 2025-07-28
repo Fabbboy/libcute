@@ -12,9 +12,9 @@ struct cu_WasmAllocator_Header {
   size_t slot_size;
 };
 
-static cu_Slice_Result cu_wasm_alloc(void *self, size_t size, size_t alignment);
+static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout);
 static cu_Slice_Result cu_wasm_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment);
+    void *self, cu_Slice mem, cu_Layout layout);
 static void cu_wasm_free(void *self, cu_Slice mem);
 
 #define CU_WASM_BIGPAGE_SIZE (64 * 1024)
@@ -60,14 +60,15 @@ static size_t alloc_big_pages(size_t n) {
   return (size_t)page_index * CU_WASM_PAGE_SIZE;
 }
 
-static cu_Slice_Result cu_wasm_alloc(
-    void *self, size_t size, size_t alignment) {
+static cu_Slice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
   CU_UNUSED(self);
-  if (size == 0) {
+  if (layout.elem_size == 0) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -119,14 +120,16 @@ static cu_Slice_Result cu_wasm_alloc(
 }
 
 static cu_Slice_Result cu_wasm_resize(
-    void *self, cu_Slice mem, size_t size, size_t alignment) {
-  CU_IF_NULL(mem.ptr) { return cu_wasm_alloc(self, size, alignment); }
-  if (size == 0) {
+    void *self, cu_Slice mem, cu_Layout layout) {
+  CU_IF_NULL(mem.ptr) { return cu_wasm_alloc(self, layout); }
+  if (layout.elem_size == 0) {
     cu_wasm_free(self, mem);
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_Slice_result_error(err);
   }
+  size_t size = layout.elem_size;
+  size_t alignment = layout.alignment;
   if (alignment == 0) {
     alignment = 1;
   }
@@ -142,7 +145,8 @@ static cu_Slice_Result cu_wasm_resize(
     return cu_Slice_result_ok(cu_Slice_create(mem.ptr, size));
   }
 
-  cu_Slice_Result new_mem = cu_wasm_alloc(self, size, alignment);
+  cu_Slice_Result new_mem =
+      cu_wasm_alloc(self, cu_Layout_create(size, alignment));
   if (!cu_Slice_result_is_ok(&new_mem)) {
     return new_mem;
   }
