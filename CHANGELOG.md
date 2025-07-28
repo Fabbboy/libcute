@@ -13,15 +13,6 @@ All notable changes to this project will be documented in this file. See [conven
 - fixes test case, feat: interduces push pop methods - ([05993a1](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05993a1fd1b0d8cafe1e5b7933ed1c743b60b282)) - Fabrice
 - some fixes - ([f02ca19](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f02ca19a63709948575507baaf15f5a745388d72)) - Fabrice
 - adjusted name - ([3e8ec20](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/3e8ec20a5a070f784286564bcf7c80d54144ea78)) - Fabrice
-- allocator: allow layouts where size isn't a multiple of alignment
-
-### API
-
-- allocator: accept layout instead of size and alignment
-
-### API
-
-- allocator: accept layout instead of size and alignment
 
 ### Documentation
 
@@ -30,7 +21,6 @@ All notable changes to this project will be documented in this file. See [conven
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
 - adds changelog - ([18a2468](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/18a24688ea8d9afe6c99cba593fbc1bf2b9207f4)) - Fabrice
 - designing the gpa - ([fe09ec3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe09ec368895dfed564d7664363d68f1f8b55525)) - Fabrice
-- document revised naming scheme - Codex
 - updated changelog - ([fe8eea2](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/fe8eea2dd4ec72a762e4dd7927d9c46a783b4d2e)) - Fabrice
 - clarify bitset and bitmap - ([c212ee4](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c212ee43b27021c33c70cf24a19d865059b37711)) - Fabrice
 - adds changelog - ([0bc1278](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0bc1278bbbce8395fe775b69a17c5577cae5f2db)) - Fabrice
@@ -65,8 +55,6 @@ All notable changes to this project will be documented in this file. See [conven
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
 - stress arena reuse - ([2e502f9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2e502f95e766ee9e63e6ca13f0282b6a92397651)) - Fabrice
-- fix gpa test linkage - (27187ad)
-- add gitlab test pipeline
 
 ### Allocator
 
@@ -83,10 +71,16 @@ All notable changes to this project will be documented in this file. See [conven
 - refine wasm allocator - ([6bd14cd](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/6bd14cd31a0bb1d7921dc01771f70e6087614c32)) - Fabrice
 - align callocator and use null helpers - ([19a605a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/19a605a4b245a4be36b934bc3f9e6c95a866b9d1)) - Fabrice
 - add null allocator for freestanding - ([f1680e0](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f1680e00ab6a794a3925ff8209da08b055c17bac)) - Fabrice
+- use layout for allocations - ([a457ad9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a457ad9c42579fbb65a6f757f36ee9979f5379ab)) - Fabrice
+
+### Bug
+
+- something is wronmg - ([ef0fec7](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ef0fec747045150ad397ea1e5f4b99e30847604f)) - Fabrice
 
 ### Changelog
 
 - fix header - ([0ad21d6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/0ad21d69958b860f856fb7da931a3d41a6c4ee48)) - Fabrice
+- updated changelog again - ([d38db31](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d38db3105204c7831232f384e80cc02325e030a3)) - Fabrice
 
 ### Collection
 
@@ -124,8 +118,6 @@ All notable changes to this project will be documented in this file. See [conven
 ### Macro
 
 - add wasm platform macro - ([c3c4cb6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c3c4cb66f54a36485732cfc44be3de07ca48d307)) - Fabrice
-- add CU_OPTIONAL_NAME and CU_RESULT_NAME macros - Codex
-- unify result naming and apply CU_*_NAME to function names - Codex
 
 ### Merge
 
@@ -141,6 +133,10 @@ All notable changes to this project will be documented in this file. See [conven
 ### Note
 
 - must've forgotten - ([c202c75](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c202c7599e6cdf1b776ffed18f9d718f26b6d623)) - Fabrice
+
+### Object
+
+- unify result naming - ([6c59979](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/6c59979fd50f6619819043ceb72a1c75133fb958)) - Fabrice
 
 ### Stream
 
