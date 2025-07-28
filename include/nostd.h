@@ -33,12 +33,14 @@ void cu_abort(void);
     fprintf(stderr, "\n");                                                     \
     cu_abort();                                                                \
   } while (0);
-  // intentionally NO else case if we are building for freestanding the user has to define their own panic handler
-  // like rusts #[panic_handler]
+// intentionally NO else case if we are building for freestanding the user has
+// to define their own panic handler like rusts #[panic_handler]
 #endif
 
 void cu_Memory_memmove(void *dest, cu_Slice src);
+void cu_Memory_smemmove(cu_Slice dest, cu_Slice src);
 void cu_Memory_memcpy(void *dest, cu_Slice src);
+void cu_Memory_smemcpy(cu_Slice dest, cu_Slice src);
 void cu_Memory_memset(void *dest, int value, size_t size);
 bool cu_Memory_memcmp(cu_Slice a, cu_Slice b);
 

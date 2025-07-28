@@ -29,6 +29,30 @@ void cu_Memory_memmove(void *dest, cu_Slice src) {
   }
 }
 
+
+void cu_Memory_smemmove(cu_Slice dest, cu_Slice src){
+  unsigned char *d = (unsigned char *)dest.ptr;
+  unsigned char *s = (unsigned char *)src.ptr;
+  size_t n = src.length;
+
+  CU_IF_NULL(d) return;
+  CU_IF_NULL(s) return;
+
+  if (d < s) {
+    // Forward copy when dest is before src
+    while (n--) {
+      *d++ = *s++;
+    }
+  } else {
+    // Backward copy when dest overlaps with src
+    d += n;
+    s += n;
+    while (n--) {
+      *--d = *--s;
+    }
+  }
+}
+
 void cu_Memory_memcpy(void *dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest;
   unsigned char *s = (unsigned char *)src.ptr;
@@ -38,6 +62,20 @@ void cu_Memory_memcpy(void *dest, cu_Slice src) {
   CU_IF_NULL(s) return;
 
   // Note: memcpy assumes no overlap, but this is still safe
+  while (n--) {
+    *d++ = *s++;
+  }
+}
+
+void cu_Memory_smemcpy(cu_Slice dest, cu_Slice src) {
+  unsigned char *d = (unsigned char *)dest.ptr;
+  unsigned char *s = (unsigned char *)src.ptr;
+  size_t n = src.length;
+
+  CU_IF_NULL(d) return;
+  CU_IF_NULL(s) return;
+
+  // Note: smemcpy assumes no overlap, but this is still safe
   while (n--) {
     *d++ = *s++;
   }
