@@ -15,7 +15,7 @@ test_files = [
   'test_string.cpp',
   'test_allocator.cpp',
   'test_bitmap.cpp',
-  'test_gpa_large.cpp',
+  'test_gpa.cpp',
   'test_hash.cpp',
   'test_hashmap.cpp',
   'test_page_allocator.cpp',
