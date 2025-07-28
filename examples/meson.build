@@ -5,3 +5,11 @@ sources_6502 = [
 
 executable('6502emu', sources_6502, dependencies : cute_dep,
     include_directories : includes, )
+
+sources_http = [
+    'http/http.c',
+    'http/main.c',
+]
+
+executable('httpserver', sources_http, dependencies : cute_dep,
+    include_directories : includes, )
