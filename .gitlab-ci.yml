@@ -1,10 +1,28 @@
 image: debian:stable
 
+stages:
+  - test
+  - deploy
+
+test:
+  stage: test
+  script:
+    - apt-get update
+    - apt-get install -y clang clang-tools build-essential git ninja-build tar python3 curl wget
+    - tar -xf meson-1.8.2.tar.gz
+    - python3 meson-1.8.2/meson.py setup build -Dtests=enabled
+    - ninja -C build
+    - ninja -C build test
+  tags:
+    - ubuntu
+
 pages:
   stage: deploy
   script:
-    - apt-get update && apt-get install -y doxygen graphviz meson ninja-build
-    - meson setup build
+    - apt-get update
+    - apt-get install -y doxygen graphviz ninja-build python3 tar
+    - tar -xf meson-1.8.2.tar.gz
+    - python3 meson-1.8.2/meson.py setup build
     - ninja -C build docs
     - mv build/docs/html public
   artifacts:
