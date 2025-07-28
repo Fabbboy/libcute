@@ -20,7 +20,8 @@ cu_String_Error cu_StrBuilder_appendf(
     cu_StrBuilder *builder, const char *fmt, ...) {
   va_list args;
   va_start(args, fmt);
-  int needed = cu_CString_vsnprintf(NULL, 0, fmt, args);
+  char tmp[128];
+  int needed = cu_CString_vsnprintf(tmp, sizeof(tmp), fmt, args);
   va_end(args);
   if (needed < 0) {
     return CU_STRING_ERROR_OOM;

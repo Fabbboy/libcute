@@ -7,6 +7,7 @@ extern "C" {
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
+#include "memory/page.h"
 #include "nostd.h"
 }
 #include <gtest/gtest.h>

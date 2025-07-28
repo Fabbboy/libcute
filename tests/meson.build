@@ -1,6 +1,13 @@
-# Build tests with freestanding flags
+# Build tests respecting the freestanding option
 gtest_dep = dependency('gtest')
 gtest_main = dependency('gtest_main')
+
+# Determine whether to compile in freestanding mode
+freestanding = get_option('freestanding')
+test_args = []
+if freestanding.enabled()
+  test_args += ['-DCU_FREESTANDING']
+endif
 
 # Individual test executables
 test_files = [
@@ -32,8 +39,8 @@ foreach test_file : test_files
     test_file,
     dependencies: [cute_dep, gtest_dep, gtest_main],
     include_directories: includes,
-    c_args: ['-DCU_FREESTANDING'],
-    cpp_args: ['-DCU_FREESTANDING'],
+    c_args: test_args,
+    cpp_args: test_args,
   )
   test(test_name, exe)
 endforeach

@@ -7,6 +7,7 @@ extern "C" {
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
+#include "memory/page.h"
 }
 #include <gtest/gtest.h>
 
@@ -57,7 +58,8 @@ TEST(SkipList, InsertFindRemove) {
     cu_SkipList_Error_Optional err = cu_SkipList_remove(&list, &i);
     ASSERT_TRUE(cu_SkipList_Error_Optional_is_none(&err));
   }
-  EXPECT_TRUE(cu_SkipList_find(&list, &(int){0}).isSome == false);
+  int zero = 0;
+  EXPECT_FALSE(cu_SkipList_find(&list, &zero).isSome);
 
   cu_SkipList_destroy(&list);
   cu_GPAllocator_destroy(&gpa);
