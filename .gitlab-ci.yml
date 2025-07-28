@@ -9,7 +9,7 @@ test:
   script:
     - apt-get update
     - apt-get install -y clang clang-tools build-essential git ninja-build tar python3 curl wget python3-pip 
-    - sudo apt-get install -y doxygen graphviz python3-pip ninja-build
+    - apt-get install -y doxygen graphviz python3-pip ninja-build
     - pip3 install --user meson
     - meson setup build --buildtype=release -Dtests=enabled
     - ninja -C build
