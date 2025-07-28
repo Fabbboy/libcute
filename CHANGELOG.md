@@ -80,9 +80,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add ring buffer container - ([5555350](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/55553500bdc85f506de28725cf9816dd939b3f39)) - Fabrice
 - extend list APIs - ([8788373](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/878837377a7c283cfe5b39355b43de0782e9b410)) - Fabrice
-- add skip list container -
-- add skip list sorted string table test -
-- add cu_CString_cmp for freestanding strcmp replacement -
 
 ### Example
 
@@ -125,6 +122,7 @@ All notable changes to this project will be documented in this file. See [conven
 ### Nostd
 
 - migrate and potentially forward declare types - ([06b8c87](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/06b8c87b52d69807537cbef4a9e1792395389d11)) - Fabrice
+- fixes implementation and adds new webserver example - ([1605ca3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/1605ca3c0697c1a04788c89bf388672eae4d3d2b)) - Fabrice
 
 ### Note
 
