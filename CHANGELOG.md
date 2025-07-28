@@ -40,6 +40,7 @@ All notable changes to this project will be documented in this file. See [conven
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
+- add reference counted pointer with optional destructor - (unreleased) - Codex
 
 ### Refactoring
 
