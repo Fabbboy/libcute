@@ -1,12 +1,12 @@
-#include "io/error.h"
-#include "utility.h"
 #include <gtest/gtest.h>
 #include <vector>
 extern "C" {
+#include "io/error.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 }
+#include "utility.h"
 
 static unsigned char backing[512 * 1024 * 1024];
 
@@ -122,5 +122,6 @@ TEST(Allocator, Exhaustion) {
       cu_Allocator_Alloc(alloc, large_size, alignof(cu_Point));
 
   ASSERT_FALSE(cu_Slice_result_is_ok(&res));
-  EXPECT_EQ(cu_Slice_result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
+  EXPECT_EQ(
+      cu_Slice_result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
 }
