@@ -1,5 +1,4 @@
 #pragma once
-
 #include "object/optional.h"
 #include <stddef.h>
 
@@ -25,9 +24,16 @@ typedef enum {
 } cu_Io_ErrorKind;
 
 typedef struct {
-  cu_Io_ErrorKind kind; /**< error kind */
-  Size_Optional errnum; /**< optional errno value */
+  cu_Io_ErrorKind kind;
+  Size_Optional errnum;
 } cu_Io_Error;
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
 CU_RESULT_DECL(cu_Slice, cu_Slice, cu_Io_Error)
+
+// Cross-platform error construction
+cu_Io_Error cu_Io_Error_from_errno(int error_code);
+
+#if CU_PLAT_WINDOWS
+cu_Io_Error cu_Io_Error_from_win32(unsigned long error_code);
+#endif

@@ -30,6 +30,7 @@ test_files = [
   'test_wasm_allocator.cpp',
   'test_skip_list.cpp',
   'test_skip_list_sst.cpp',
+  'test_file.cpp'
 ]
 
 foreach test_file : test_files

@@ -4,24 +4,32 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include <errno.h>
 
 #ifndef CU_FREESTANDING
 
-CU_RESULT_IMPL(cu_File, cu_File, cu_Io_Error)
-#if CU_PLAT_POSIX
+#if CU_PLAT_WINDOWS
+#include <io.h>
+#include <windows.h>
+#else
+#include <errno.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <unistd.h>
-Int_Optional cu_File_OpenOptions_construct(const cu_File_OpenOptions *options) {
-  CU_IF_NULL(options) { return Int_Optional_none(); }
+#endif
 
+CU_RESULT_IMPL(cu_File, cu_File, cu_Io_Error)
+
+#if CU_PLAT_POSIX
+static int cu_File_OpenOptions_to_posix_flags(
+    const cu_File_OpenOptions *options) {
   int flags = 0;
-  if (options->read) {
-    flags |= O_RDONLY;
-  }
 
-  if (options->write) {
+  if (options->read && options->write) {
+    flags |= O_RDWR;
+  } else if (options->write) {
     flags |= O_WRONLY;
+  } else if (options->read) {
+    flags |= O_RDONLY;
   }
 
   if (options->create) {
@@ -36,17 +44,42 @@ Int_Optional cu_File_OpenOptions_construct(const cu_File_OpenOptions *options) {
     flags |= O_TRUNC;
   }
 
-  if (flags == 0) {
-    return Int_Optional_none();
+  return flags;
+}
+#endif
+
+#if CU_PLAT_WINDOWS
+static DWORD cu_File_OpenOptions_to_win32_access(
+    const cu_File_OpenOptions *options) {
+  DWORD access = 0;
+
+  if (options->read) {
+    access |= GENERIC_READ;
   }
 
-  return Int_Optional_some(flags);
+  if (options->write) {
+    access |= GENERIC_WRITE;
+  }
+
+  return access;
+}
+
+static DWORD cu_File_OpenOptions_to_win32_creation(
+    const cu_File_OpenOptions *options) {
+  if (options->create && options->truncate) {
+    return CREATE_ALWAYS;
+  } else if (options->create) {
+    return OPEN_ALWAYS;
+  } else if (options->truncate) {
+    return TRUNCATE_EXISTING;
+  } else {
+    return OPEN_EXISTING;
+  }
 }
 #endif
 
 cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
-  Int_Optional flags = cu_File_OpenOptions_construct(&options);
-  if (Int_Optional_is_none(&flags)) {
+  if (!options.read && !options.write) {
     cu_Io_Error error = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
         .errnum = Size_Optional_none(),
@@ -54,35 +87,183 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
     return cu_File_result_error(error);
   }
 
-  char lpath[MAX_PATH_LENGTH] = {0};
-  cu_Memory_smemcpy(cu_Slice_create(lpath, MAX_PATH_LENGTH), path);
-  lpath[MAX_PATH_LENGTH - 1] = '\0';
+  // Convert path to null-terminated string
+  char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
+  size_t path_len;
+  if (path.length < (CU_FILE_MAX_PATH_LENGTH - 1)) {
+    path_len = path.length;
+  } else {
+    path_len = CU_FILE_MAX_PATH_LENGTH - 1;
+  }
+  cu_Memory_smemcpy(
+      cu_Slice_create(lpath, path_len), cu_Slice_create(path.ptr, path_len));
+  lpath[path_len] = '\0';
 
-  cu_Handle handle = -1;
+  cu_Handle handle = CU_INVALID_HANDLE;
+
 #if CU_PLAT_POSIX
-  handle = open(lpath, Int_Optional_unwrap(&flags));
-  if (handle < 0) {
-    cu_Io_Error error = {
-        .kind = CU_IO_ERROR_KIND_OTHER,
-        .errnum = Size_Optional_some(errno),
-    };
-    return cu_File_result_error(error);
+  int flags = cu_File_OpenOptions_to_posix_flags(&options);
+  mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH; // 644
+
+  handle = open(lpath, flags, mode);
+  if (handle == -1) {
+    return cu_File_result_error(cu_Io_Error_from_errno(errno));
   }
 #else
-#error "Windows file opening not implemented"
+  DWORD access = cu_File_OpenOptions_to_win32_access(&options);
+  DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);
+  DWORD attributes = FILE_ATTRIBUTE_NORMAL;
+
+  handle = CreateFileA(lpath, access, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+      creation, attributes, NULL);
+
+  if (handle == INVALID_HANDLE_VALUE) {
+    return cu_File_result_error(cu_Io_Error_from_win32(GetLastError()));
+  }
 #endif
 
   cu_File file = {.handle = handle};
   return cu_File_result_ok(file);
 }
+
 void cu_File_close(cu_File *file) {
   CU_IF_NULL(file) return;
+  if (file->handle == CU_INVALID_HANDLE)
+    return;
 
 #if CU_PLAT_POSIX
   close(file->handle);
 #else
-#error "Windows file closing not implemented"
+  CloseHandle(file->handle);
 #endif
-  file->handle = -1; // Invalidate handle
+
+  file->handle = CU_INVALID_HANDLE;
 }
+
+cu_Io_Error_Optional cu_File_read(cu_File *file, cu_Slice buffer) {
+  CU_IF_NULL(file) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  if (file->handle == CU_INVALID_HANDLE || !buffer.ptr) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+#if CU_PLAT_POSIX
+  ssize_t bytes_read = read(file->handle, buffer.ptr, buffer.length);
+  if (bytes_read == -1) {
+    return cu_Io_Error_Optional_some(cu_Io_Error_from_errno(errno));
+  }
+#else
+  DWORD bytes_read;
+  if (!ReadFile(
+          file->handle, buffer.ptr, (DWORD)buffer.length, &bytes_read, NULL)) {
+    return cu_Io_Error_Optional_some(cu_Io_Error_from_win32(GetLastError()));
+  }
 #endif
+
+  return cu_Io_Error_Optional_none();
+}
+
+cu_Io_Error_Optional cu_File_write(cu_File *file, cu_Slice data) {
+  CU_IF_NULL(file) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  if (file->handle == CU_INVALID_HANDLE || !data.ptr) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+#if CU_PLAT_POSIX
+  ssize_t bytes_written = write(file->handle, data.ptr, data.length);
+  if (bytes_written == -1) {
+    return cu_Io_Error_Optional_some(cu_Io_Error_from_errno(errno));
+  }
+#else
+  DWORD bytes_written;
+  if (!WriteFile(
+          file->handle, data.ptr, (DWORD)data.length, &bytes_written, NULL)) {
+    return cu_Io_Error_Optional_some(cu_Io_Error_from_win32(GetLastError()));
+  }
+#endif
+
+  return cu_Io_Error_Optional_none();
+}
+
+cu_Io_Error_Optional cu_File_seek(cu_File *file, cu_File_SeekTo seek_to) {
+  CU_IF_NULL(file) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  if (file->handle == CU_INVALID_HANDLE) {
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  long offset = Size_Optional_is_some(&seek_to.offset)
+                    ? (long)Size_Optional_unwrap(&seek_to.offset)
+                    : 0;
+
+#if CU_PLAT_POSIX
+  int whence;
+  switch (seek_to.whence) {
+  case CU_FILE_SEEK_START:
+    whence = SEEK_SET;
+    break;
+  case CU_FILE_SEEK_CURRENT:
+    whence = SEEK_CUR;
+    break;
+  case CU_FILE_SEEK_END:
+    whence = SEEK_END;
+    break;
+  default:
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  if (lseek(file->handle, offset, whence) == -1) {
+    return cu_Io_Error_Optional_some(cu_Io_Error_from_errno(errno));
+  }
+#else
+  DWORD move_method;
+  switch (seek_to.whence) {
+  case CU_FILE_SEEK_START:
+    move_method = FILE_BEGIN;
+    break;
+  case CU_FILE_SEEK_CURRENT:
+    move_method = FILE_CURRENT;
+    break;
+  case CU_FILE_SEEK_END:
+    move_method = FILE_END;
+    break;
+  default:
+    return cu_Io_Error_Optional_some(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+
+  if (SetFilePointer(file->handle, offset, NULL, move_method) ==
+      INVALID_SET_FILE_POINTER) {
+    DWORD error = GetLastError();
+    if (error != NO_ERROR) {
+      return cu_Io_Error_Optional_some(cu_Io_Error_from_win32(error));
+    }
+  }
+#endif
+
+  return cu_Io_Error_Optional_none();
+}
+
+#endif // CU_FREESTANDING
