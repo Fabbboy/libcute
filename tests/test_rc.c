@@ -1,35 +1,33 @@
-#include <gtest/gtest.h>
+#include "test_common.h"
 
-extern "C" {
 #include "cute.h"
-}
 
 CU_RC_DECL(Int, int)
 CU_RC_IMPL(Int, int)
 
 static int drop_count = 0;
 
-TEST(Rc, Basic) {
+static void Rc_Basic(void) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   drop_count = 0;
 
   Int_Rc_Result result =
       Int_Rc_create(alloc, 42, Int_Rc_Destructor_Optional_none());
-  ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
+  TEST_ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
 
   Int_Rc rc = Int_Rc_Result_unwrap(&result);
-  EXPECT_EQ(*Int_Rc_get(&rc), 42);
+  TEST_ASSERT_EQUAL(*Int_Rc_get(&rc), 42);
 
   Int_Rc_Optional clone_opt = Int_Rc_clone(&rc);
-  ASSERT_TRUE(Int_Rc_Optional_is_some(&clone_opt));
+  TEST_ASSERT_TRUE(Int_Rc_Optional_is_some(&clone_opt));
   Int_Rc clone = Int_Rc_Optional_unwrap(&clone_opt);
-  EXPECT_EQ(*Int_Rc_get(&clone), 42);
+  TEST_ASSERT_EQUAL(*Int_Rc_get(&clone), 42);
 
   Int_Rc_destroy(&rc);
-  EXPECT_EQ(*Int_Rc_get(&clone), 42);
+  TEST_ASSERT_EQUAL(*Int_Rc_get(&clone), 42);
 
   Int_Rc_destroy(&clone);
-  EXPECT_EQ(drop_count, 0);
+  TEST_ASSERT_EQUAL(drop_count, 0);
 }
 
 typedef struct {
@@ -51,48 +49,56 @@ void destruct_point(cu_Point *point) {
   }
 }
 
-TEST(Rc, Point) {
+static void Rc_Point(void) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   drop_count = 0;
 
   cu_Slice_Result int_container = cu_Allocator_Alloc(alloc, CU_LAYOUT(int));
-  ASSERT_TRUE(cu_Slice_Result_is_ok(&int_container));
+  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&int_container));
   int *y = (int *)cu_Slice_Result_unwrap(&int_container).ptr;
   *y = 100;
 
   cu_Point point = {42, y, alloc};
   Point_Rc_Result result = Point_Rc_create(
       alloc, point, Point_Rc_Destructor_Optional_some(destruct_point));
-  ASSERT_TRUE(Point_Rc_Result_is_ok(&result));
+  TEST_ASSERT_TRUE(Point_Rc_Result_is_ok(&result));
   Point_Rc rc = Point_Rc_Result_unwrap(&result);
-  EXPECT_EQ(rc.inner->item.x, 42);
-  EXPECT_EQ(*rc.inner->item.y, 100);
-  EXPECT_EQ(drop_count, 0);
+  TEST_ASSERT_EQUAL(rc.inner->item.x, 42);
+  TEST_ASSERT_EQUAL(*rc.inner->item.y, 100);
+  TEST_ASSERT_EQUAL(drop_count, 0);
 
   Point_Rc_Optional clone_opt = Point_Rc_clone(&rc);
-  ASSERT_TRUE(Point_Rc_Optional_is_some(&clone_opt));
+  TEST_ASSERT_TRUE(Point_Rc_Optional_is_some(&clone_opt));
   Point_Rc clone = Point_Rc_Optional_unwrap(&clone_opt);
-  EXPECT_EQ(clone.inner->item.x, 42);
-  EXPECT_EQ(*clone.inner->item.y, 100);
-  EXPECT_EQ(drop_count, 0);
+  TEST_ASSERT_EQUAL(clone.inner->item.x, 42);
+  TEST_ASSERT_EQUAL(*clone.inner->item.y, 100);
+  TEST_ASSERT_EQUAL(drop_count, 0);
 
   Point_Rc_destroy(&rc);
-  EXPECT_EQ(drop_count, 0);
+  TEST_ASSERT_EQUAL(drop_count, 0);
 
   Point_Rc_destroy(&clone);
-  EXPECT_EQ(drop_count, 1);
+  TEST_ASSERT_EQUAL(drop_count, 1);
 }
 
-TEST(Rc, OptionalDestructor) {
+static void Rc_OptionalDestructor(void) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   drop_count = 0;
 
   Int_Rc_Result result =
       Int_Rc_create(alloc, 7, Int_Rc_Destructor_Optional_none());
-  ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
+  TEST_ASSERT_TRUE(Int_Rc_Result_is_ok(&result));
   Int_Rc rc = Int_Rc_Result_unwrap(&result);
-  EXPECT_EQ(*Int_Rc_get(&rc), 7);
+  TEST_ASSERT_EQUAL(*Int_Rc_get(&rc), 7);
 
   Int_Rc_destroy(&rc);
-  EXPECT_EQ(drop_count, 0);
+  TEST_ASSERT_EQUAL(drop_count, 0);
+}
+
+int main(void) {
+    UNITY_BEGIN();
+    RUN_TEST(Rc_Basic);
+    RUN_TEST(Rc_Point);
+    RUN_TEST(Rc_OptionalDestructor);
+    return UNITY_END();
 }
