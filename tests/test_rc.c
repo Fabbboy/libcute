@@ -40,7 +40,7 @@ typedef struct {
 CU_RC_DECL(Point, cu_Point)
 CU_RC_IMPL(Point, cu_Point)
 
-void destruct_point(cu_Point *point) { //NOLINT 
+void destruct_point(cu_Point *point) { // NOLINT
   drop_count++;
   if (point->y) {
     cu_Allocator_Free(point->alloc, cu_Slice_create(point->y, sizeof(int)));
@@ -52,9 +52,9 @@ static void Rc_Point(void) {
   cu_Allocator alloc = cu_Allocator_CAllocator();
   drop_count = 0;
 
-  cu_Slice_Result int_container = cu_Allocator_Alloc(alloc, CU_LAYOUT(int));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&int_container));
-  int *y = (int *)cu_Slice_Result_unwrap(&int_container).ptr;
+  cu_IoSlice_Result int_container = cu_Allocator_Alloc(alloc, CU_LAYOUT(int));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&int_container));
+  int *y = (int *)cu_IoSlice_Result_unwrap(&int_container).ptr;
   *y = 100;
 
   cu_Point point = {42, y, alloc};

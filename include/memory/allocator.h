@@ -9,9 +9,10 @@
 #include "utility.h"
 
 /** Allocation function signature. */
-typedef cu_Slice_Result (*cu_Allocator_AllocFunc)(void *self, cu_Layout layout);
+typedef cu_IoSlice_Result (*cu_Allocator_AllocFunc)(
+    void *self, cu_Layout layout);
 /** Resize function signature. */
-typedef cu_Slice_Result (*cu_Allocator_ResizeFunc)(
+typedef cu_IoSlice_Result (*cu_Allocator_ResizeFunc)(
     void *self, cu_Slice mem, cu_Layout layout);
 /** Free function signature. */
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
@@ -26,13 +27,13 @@ typedef struct {
 CU_OPTIONAL_DECL(cu_Allocator, cu_Allocator)
 
 /** Allocate memory using the allocator. */
-static inline cu_Slice_Result cu_Allocator_Alloc(
+static inline cu_IoSlice_Result cu_Allocator_Alloc(
     cu_Allocator allocator, cu_Layout layout) {
   return allocator.allocFn(allocator.self, layout);
 }
 
 /** Resize a previously allocated block. */
-static inline cu_Slice_Result cu_Allocator_Resize(
+static inline cu_IoSlice_Result cu_Allocator_Resize(
     cu_Allocator allocator, cu_Slice mem, cu_Layout layout) {
   return allocator.resizeFn(allocator.self, mem, layout);
 }

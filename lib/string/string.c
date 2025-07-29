@@ -1,5 +1,5 @@
-#include "macro.h"
 #include "string/string.h"
+#include "macro.h"
 #include <nostd.h>
 
 CU_RESULT_IMPL(cu_String, cu_String, cu_String_Error)
@@ -14,16 +14,15 @@ cu_String cu_String_init(cu_Allocator allocator) {
 }
 
 static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
-  cu_Slice_Result mem;
+  cu_IoSlice_Result mem;
   if (str->data == NULL) {
-    mem =
-        cu_Allocator_Alloc(str->allocator, cu_Layout_create(cap + 1, 1));
+    mem = cu_Allocator_Alloc(str->allocator, cu_Layout_create(cap + 1, 1));
   } else {
     mem = cu_Allocator_Resize(str->allocator,
         cu_Slice_create(str->data, str->capacity + 1),
         cu_Layout_create(cap + 1, 1));
   }
-  if (!cu_Slice_Result_is_ok(&mem)) {
+  if (!cu_IoSlice_Result_is_ok(&mem)) {
     return CU_STRING_ERROR_OOM;
   }
   str->data = mem.value.ptr;
@@ -99,8 +98,8 @@ cu_String_Error cu_String_append_slice(cu_String *str, cu_Slice slice) {
     }
   }
   if (slice.length > 0) {
-    cu_Memory_memcpy(str->data + str->length,
-        cu_Slice_create(slice.ptr, slice.length));
+    cu_Memory_memcpy(
+        str->data + str->length, cu_Slice_create(slice.ptr, slice.length));
   }
   str->length = new_len;
   str->data[new_len] = '\0';

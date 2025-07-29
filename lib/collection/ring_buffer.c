@@ -13,10 +13,9 @@ cu_RingBuffer_Result cu_RingBuffer_create(cu_Allocator allocator,
 
   cu_Slice_Optional data = cu_Slice_Optional_none();
   if (capacity > 0) {
-    cu_Slice_Result r = cu_Allocator_Alloc(
-        allocator,
+    cu_IoSlice_Result r = cu_Allocator_Alloc(allocator,
         cu_Layout_create(capacity * layout.elem_size, layout.alignment));
-    if (!cu_Slice_Result_is_ok(&r)) {
+    if (!cu_IoSlice_Result_is_ok(&r)) {
       return cu_RingBuffer_Result_error(CU_RINGBUFFER_ERROR_OOM);
     }
     data = cu_Slice_Optional_some(r.value);
@@ -43,8 +42,8 @@ void cu_RingBuffer_destroy(cu_RingBuffer *rb) {
       cu_Destructor dtor = cu_Destructor_Optional_unwrap(&rb->destructor);
       for (size_t i = 0; i < rb->length; ++i) {
         size_t idx = (rb->head + i) % rb->capacity;
-        void *ptr = (unsigned char *)rb->data.value.ptr +
-                    idx * rb->layout.elem_size;
+        void *ptr =
+            (unsigned char *)rb->data.value.ptr + idx * rb->layout.elem_size;
         dtor(ptr);
       }
     }
@@ -71,8 +70,7 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_push(cu_RingBuffer *rb, void *elem) {
   size_t tail = (rb->head + rb->length) % rb->capacity;
   void *dest =
       (unsigned char *)rb->data.value.ptr + tail * rb->layout.elem_size;
-  cu_Memory_memcpy(dest,
-      cu_Slice_create((void *)elem, rb->layout.elem_size));
+  cu_Memory_memcpy(dest, cu_Slice_create((void *)elem, rb->layout.elem_size));
   rb->length++;
   return cu_RingBuffer_Error_Optional_none();
 }
@@ -91,8 +89,7 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_pop(
   }
   void *src =
       (unsigned char *)rb->data.value.ptr + rb->head * rb->layout.elem_size;
-  cu_Memory_memcpy(out_elem,
-      cu_Slice_create(src, rb->layout.elem_size));
+  cu_Memory_memcpy(out_elem, cu_Slice_create(src, rb->layout.elem_size));
   if (cu_Destructor_Optional_is_some(&rb->destructor)) {
     cu_Destructor dtor = cu_Destructor_Optional_unwrap(&rb->destructor);
     dtor(src);

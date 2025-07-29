@@ -1,7 +1,7 @@
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
-#include "utility.h"
 #include "state.h"
+#include "utility.h"
 #include <nostd.h>
 #include <stdalign.h>
 
@@ -32,9 +32,9 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
     size_t level, void *key, void *value, struct cu_SkipList_Node **out) {
   size_t fwd_sz = level * sizeof(struct cu_SkipList_Node *);
   size_t node_sz = sizeof(struct cu_SkipList_Node) + fwd_sz;
-  cu_Slice_Result mem = cu_Allocator_Alloc(list->allocator,
+  cu_IoSlice_Result mem = cu_Allocator_Alloc(list->allocator,
       cu_Layout_create(node_sz, alignof(struct cu_SkipList_Node)));
-  if (!cu_Slice_Result_is_ok(&mem)) {
+  if (!cu_IoSlice_Result_is_ok(&mem)) {
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
   }
   struct cu_SkipList_Node *node = (struct cu_SkipList_Node *)mem.value.ptr;
@@ -45,9 +45,9 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
     node->forward[i] = NULL;
   }
 
-  cu_Slice_Result k = cu_Allocator_Alloc(list->allocator,
+  cu_IoSlice_Result k = cu_Allocator_Alloc(list->allocator,
       cu_Layout_create(list->key_layout.elem_size, list->key_layout.alignment));
-  if (!cu_Slice_Result_is_ok(&k)) {
+  if (!cu_IoSlice_Result_is_ok(&k)) {
     cu_Allocator_Free(list->allocator, mem.value);
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
   }
@@ -55,10 +55,10 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
       k.value.ptr, cu_Slice_create(key, list->key_layout.elem_size));
   node->key = k.value.ptr;
 
-  cu_Slice_Result v = cu_Allocator_Alloc(
+  cu_IoSlice_Result v = cu_Allocator_Alloc(
       list->allocator, cu_Layout_create(list->value_layout.elem_size,
                            list->value_layout.alignment));
-  if (!cu_Slice_Result_is_ok(&v)) {
+  if (!cu_IoSlice_Result_is_ok(&v)) {
     cu_Allocator_Free(list->allocator, mem.value);
     cu_Allocator_Free(list->allocator, k.value);
     return cu_SkipList_Error_Optional_some(CU_SKIPLIST_ERROR_OOM);
@@ -87,9 +87,9 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
 
   size_t head_size = sizeof(struct cu_SkipList_Node) +
                      max_level * sizeof(struct cu_SkipList_Node *);
-  cu_Slice_Result mem = cu_Allocator_Alloc(
+  cu_IoSlice_Result mem = cu_Allocator_Alloc(
       allocator, cu_Layout_create(head_size, alignof(struct cu_SkipList_Node)));
-  if (!cu_Slice_Result_is_ok(&mem)) {
+  if (!cu_IoSlice_Result_is_ok(&mem)) {
     return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_OOM);
   }
   struct cu_SkipList_Node *head = (struct cu_SkipList_Node *)mem.value.ptr;

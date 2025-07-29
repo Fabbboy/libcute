@@ -20,9 +20,9 @@ static void Allocator_GPALargeAllocFree(void) {
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
   const size_t big = 100 * 1024 * 1024; // 100 MiB
-  cu_Slice_Result mem_res =
+  cu_IoSlice_Result mem_res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(big, 16));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&mem_res));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xCD, mem.length);
   cu_Allocator_Free(alloc, mem);
@@ -32,9 +32,9 @@ static void Allocator_GPALargeAllocFree(void) {
   const size_t count = total / small;
   cu_Slice *blocks = malloc(sizeof(cu_Slice) * count);
   for (size_t i = 0; i < count; ++i) {
-    cu_Slice_Result s_res =
+    cu_IoSlice_Result s_res =
         cu_Allocator_Alloc(alloc, cu_Layout_create(small, 16));
-    TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&s_res));
+    TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&s_res));
     blocks[i] = s_res.value;
     cu_Memory_memset(blocks[i].ptr, 0xEF, blocks[i].length);
   }
@@ -61,8 +61,8 @@ static void Allocator_NormalAllocAndFree(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
-  cu_Slice_Result res = cu_Allocator_Alloc(alloc, CU_LAYOUT(cu_Point));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&res));
+  cu_IoSlice_Result res = cu_Allocator_Alloc(alloc, CU_LAYOUT(cu_Point));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&res));
 
   cu_Slice mem = res.value;
   TEST_ASSERT_TRUE(mem.ptr != NULL);
@@ -89,8 +89,8 @@ static void Allocator_DoubleFree(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
 
-  cu_Slice_Result res = cu_Allocator_Alloc(alloc, CU_LAYOUT(cu_Point));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&res));
+  cu_IoSlice_Result res = cu_Allocator_Alloc(alloc, CU_LAYOUT(cu_Point));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&res));
 
   cu_Slice mem = res.value;
   TEST_ASSERT_TRUE(mem.ptr != NULL);
@@ -116,12 +116,12 @@ static void Allocator_Exhaustion(void) {
 
   // Allocate a large block
   size_t large_size = 512 * 1024 * 1024; // 100 MiB
-  cu_Slice_Result res =
+  cu_IoSlice_Result res =
       cu_Allocator_Alloc(alloc, cu_Layout_create(large_size, 16));
 
-  TEST_ASSERT_FALSE(cu_Slice_Result_is_ok(&res));
-  TEST_ASSERT_EQUAL(
-      cu_Slice_Result_unwrap_error(&res).kind, CU_IO_ERROR_KIND_OUT_OF_MEMORY);
+  TEST_ASSERT_FALSE(cu_IoSlice_Result_is_ok(&res));
+  TEST_ASSERT_EQUAL(cu_IoSlice_Result_unwrap_error(&res).kind,
+      CU_IO_ERROR_KIND_OUT_OF_MEMORY);
 }
 int main(void) {
   UNITY_BEGIN();

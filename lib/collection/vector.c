@@ -22,9 +22,9 @@ cu_Vector_Result cu_Vector_create(cu_Allocator allocator, cu_Layout layout,
   if (Size_Optional_is_some(&initial_capacity) &&
       Size_Optional_unwrap(&initial_capacity) > 0) {
     cap = Size_Optional_unwrap(&initial_capacity);
-    cu_Slice_Result r = cu_Allocator_Alloc(
+    cu_IoSlice_Result r = cu_Allocator_Alloc(
         allocator, cu_Layout_create(cap * layout.elem_size, layout.alignment));
-    if (!cu_Slice_Result_is_ok(&r)) {
+    if (!cu_IoSlice_Result_is_ok(&r)) {
       return cu_Vector_Result_error(CU_VECTOR_ERROR_OOM);
     }
     data = cu_Slice_Optional_some(r.value);
@@ -66,11 +66,12 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
 
   if (cu_Slice_Optional_is_some(&vector->data)) {
     cu_Slice old_data = cu_Slice_Optional_unwrap(&vector->data);
-    cu_Slice_Result new_data = cu_Allocator_Resize(vector->allocator, old_data,
-        cu_Layout_create(
-            capacity * vector->layout.elem_size, vector->layout.alignment));
+    cu_IoSlice_Result new_data =
+        cu_Allocator_Resize(vector->allocator, old_data,
+            cu_Layout_create(
+                capacity * vector->layout.elem_size, vector->layout.alignment));
 
-    if (!cu_Slice_Result_is_ok(&new_data)) {
+    if (!cu_IoSlice_Result_is_ok(&new_data)) {
       return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
     }
 
@@ -79,10 +80,10 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
     return cu_Vector_Error_Optional_none();
   }
 
-  cu_Slice_Result new_data_res = cu_Allocator_Alloc(
+  cu_IoSlice_Result new_data_res = cu_Allocator_Alloc(
       vector->allocator, cu_Layout_create(capacity * vector->layout.elem_size,
                              vector->layout.alignment));
-  if (!cu_Slice_Result_is_ok(&new_data_res)) {
+  if (!cu_IoSlice_Result_is_ok(&new_data_res)) {
     return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
   }
   vector->data = cu_Slice_Optional_some(new_data_res.value);
@@ -101,7 +102,8 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t size) {
       return err;
     }
   }
-  if (size < vector->length && cu_Destructor_Optional_is_some(&vector->destructor)) {
+  if (size < vector->length &&
+      cu_Destructor_Optional_is_some(&vector->destructor)) {
     cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
     for (size_t i = size; i < vector->length; ++i) {
       void *ptr = (unsigned char *)vector->data.value.ptr +
@@ -252,9 +254,8 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
     return cu_Vector_Result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
 
-  cu_Vector_Result result = cu_Vector_create(
-      src->allocator, src->layout, Size_Optional_some(src->capacity),
-      src->destructor);
+  cu_Vector_Result result = cu_Vector_create(src->allocator, src->layout,
+      Size_Optional_some(src->capacity), src->destructor);
   if (!cu_Vector_Result_is_ok(&result)) {
     return result;
   }

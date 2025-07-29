@@ -29,9 +29,8 @@ typedef struct {
 } cu_Io_Error;
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
-CU_RESULT_DECL(cu_Slice, cu_Slice, cu_Io_Error)
+CU_RESULT_DECL(cu_IoSlice, cu_Slice, cu_Io_Error)
 
-// Cross-platform error construction
 cu_Io_Error cu_Io_Error_from_errno(int error_code);
 
 #if CU_PLAT_WINDOWS

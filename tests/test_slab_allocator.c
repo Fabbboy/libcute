@@ -17,11 +17,11 @@ static void SlabAllocator_Basic(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
+  cu_IoSlice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
-  cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
+  cu_IoSlice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&b_res));
   cu_Slice b = b_res.value;
   TEST_ASSERT_TRUE((a.ptr) != (b.ptr));
 
@@ -39,8 +39,9 @@ static void SlabAllocator_BigAllocation(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  cu_Slice_Result big_res = cu_Allocator_Alloc(alloc, cu_Layout_create(256, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&big_res));
+  cu_IoSlice_Result big_res =
+      cu_Allocator_Alloc(alloc, cu_Layout_create(256, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&big_res));
 
   cu_SlabAllocator_destroy(&slab);
 }
@@ -56,14 +57,15 @@ static void SlabAllocator_Resize(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  cu_Slice_Result mem_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&mem_res));
+  cu_IoSlice_Result mem_res =
+      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&mem_res));
   cu_Slice mem = mem_res.value;
   cu_Memory_memset(mem.ptr, 0xAA, mem.length);
 
-  cu_Slice_Result resized_res =
+  cu_IoSlice_Result resized_res =
       cu_Allocator_Resize(alloc, mem, cu_Layout_create(128, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&resized_res));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized_res));
   TEST_ASSERT_EQUAL(((unsigned char *)resized_res.value.ptr)[0], 0xAA);
 
   cu_SlabAllocator_destroy(&slab);
@@ -81,8 +83,8 @@ static void SlabAllocator_ManyAllocations(void) {
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
   for (int i = 0; i < 1000; ++i) {
-    cu_Slice_Result s_res = cu_Allocator_Alloc(alloc, cu_Layout_create(8, 4));
-    TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&s_res));
+    cu_IoSlice_Result s_res = cu_Allocator_Alloc(alloc, cu_Layout_create(8, 4));
+    TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&s_res));
   }
 
   cu_SlabAllocator_destroy(&slab);
@@ -99,14 +101,14 @@ static void SlabAllocator_ReuseFreed(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
+  cu_IoSlice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
   void *ptr = a.ptr;
   cu_Allocator_Free(alloc, a);
 
-  cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
+  cu_IoSlice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&b_res));
   TEST_ASSERT_EQUAL(b_res.value.ptr, ptr);
 
   cu_SlabAllocator_destroy(&slab);
@@ -123,8 +125,8 @@ static void SlabAllocator_Alignment(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  cu_Slice_Result res = cu_Allocator_Alloc(alloc, cu_Layout_create(8, 16));
-  TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&res));
+  cu_IoSlice_Result res = cu_Allocator_Alloc(alloc, cu_Layout_create(8, 16));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&res));
   TEST_ASSERT_EQUAL((uintptr_t)res.value.ptr % 16, 0u);
 
   cu_SlabAllocator_destroy(&slab);
