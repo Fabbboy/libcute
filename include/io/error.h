@@ -32,8 +32,10 @@ typedef struct {
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
 CU_RESULT_DECL(cu_IoSlice, cu_Slice, cu_Io_Error)
 
+#ifndef CU_FREESTANDING
 cu_Io_Error cu_Io_Error_from_errno(int error_code);
 
 #if CU_PLAT_WINDOWS
 cu_Io_Error cu_Io_Error_from_win32(unsigned long error_code);
+#endif
 #endif

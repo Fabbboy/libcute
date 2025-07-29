@@ -42,6 +42,7 @@ All notable changes to this project will be documented in this file. See [conven
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
+- implement directory path helpers - Fabrice
 
 ### Refactoring
 
@@ -51,6 +52,7 @@ All notable changes to this project will be documented in this file. See [conven
 - changed template and moved file name - ([ac615b9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/ac615b92133f8500b4ea82457d101c8014feb4d7)) - Fabrice
 - changed changelog format again - ([87b6f41](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/87b6f416f96f7d5fe2afc5b649d8648c626b41a9)) - Fabrice
 - formats the codebase, splits tests into individual tests, fixes bitset warnings - ([2009a07](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2009a07316e9a08f24c40d0e720dfb3772b7aa45)) - Fabrice
+- require allocator parameter for directory path helpers - Fabrice
 
 ### Tests
 
