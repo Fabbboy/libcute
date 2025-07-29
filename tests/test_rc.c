@@ -1,4 +1,5 @@
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 #include "cute.h"
 
@@ -96,9 +97,9 @@ static void Rc_OptionalDestructor(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(Rc_Basic);
-    RUN_TEST(Rc_Point);
-    RUN_TEST(Rc_OptionalDestructor);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(Rc_Basic);
+  RUN_TEST(Rc_Point);
+  RUN_TEST(Rc_OptionalDestructor);
+  return UNITY_END();
 }

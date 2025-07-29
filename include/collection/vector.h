@@ -89,8 +89,6 @@ cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector);
 /** Reset the vector. */
 void cu_Vector_clear(cu_Vector *vector);
 
-void *cu_Vector_at(const cu_Vector *vector, size_t index);
-
-#define CU_VECTOR_AT_AS(vector, T, index) ((T *)cu_Vector_at((vector), (index)))
+Ptr_Optional cu_Vector_at(const cu_Vector *vector, size_t index);
 
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem);

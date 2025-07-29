@@ -34,6 +34,6 @@ static inline cu_Layout cu_Layout_create(size_t elem_size, size_t alignment) {
   return layout;
 }
 
-#define CU_LAYOUT(T) cu_Layout_create(sizeof(T), alignof(T))
+#define CU_LAYOUT(T) cu_Layout_create(sizeof(T), _Alignof(T))
 #define CU_LAYOUT_CHECK(layout)                                                \
   if ((layout).elem_size == 0 || (layout).alignment == 0)

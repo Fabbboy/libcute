@@ -1,10 +1,10 @@
 #include "collection/vector.h"
 #include "macro.h"
 #include "memory/allocator.h"
-#include <nostd.h>
 #include "object/optional.h"
 #include "object/result.h"
 #include "utility.h"
+#include <nostd.h>
 #include <stdalign.h>
 #include <stddef.h>
 
@@ -23,8 +23,7 @@ cu_Vector_Result cu_Vector_create(
       Size_Optional_unwrap(&initial_capacity) > 0) {
     cap = Size_Optional_unwrap(&initial_capacity);
     cu_Slice_Result r = cu_Allocator_Alloc(
-        allocator,
-        cu_Layout_create(cap * layout.elem_size, layout.alignment));
+        allocator, cu_Layout_create(cap * layout.elem_size, layout.alignment));
     if (!cu_Slice_Result_is_ok(&r)) {
       return cu_Vector_Result_error(CU_VECTOR_ERROR_OOM);
     }
@@ -66,10 +65,9 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
 
   if (cu_Slice_Optional_is_some(&vector->data)) {
     cu_Slice old_data = cu_Slice_Optional_unwrap(&vector->data);
-    cu_Slice_Result new_data = cu_Allocator_Resize(
-        vector->allocator, old_data,
-        cu_Layout_create(capacity * vector->layout.elem_size,
-            vector->layout.alignment));
+    cu_Slice_Result new_data = cu_Allocator_Resize(vector->allocator, old_data,
+        cu_Layout_create(
+            capacity * vector->layout.elem_size, vector->layout.alignment));
 
     if (!cu_Slice_Result_is_ok(&new_data)) {
       return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
@@ -81,9 +79,8 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
   }
 
   cu_Slice_Result new_data_res = cu_Allocator_Alloc(
-      vector->allocator,
-      cu_Layout_create(capacity * vector->layout.elem_size,
-          vector->layout.alignment));
+      vector->allocator, cu_Layout_create(capacity * vector->layout.elem_size,
+                             vector->layout.alignment));
   if (!cu_Slice_Result_is_ok(&new_data_res)) {
     return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
   }
@@ -136,8 +133,8 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
 
   void *dest = (unsigned char *)vector->data.value.ptr +
                vector->length * vector->layout.elem_size;
-  cu_Memory_memcpy(dest,
-      cu_Slice_create((void *)elem, vector->layout.elem_size));
+  cu_Memory_memcpy(
+      dest, cu_Slice_create((void *)elem, vector->layout.elem_size));
   vector->length++;
   return cu_Vector_Error_Optional_none();
 }
@@ -158,8 +155,7 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
   vector->length--;
   void *src = (unsigned char *)vector->data.value.ptr +
               vector->length * vector->layout.elem_size;
-  cu_Memory_memcpy(out_elem,
-      cu_Slice_create(src, vector->layout.elem_size));
+  cu_Memory_memcpy(out_elem, cu_Slice_create(src, vector->layout.elem_size));
 
   if (vector->length == 0) {
     cu_Vector_shrink_to_fit(vector);
@@ -186,9 +182,8 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
 
   void *dest =
       (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
-  cu_Memory_memmove(dest,
-      cu_Slice_create(vector->data.value.ptr,
-          vector->length * vector->layout.elem_size));
+  cu_Memory_memmove(dest, cu_Slice_create(vector->data.value.ptr,
+                              vector->length * vector->layout.elem_size));
 
   cu_Memory_memcpy(vector->data.value.ptr,
       cu_Slice_create((void *)elem, vector->layout.elem_size));
@@ -211,8 +206,7 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
   }
 
   void *src = vector->data.value.ptr;
-  cu_Memory_memcpy(out_elem,
-      cu_Slice_create(src, vector->layout.elem_size));
+  cu_Memory_memcpy(out_elem, cu_Slice_create(src, vector->layout.elem_size));
 
   void *dest =
       (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
@@ -272,14 +266,14 @@ void cu_Vector_clear(cu_Vector *vector) {
   cu_Vector_shrink_to_fit(vector);
 }
 
-void *cu_Vector_at(const cu_Vector *vector, size_t index) {
-  CU_IF_NULL(vector) { return NULL; }
-  CU_LAYOUT_CHECK(vector->layout) { return NULL; }
+Ptr_Optional cu_Vector_at(const cu_Vector *vector, size_t index) {
+  CU_IF_NULL(vector) { return Ptr_Optional_none(); }
+  CU_LAYOUT_CHECK(vector->layout) { return Ptr_Optional_none(); }
   if (index >= vector->length) {
-    return NULL;
+    return Ptr_Optional_none();
   }
-  return (unsigned char *)vector->data.value.ptr +
-         index * vector->layout.elem_size;
+  return Ptr_Optional_some((unsigned char *)vector->data.value.ptr +
+                           index * vector->layout.elem_size);
 }
 
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem) {

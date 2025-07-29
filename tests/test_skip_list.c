@@ -1,13 +1,15 @@
 #if CU_FREESTANDING
-#include "test_common.h"
-static void SkipList_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void SkipList_Unsupported(void) {}
 #else
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -93,12 +95,12 @@ static void SkipList_Iteration(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(SkipList_Unsupported);
+  RUN_TEST(SkipList_Unsupported);
 #else
-    RUN_TEST(SkipList_InsertFindRemove);
-    RUN_TEST(SkipList_Iteration);
+  RUN_TEST(SkipList_InsertFindRemove);
+  RUN_TEST(SkipList_Iteration);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

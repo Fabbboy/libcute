@@ -1,5 +1,6 @@
-#include "test_common.h"
 #include "hash/hash.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static void Hash_FNV1a32(void) {
   const char *data = "abcd";
@@ -14,8 +15,8 @@ static void Hash_Murmur3(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(Hash_FNV1a32);
-    RUN_TEST(Hash_Murmur3);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(Hash_FNV1a32);
+  RUN_TEST(Hash_Murmur3);
+  return UNITY_END();
 }

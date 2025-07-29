@@ -1,13 +1,15 @@
 #if CU_FREESTANDING
-#include "test_common.h"
-static void List_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void List_Unsupported(void) {}
 #else
 #include "collection/list.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -69,7 +71,8 @@ static void List_InsertIter(void) {
   TEST_ASSERT_TRUE(cu_List_Error_Optional_is_none(&err)); // list:2,42,1,0
 
   node = list.head; // head 2
-  while (node->next->next) node = node->next; // node at 1
+  while (node->next->next)
+    node = node->next; // node at 1
   val = 99;
   err = cu_List_insert_before(&list, node->next, &val); // before 0
   TEST_ASSERT_TRUE(cu_List_Error_Optional_is_none(&err));
@@ -90,12 +93,12 @@ static void List_InsertIter(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(List_Unsupported);
+  RUN_TEST(List_Unsupported);
 #else
-    RUN_TEST(List_PushPop);
-    RUN_TEST(List_InsertIter);
+  RUN_TEST(List_PushPop);
+  RUN_TEST(List_InsertIter);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

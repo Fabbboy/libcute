@@ -1,6 +1,8 @@
 #include "http.h"
+#include "collection/vector.h"
 #include "macro.h"
 #include "memory/allocator.h"
+#include "object/optional.h"
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <nostd.h>
@@ -43,12 +45,12 @@ static int set_nonblocking(int fd) {
 static void close_client(cu_HttpServer *server, int fd) {
   close(fd);
   for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
-    int *ptr = CU_VECTOR_AT_AS(&server->clients, int, i);
-    if (*ptr == fd) {
+    Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
+    if (Ptr_Optional_is_some(&ptr) &&
+        *CU_AS(Ptr_Optional_unwrap(&ptr), int *) == fd) {
       size_t last = cu_Vector_size(&server->clients) - 1;
       if (i != last) {
-        int *last_ptr = CU_VECTOR_AT_AS(&server->clients, int, last);
-        *ptr = *last_ptr;
+        ptr = cu_Vector_at(&server->clients, last);
       }
       int dummy;
       cu_Vector_pop_back(&server->clients, &dummy);
@@ -257,8 +259,12 @@ void cu_HttpServer_destroy(cu_HttpServer *server) {
   close(server->listen_fd);
   close(server->epoll_fd);
   for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
-    int *fd = CU_VECTOR_AT_AS(&server->clients, int, i);
-    close(*fd);
+    Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
+    if (Ptr_Optional_is_some(&ptr)) {
+      int *fd = CU_AS(Ptr_Optional_unwrap(&ptr), int *);
+      printf("DEBUG: Closing client fd=%d\n", *fd);
+      close(*fd);
+    }
   }
   cu_Vector_destroy(&server->clients);
   cu_SlabAllocator_destroy(&server->slab);

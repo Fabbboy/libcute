@@ -1,8 +1,9 @@
-#include "test_common.h"
 #include "collection/bitmap.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/wasmallocator.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static void Bitmap_Basic(void) {
 #if CU_PLAT_WASM
@@ -30,7 +31,7 @@ static void Bitmap_Basic(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(Bitmap_Basic);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(Bitmap_Basic);
+  return UNITY_END();
 }

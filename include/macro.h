@@ -61,7 +61,8 @@
 #define CU_PLAT_POSIX 0
 #endif
 
-#define UNREACHABLE(msg)                                                       \
-  cu_panic_handler("Unreachable code reached: %s", msg)
+#define UNREACHABLE(msg) cu_panic_handler("Unreachable code reached: %s", msg)
 
 #define TODO(msg) cu_panic_handler("TODO: %s", msg)
+
+#define CU_AS(expr, T) (T)(expr)

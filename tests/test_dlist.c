@@ -1,13 +1,15 @@
 #if CU_FREESTANDING
-#include "test_common.h"
-static void DList_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void DList_Unsupported(void) {}
 #else
 #include "collection/dlist.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
   (void)gpa;
@@ -72,12 +74,12 @@ static void DList_InsertIter(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(DList_Unsupported);
+  RUN_TEST(DList_Unsupported);
 #else
-    RUN_TEST(DList_PushPop);
-    RUN_TEST(DList_InsertIter);
+  RUN_TEST(DList_PushPop);
+  RUN_TEST(DList_InsertIter);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

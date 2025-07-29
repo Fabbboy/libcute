@@ -1,6 +1,7 @@
 #if CU_FREESTANDING
-#include "test_common.h"
-static void SkipListSST_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void SkipListSST_Unsupported(void) {}
 #else
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
@@ -8,7 +9,8 @@ static void SkipListSST_Unsupported(void) { }
 #include "memory/gpallocator.h"
 #include "memory/page.h"
 #include "nostd.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -60,11 +62,21 @@ static void SkipListSST_SortedStrings(void) {
     const char *vv = *(const char **)v;
     TEST_ASSERT_TRUE((idx) < (5));
     TEST_ASSERT_EQUAL_STRING(kk, sorted[idx]);
-    if (cu_CString_cmp(kk, "apple") == 0) { TEST_ASSERT_EQUAL_STRING(vv, "A"); }
-    if (cu_CString_cmp(kk, "banana") == 0) { TEST_ASSERT_EQUAL_STRING(vv, "B"); }
-    if (cu_CString_cmp(kk, "cherry") == 0) { TEST_ASSERT_EQUAL_STRING(vv, "C"); }
-    if (cu_CString_cmp(kk, "date") == 0) { TEST_ASSERT_EQUAL_STRING(vv, "D"); }
-    if (cu_CString_cmp(kk, "elderberry") == 0) { TEST_ASSERT_EQUAL_STRING(vv, "E"); }
+    if (cu_CString_cmp(kk, "apple") == 0) {
+      TEST_ASSERT_EQUAL_STRING(vv, "A");
+    }
+    if (cu_CString_cmp(kk, "banana") == 0) {
+      TEST_ASSERT_EQUAL_STRING(vv, "B");
+    }
+    if (cu_CString_cmp(kk, "cherry") == 0) {
+      TEST_ASSERT_EQUAL_STRING(vv, "C");
+    }
+    if (cu_CString_cmp(kk, "date") == 0) {
+      TEST_ASSERT_EQUAL_STRING(vv, "D");
+    }
+    if (cu_CString_cmp(kk, "elderberry") == 0) {
+      TEST_ASSERT_EQUAL_STRING(vv, "E");
+    }
     ++idx;
   }
   TEST_ASSERT_EQUAL(idx, 5);
@@ -75,11 +87,11 @@ static void SkipListSST_SortedStrings(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(SkipListSST_Unsupported);
+  RUN_TEST(SkipListSST_Unsupported);
 #else
-    RUN_TEST(SkipListSST_SortedStrings);
+  RUN_TEST(SkipListSST_SortedStrings);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

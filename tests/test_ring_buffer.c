@@ -3,7 +3,8 @@
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -49,7 +50,7 @@ static void RingBuffer_PushPop(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(RingBuffer_PushPop);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(RingBuffer_PushPop);
+  return UNITY_END();
 }

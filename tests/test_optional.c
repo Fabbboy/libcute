@@ -1,5 +1,6 @@
-#include "test_common.h"
 #include "object/optional.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static void Optional_SomeAndNone(void) {
   Int_Optional some = Int_Optional_some(123);
@@ -13,7 +14,7 @@ static void Optional_SomeAndNone(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(Optional_SomeAndNone);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(Optional_SomeAndNone);
+  return UNITY_END();
 }

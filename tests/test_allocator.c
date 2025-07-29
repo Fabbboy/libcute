@@ -1,7 +1,9 @@
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
+#include "unity_internals.h"
 
 static char buffer[1024 * 1024];
 

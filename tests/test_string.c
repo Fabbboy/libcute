@@ -1,9 +1,10 @@
-#include "test_common.h"
 #include "memory/allocator.h"
-#include "memory/wasmallocator.h"
 #include "memory/fixedallocator.h"
+#include "memory/wasmallocator.h"
 #include "nostd.h"
 #include "string/string.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static void String_AppendAndSubstring(void) {
 #if CU_PLAT_WASM
@@ -23,7 +24,8 @@ static void String_AppendAndSubstring(void) {
   TEST_ASSERT_EQUAL(str.length, 5u);
   TEST_ASSERT_EQUAL_STRING(str.data, "hello");
 
-  TEST_ASSERT_EQUAL(CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
+  TEST_ASSERT_EQUAL(
+      CU_STRING_ERROR_NONE, cu_String_append_cstr(&str, ", world"));
   TEST_ASSERT_EQUAL(str.length, 12u);
   TEST_ASSERT_EQUAL_STRING(str.data, "hello, world");
 
@@ -58,8 +60,8 @@ static void String_Clear(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(String_AppendAndSubstring);
-    RUN_TEST(String_Clear);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(String_AppendAndSubstring);
+  RUN_TEST(String_Clear);
+  return UNITY_END();
 }

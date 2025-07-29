@@ -37,7 +37,7 @@ foreach test_file : test_files
   test_name = test_file.split('.')[0]
   exe = executable(
     test_name,
-    test_file,
+    [test_file, 'test_common.c'],
     dependencies: [cute_dep, unity_dep],
     include_directories: includes,
     c_args: test_args,

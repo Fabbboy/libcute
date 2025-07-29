@@ -1,14 +1,16 @@
 #if CU_FREESTANDING
-#include "test_common.h"
-static void HashMap_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void HashMap_Unsupported(void) {}
 #else
 #include "collection/hashmap.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
 #include <stdlib.h>
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -104,26 +106,26 @@ static void HashMap_StressRandomAccess(void) {
     TEST_ASSERT_TRUE(cu_HashMap_Error_Optional_is_none(&err));
   }
 
-    int *keys = malloc(sizeof(int) * count);
-    for (int i = 0; i < count; ++i) {
-        keys[i] = i;
-    }
-    srand(1234);
-    for (int i = count - 1; i > 0; --i) {
-        int j = rand() % (i + 1);
-        int tmp = keys[i];
-        keys[i] = keys[j];
-        keys[j] = tmp;
-    }
+  int *keys = malloc(sizeof(int) * count);
+  for (int i = 0; i < count; ++i) {
+    keys[i] = i;
+  }
+  srand(1234);
+  for (int i = count - 1; i > 0; --i) {
+    int j = rand() % (i + 1);
+    int tmp = keys[i];
+    keys[i] = keys[j];
+    keys[j] = tmp;
+  }
 
-    for (int i = 0; i < count; ++i) {
-        int k = keys[i];
-        Ptr_Optional opt = cu_HashMap_get(&map, &k);
-        TEST_ASSERT_TRUE(Ptr_Optional_is_some(&opt));
-        int *val = (int *)Ptr_Optional_unwrap(&opt);
-        TEST_ASSERT_EQUAL(*val, k);
-    }
-    free(keys);
+  for (int i = 0; i < count; ++i) {
+    int k = keys[i];
+    Ptr_Optional opt = cu_HashMap_get(&map, &k);
+    TEST_ASSERT_TRUE(Ptr_Optional_is_some(&opt));
+    int *val = (int *)Ptr_Optional_unwrap(&opt);
+    TEST_ASSERT_EQUAL(*val, k);
+  }
+  free(keys);
 
   cu_HashMap_destroy(&map);
   cu_GPAllocator_destroy(&gpa);
@@ -131,13 +133,13 @@ static void HashMap_StressRandomAccess(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(HashMap_Unsupported);
+  RUN_TEST(HashMap_Unsupported);
 #else
-    RUN_TEST(HashMap_BasicInsertGet);
-    RUN_TEST(HashMap_CustomHashIter);
-    RUN_TEST(HashMap_StressRandomAccess);
+  RUN_TEST(HashMap_BasicInsertGet);
+  RUN_TEST(HashMap_CustomHashIter);
+  RUN_TEST(HashMap_StressRandomAccess);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

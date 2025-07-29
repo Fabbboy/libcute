@@ -1,8 +1,9 @@
-#include "test_common.h"
 #include "memory/allocator.h"
-#include "memory/wasmallocator.h"
 #include "memory/fixedallocator.h"
+#include "memory/wasmallocator.h"
 #include "string/fmt.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static void StrBuilder_AppendFormatted(void) {
 #if CU_PLAT_WASM
@@ -58,8 +59,8 @@ static void StrBuilder_AppendAndFinalize(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(StrBuilder_AppendFormatted);
-    RUN_TEST(StrBuilder_AppendAndFinalize);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(StrBuilder_AppendFormatted);
+  RUN_TEST(StrBuilder_AppendAndFinalize);
+  return UNITY_END();
 }

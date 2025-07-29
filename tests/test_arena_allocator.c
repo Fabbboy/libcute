@@ -1,7 +1,8 @@
-#include "test_common.h"
 #include "collection/vector.h"
 #include "memory/arenaallocator.h"
 #include "memory/fixedallocator.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static unsigned char backing[64 * 1024];
 
@@ -58,19 +59,16 @@ static void ArenaAllocator_NonLifoAlloc(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
-  cu_Slice_Result a_res =
-      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
-  cu_Slice_Result b_res =
-      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
   cu_Slice b = b_res.value;
   void *first = a.ptr;
 
   cu_Allocator_Free(alloc, a);
-  cu_Slice_Result c_res =
-      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  cu_Slice_Result c_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&c_res));
   cu_Slice c = c_res.value;
   TEST_ASSERT_TRUE((c.ptr) != (first));
@@ -129,8 +127,7 @@ static void ArenaAllocator_ReuseOldChunk(void) {
   cu_Slice_Result blocks_res[20];
   cu_Slice blocks[20];
   for (int i = 0; i < 20; ++i) {
-    blocks_res[i] =
-        cu_Allocator_Alloc(alloc, cu_Layout_create(112, 8));
+    blocks_res[i] = cu_Allocator_Alloc(alloc, cu_Layout_create(112, 8));
     TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&blocks_res[i]));
     blocks[i] = blocks_res[i].value;
   }
@@ -213,12 +210,10 @@ static void ArenaAllocator_ResizeAllocNewBlock(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
-  cu_Slice_Result a_res =
-      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  cu_Slice_Result a_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&a_res));
   cu_Slice a = a_res.value;
-  cu_Slice_Result b_res =
-      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  cu_Slice_Result b_res = cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_Slice_Result_is_ok(&b_res));
   cu_Slice b = b_res.value;
   void *old_ptr = a.ptr;
@@ -234,13 +229,13 @@ static void ArenaAllocator_ResizeAllocNewBlock(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(ArenaAllocator_LifoVectors);
-    RUN_TEST(ArenaAllocator_NonLifoAlloc);
-    RUN_TEST(ArenaAllocator_ChunkReuseStress);
-    RUN_TEST(ArenaAllocator_ReuseOldChunk);
-    RUN_TEST(ArenaAllocator_ResizeGrowInPlace);
-    RUN_TEST(ArenaAllocator_ResizeShrinkInPlace);
-    RUN_TEST(ArenaAllocator_ResizeAllocNewBlock);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(ArenaAllocator_LifoVectors);
+  RUN_TEST(ArenaAllocator_NonLifoAlloc);
+  RUN_TEST(ArenaAllocator_ChunkReuseStress);
+  RUN_TEST(ArenaAllocator_ReuseOldChunk);
+  RUN_TEST(ArenaAllocator_ResizeGrowInPlace);
+  RUN_TEST(ArenaAllocator_ResizeShrinkInPlace);
+  RUN_TEST(ArenaAllocator_ResizeAllocNewBlock);
+  return UNITY_END();
 }

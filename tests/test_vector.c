@@ -1,13 +1,16 @@
+#include "object/optional.h"
 #if CU_FREESTANDING
-#include "test_common.h"
-static void Vector_Unsupported(void) { }
+#include "unity.h"
+#include <unity_internals.h>
+static void Vector_Unsupported(void) {}
 #else
 #include "collection/vector.h"
 #include "memory/allocator.h"
 #include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
 #include "memory/page.h"
-#include "test_common.h"
+#include "unity.h"
+#include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 #if CU_FREESTANDING
@@ -68,7 +71,8 @@ static void Vector_PushBack(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
-  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+  cu_Vector_Result res =
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -86,7 +90,8 @@ static void Vector_PopBack(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
-  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+  cu_Vector_Result res =
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -113,7 +118,8 @@ static void Vector_Copy(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
-  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
+  cu_Vector_Result res =
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
 
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
@@ -131,7 +137,10 @@ static void Vector_Copy(void) {
   TEST_ASSERT_EQUAL(cu_Vector_size(&copy), 5u);
   TEST_ASSERT_EQUAL(cu_Vector_capacity(&copy), 5u);
   for (int i = 0; i < 5; ++i) {
-    TEST_ASSERT_EQUAL(*CU_VECTOR_AT_AS(&copy, int, i), i);
+    Ptr_Optional ptr = cu_Vector_at(&copy, i);
+    TEST_ASSERT_TRUE(Ptr_Optional_is_some(&ptr));
+    int *val = CU_AS(Ptr_Optional_unwrap(&ptr), int *);
+    TEST_ASSERT_EQUAL(*val, i);
   }
 
   cu_Vector_destroy(&copy);
@@ -143,7 +152,8 @@ static void Vector_ReserveClearAt(void) {
   cu_GPAllocator gpa;
   cu_Allocator alloc = create_allocator(&gpa);
 
-  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+  cu_Vector_Result res =
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -155,7 +165,10 @@ static void Vector_ReserveClearAt(void) {
     cu_Vector_push_back(&vector, &i);
   }
 
-  int *val = CU_VECTOR_AT_AS(&vector, int, 2);
+  // int *val = CU_VECTOR_AT_AS(&vector, int, 2);
+  Ptr_Optional ptr = cu_Vector_at(&vector, 2);
+  TEST_ASSERT_TRUE(Ptr_Optional_is_some(&ptr));
+  int *val = CU_AS(Ptr_Optional_unwrap(&ptr), int *);
   TEST_ASSERT_TRUE((val) != (NULL));
   TEST_ASSERT_EQUAL(*val, 2);
 
@@ -169,16 +182,16 @@ static void Vector_ReserveClearAt(void) {
 #endif
 
 int main(void) {
-    UNITY_BEGIN();
+  UNITY_BEGIN();
 #if CU_FREESTANDING
-    RUN_TEST(Vector_Unsupported);
+  RUN_TEST(Vector_Unsupported);
 #else
-    RUN_TEST(Vector_Create);
-    RUN_TEST(Vector_Resize);
-    RUN_TEST(Vector_PushBack);
-    RUN_TEST(Vector_PopBack);
-    RUN_TEST(Vector_Copy);
-    RUN_TEST(Vector_ReserveClearAt);
+  RUN_TEST(Vector_Create);
+  RUN_TEST(Vector_Resize);
+  RUN_TEST(Vector_PushBack);
+  RUN_TEST(Vector_PopBack);
+  RUN_TEST(Vector_Copy);
+  RUN_TEST(Vector_ReserveClearAt);
 #endif
-    return UNITY_END();
+  return UNITY_END();
 }

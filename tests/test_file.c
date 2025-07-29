@@ -1,6 +1,7 @@
-#include "test_common.h"
-#include <nostd.h>
 #include "cute.h"
+#include "unity.h"
+#include <nostd.h>
+#include <unity_internals.h>
 
 static void File_OpenAndClose(void) {
   cu_File_OpenOptions options = {0};
@@ -62,9 +63,9 @@ static void File_InvalidOptions(void) {
 }
 
 int main(void) {
-    UNITY_BEGIN();
-    RUN_TEST(File_OpenAndClose);
-    RUN_TEST(File_WriteAndRead);
-    RUN_TEST(File_InvalidOptions);
-    return UNITY_END();
+  UNITY_BEGIN();
+  RUN_TEST(File_OpenAndClose);
+  RUN_TEST(File_WriteAndRead);
+  RUN_TEST(File_InvalidOptions);
+  return UNITY_END();
 }
