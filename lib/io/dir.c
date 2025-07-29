@@ -5,6 +5,7 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "string/fmt.h"
 #include "string/string.h"
 #include <stdlib.h>
 #if CU_PLAT_POSIX
@@ -99,8 +100,95 @@ void cu_Dir_close(cu_Dir *dir) {
   dir->handle = CU_INVALID_HANDLE;
 }
 
-cu_String_Optional cu_Dir_Home(void) { return cu_String_Optional_none(); }
-cu_String_Optional cu_Dir_Tmp(void) { return cu_String_Optional_none(); }
-cu_String_Optional cu_Dir_Config(void) { return cu_String_Optional_none(); }
+cu_String_Optional cu_Dir_Home(cu_Allocator allocator) {
+#if CU_PLAT_WINDOWS
+  const char *home = getenv("USERPROFILE");
+  if (!home) {
+    const char *drive = getenv("HOMEDRIVE");
+    const char *path = getenv("HOMEPATH");
+    if (drive && path) {
+      cu_StrBuilder sb = cu_StrBuilder_init(allocator);
+      if (cu_StrBuilder_append_cstr(&sb, drive) != CU_STRING_ERROR_NONE ||
+          cu_StrBuilder_append_cstr(&sb, path) != CU_STRING_ERROR_NONE) {
+        cu_StrBuilder_destroy(&sb);
+        return cu_String_Optional_none();
+      }
+      cu_String_Result res = cu_StrBuilder_finalize(&sb);
+      cu_StrBuilder_destroy(&sb);
+      return cu_String_Optional_some(res.value);
+    }
+    return cu_String_Optional_none();
+  }
+#else
+  const char *home = getenv("HOME");
+  if (!home) {
+    return cu_String_Optional_none();
+  }
+#endif
+  cu_String_Result res = cu_String_from_cstr(allocator, home);
+  if (!cu_String_Result_is_ok(&res)) {
+    return cu_String_Optional_none();
+  }
+  return cu_String_Optional_some(res.value);
+}
+
+cu_String_Optional cu_Dir_Tmp(cu_Allocator allocator) {
+#if CU_PLAT_WINDOWS
+  const char *tmp = getenv("TEMP");
+  if (!tmp)
+    tmp = getenv("TMP");
+  if (!tmp)
+    return cu_String_Optional_none();
+#else
+  const char *tmp = getenv("TMPDIR");
+  if (!tmp)
+    tmp = "/tmp";
+#endif
+  cu_String_Result res = cu_String_from_cstr(allocator, tmp);
+  if (!cu_String_Result_is_ok(&res)) {
+    return cu_String_Optional_none();
+  }
+  return cu_String_Optional_some(res.value);
+}
+
+cu_String_Optional cu_Dir_Config(cu_Allocator allocator) {
+#if CU_PLAT_WINDOWS
+  const char *cfg = getenv("APPDATA");
+  if (!cfg)
+    cfg = getenv("LOCALAPPDATA");
+  if (!cfg)
+    return cu_String_Optional_none();
+  cu_String_Result res = cu_String_from_cstr(allocator, cfg);
+  if (!cu_String_Result_is_ok(&res)) {
+    return cu_String_Optional_none();
+  }
+  return cu_String_Optional_some(res.value);
+#else
+  const char *xdg = getenv("XDG_CONFIG_HOME");
+  if (xdg) {
+    cu_String_Result res = cu_String_from_cstr(allocator, xdg);
+    if (!cu_String_Result_is_ok(&res)) {
+      return cu_String_Optional_none();
+    }
+    return cu_String_Optional_some(res.value);
+  }
+  const char *home = getenv("HOME");
+  if (!home) {
+    return cu_String_Optional_none();
+  }
+  cu_StrBuilder sb = cu_StrBuilder_init(allocator);
+  if (cu_StrBuilder_append_cstr(&sb, home) != CU_STRING_ERROR_NONE ||
+      cu_StrBuilder_append_cstr(&sb, "/.config") != CU_STRING_ERROR_NONE) {
+    cu_StrBuilder_destroy(&sb);
+    return cu_String_Optional_none();
+  }
+  cu_String_Result res = cu_StrBuilder_finalize(&sb);
+  cu_StrBuilder_destroy(&sb);
+  if (!cu_String_Result_is_ok(&res)) {
+    return cu_String_Optional_none();
+  }
+  return cu_String_Optional_some(res.value);
+#endif
+}
 
 #endif

@@ -2,6 +2,8 @@
 #include "macro.h"
 #include "object/optional.h"
 
+#ifndef CU_FREESTANDING
+
 #if CU_PLAT_WINDOWS
 #include <windows.h>
 #else
@@ -106,4 +108,6 @@ cu_Io_Error cu_Io_Error_from_win32(unsigned long error_code) {
   return (cu_Io_Error){
       .kind = kind, .errnum = Size_Optional_some((size_t)error_code)};
 }
+#endif
+
 #endif

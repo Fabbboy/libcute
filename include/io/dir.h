@@ -17,8 +17,9 @@ CU_RESULT_DECL(cu_Dir, cu_Dir, cu_Io_Error)
 cu_Dir_Result cu_Dir_open(cu_Slice path, bool create);
 void cu_Dir_close(cu_Dir *dir);
 
-cu_String_Optional cu_Dir_Home(void);
-cu_String_Optional cu_Dir_Tmp(void);
-cu_String_Optional cu_Dir_Config(void);
+cu_String_Optional cu_Dir_Home(cu_Allocator allocator);
+cu_String_Optional cu_Dir_Tmp(cu_Allocator allocator);
+cu_String_Optional cu_Dir_Config(cu_Allocator allocator);
+
 
 #endif
