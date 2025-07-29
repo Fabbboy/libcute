@@ -5,7 +5,6 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include "io/error.h"
 
 #ifndef CU_FREESTANDING
 
@@ -274,6 +273,17 @@ cu_Io_Error_Optional cu_File_seek(cu_File *file, cu_File_SeekTo seek_to) {
 #endif
 
   return cu_Io_Error_Optional_none();
+}
+
+cu_File_Result cu_Dir_openat(
+    cu_Dir *dir, cu_Slice path, cu_File_Options options) {
+  CU_IF_NULL(dir) {
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none(),
+    };
+    return cu_File_Result_error(err);
+  }
 }
 
 #endif // CU_FREESTANDING

@@ -21,5 +21,4 @@ cu_String_Optional cu_Dir_Home(cu_Allocator allocator);
 cu_String_Optional cu_Dir_Tmp(cu_Allocator allocator);
 cu_String_Optional cu_Dir_Config(cu_Allocator allocator);
 
-
 #endif

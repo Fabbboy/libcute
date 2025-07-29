@@ -1,6 +1,7 @@
 #pragma once
-#include "object/optional.h"
+#include "io/dir.h"
 #include "io/error.h"
+#include "object/optional.h"
 
 #ifndef CU_FREESTANDING
 #include "io/error.h"
@@ -59,6 +60,9 @@ static inline void cu_File_Options_truncate(cu_File_Options *options) {
 }
 
 cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options);
+cu_File_Result cu_Dir_openat(
+    cu_Dir *dir, cu_Slice path, cu_File_Options options);
+
 void cu_File_close(cu_File *file);
 cu_Io_Error_Optional cu_File_read(cu_File *file, cu_Slice buffer);
 cu_Io_Error_Optional cu_File_write(cu_File *file, cu_Slice data);
