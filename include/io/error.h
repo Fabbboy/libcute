@@ -1,5 +1,5 @@
 #pragma once
-#include "object/optional.h"
+#include "object/optional.h" 
 #include <stddef.h>
 
 typedef enum {
@@ -27,9 +27,6 @@ typedef struct {
   cu_Io_ErrorKind kind;
   Size_Optional errnum;
 } cu_Io_Error;
-
-CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
-CU_RESULT_DECL(cu_IoSlice, cu_Slice, cu_Io_Error)
 
 cu_Io_Error cu_Io_Error_from_errno(int error_code);
 
