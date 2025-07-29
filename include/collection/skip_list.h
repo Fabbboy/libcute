@@ -7,6 +7,7 @@
 #include "object/optional.h"
 #include "object/result.h"
 #include "object/destructor.h"
+#include "state.h"
 #include "utility.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -37,6 +38,7 @@ typedef struct {
   cu_Allocator allocator;
   cu_Destructor_Optional key_destructor;
   cu_Destructor_Optional value_destructor;
+  cu_State state;
 } cu_SkipList;
 
 typedef enum {
@@ -49,10 +51,11 @@ typedef enum {
 CU_RESULT_DECL(cu_SkipList, cu_SkipList, cu_SkipList_Error)
 CU_OPTIONAL_DECL(cu_SkipList_Error, cu_SkipList_Error)
 
+/** Create a new skip list using @p state as random source. */
 cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout, size_t max_level,
     cu_SkipList_CmpFn_Optional cmp, cu_Destructor_Optional key_destructor,
-    cu_Destructor_Optional value_destructor);
+    cu_Destructor_Optional value_destructor, cu_State state);
 
 void cu_SkipList_destroy(cu_SkipList *list);
 

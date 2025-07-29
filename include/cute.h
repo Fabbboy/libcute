@@ -24,6 +24,7 @@ extern "C" {
 #include "collection/skip_list.h"
 #include "collection/vector.h"
 
+#include "state.h"
 #include "hash/hash.h"
 #include "nostd.h"
 #include "object/optional.h"

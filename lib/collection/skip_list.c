@@ -1,6 +1,7 @@
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
 #include "utility.h"
+#include "state.h"
 #include <nostd.h>
 #include <stdalign.h>
 
@@ -18,15 +19,10 @@ static int cu_SkipList_default_cmp(const void *a, const void *b) {
   return 0;
 }
 
-static uint32_t rng_state = 1;
-static uint32_t rng_next(void) {
-  rng_state = rng_state * 1664525u + 1013904223u;
-  return rng_state;
-}
-
-static size_t cu_SkipList_random_level(const cu_SkipList *list) {
+static size_t cu_SkipList_random_level(cu_SkipList *list) {
   size_t lvl = 1;
-  while ((rng_next() & 0xFFFF) < 0x8000 && lvl < list->max_level) {
+  while ((cu_State_next(&list->state) & 0xFFFF) < 0x8000 &&
+         lvl < list->max_level) {
     lvl++;
   }
   return lvl;
@@ -78,7 +74,7 @@ static cu_SkipList_Error_Optional cu_SkipList_alloc_node(cu_SkipList *list,
 cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout, size_t max_level,
     cu_SkipList_CmpFn_Optional cmp, cu_Destructor_Optional key_destructor,
-    cu_Destructor_Optional value_destructor) {
+    cu_Destructor_Optional value_destructor, cu_State state) {
   CU_LAYOUT_CHECK(key_layout) {
     return cu_SkipList_Result_error(CU_SKIPLIST_ERROR_INVALID_LAYOUT);
   }
@@ -119,6 +115,7 @@ cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
   list.allocator = allocator;
   list.key_destructor = key_destructor;
   list.value_destructor = value_destructor;
+  list.state = state;
   return cu_SkipList_Result_ok(list);
 }
 
