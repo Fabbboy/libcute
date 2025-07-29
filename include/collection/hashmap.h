@@ -7,6 +7,7 @@
 #include "memory/allocator.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "state.h"
 #include "utility.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -36,6 +37,7 @@ typedef struct {
   cu_Allocator allocator;        /**< backing allocator */
   cu_HashMap_HashFn hash_fn;     /**< hashing function */
   cu_HashMap_EqualsFn equals_fn; /**< equality predicate */
+  uint32_t seed;                 /**< hash seed */
 } cu_HashMap;
 
 /** Possible error codes returned by hashmap operations. */
@@ -58,11 +60,12 @@ CU_OPTIONAL_DECL(cu_HashMap_Error, cu_HashMap_Error)
  * @param initial_capacity optional initial bucket count
  * @param hash_fn hashing function, defaults to FNV-1a when none
  * @param equals_fn equality predicate, defaults to bytewise compare
+ * @param state randomization source
  */
 cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout,
     Size_Optional initial_capacity, cu_HashMap_HashFn_Optional hash_fn,
-    cu_HashMap_EqualsFn_Optional equals_fn);
+    cu_HashMap_EqualsFn_Optional equals_fn, cu_State state);
 /** Release resources held by @p map. */
 void cu_HashMap_destroy(cu_HashMap *map);
 

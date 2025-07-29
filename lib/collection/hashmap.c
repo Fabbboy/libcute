@@ -108,7 +108,7 @@ static cu_HashMap_Error_Optional cu_HashMap_rehash(
 cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout,
     Size_Optional initial_capacity, cu_HashMap_HashFn_Optional hash_fn,
-    cu_HashMap_EqualsFn_Optional equals_fn) {
+    cu_HashMap_EqualsFn_Optional equals_fn, cu_State state) {
   CU_LAYOUT_CHECK(key_layout) {
     return cu_HashMap_Result_error(CU_HASHMAP_ERROR_INVALID_LAYOUT);
   }
@@ -146,6 +146,7 @@ cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
   if (cu_HashMap_EqualsFn_Optional_is_some(&equals_fn)) {
     map.equals_fn = cu_HashMap_EqualsFn_Optional_unwrap(&equals_fn);
   }
+  map.seed = cu_State_next(&state);
   return cu_HashMap_Result_ok(map);
 }
 
@@ -186,7 +187,7 @@ cu_HashMap_Error_Optional cu_HashMap_insert(
       return err;
     }
   }
-  uint64_t hash = map->hash_fn(key, map->key_layout.elem_size);
+  uint64_t hash = map->hash_fn(key, map->key_layout.elem_size) ^ map->seed;
   cu_HashMap_Bucket *slot = cu_HashMap_find_slot(map, key, hash);
   if (slot->used && !slot->deleted) {
     cu_Memory_memcpy(slot->value,
@@ -229,7 +230,7 @@ Ptr_Optional cu_HashMap_get(const cu_HashMap *map, const void *key) {
   if (map->capacity == 0) {
     return Ptr_Optional_none();
   }
-  uint64_t hash = map->hash_fn(key, map->key_layout.elem_size);
+  uint64_t hash = map->hash_fn(key, map->key_layout.elem_size) ^ map->seed;
   cu_HashMap_Bucket *b = cu_HashMap_lookup_bucket(map, key, hash);
   return b ? Ptr_Optional_some(b->value) : Ptr_Optional_none();
 }

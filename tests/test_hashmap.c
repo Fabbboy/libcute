@@ -12,10 +12,12 @@ static void HashMap_Unsupported(void) {}
 
 static void HashMap_BasicInsertGet(void) {
   cu_Allocator alloc = test_allocator;
+  cu_RandomState rng;
+  cu_State st = cu_RandomState_init(&rng, 1);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(8), cu_HashMap_HashFn_Optional_none(),
-      cu_HashMap_EqualsFn_Optional_none());
+      cu_HashMap_EqualsFn_Optional_none(), st);
   TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
@@ -43,11 +45,13 @@ static bool int_eq(const void *a, const void *b, size_t unused) {
 
 static void HashMap_CustomHashIter(void) {
   cu_Allocator alloc = test_allocator;
+  cu_RandomState rng;
+  cu_State st = cu_RandomState_init(&rng, 1);
 
   cu_HashMap_Result res =
       cu_HashMap_create(alloc, CU_LAYOUT(int), CU_LAYOUT(int),
           Size_Optional_some(4), cu_HashMap_HashFn_Optional_some(int_hash),
-          cu_HashMap_EqualsFn_Optional_some(int_eq));
+          cu_HashMap_EqualsFn_Optional_some(int_eq), st);
   TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
@@ -70,10 +74,13 @@ static void HashMap_CustomHashIter(void) {
 
 static void HashMap_StressRandomAccess(void) {
   cu_Allocator alloc = test_allocator;
+  cu_RandomState rng;
+  cu_State st = cu_RandomState_init(&rng, 1);
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(128),
-      cu_HashMap_HashFn_Optional_none(), cu_HashMap_EqualsFn_Optional_none());
+      cu_HashMap_HashFn_Optional_none(), cu_HashMap_EqualsFn_Optional_none(),
+      st);
   TEST_ASSERT_TRUE(cu_HashMap_Result_is_ok(&res));
   cu_HashMap map = cu_HashMap_Result_unwrap(&res);
 
