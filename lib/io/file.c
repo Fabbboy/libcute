@@ -5,6 +5,7 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "io/error.h"
 
 #ifndef CU_FREESTANDING
 

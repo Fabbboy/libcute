@@ -2,6 +2,7 @@
 
 #include "io/error.h"
 #include "io/fd.h"
+#include "object/result.h"
 
 typedef struct {
   cu_Handle handle;

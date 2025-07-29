@@ -1,5 +1,6 @@
 #pragma once
 #include "object/optional.h"
+#include "io/error.h"
 
 #ifndef CU_FREESTANDING
 #include "io/error.h"

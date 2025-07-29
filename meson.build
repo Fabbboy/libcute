@@ -32,7 +32,7 @@ sources = [
   'lib/collection/hashmap.c',
   'lib/state.c',
   'lib/io/error.c',
-  'lib/io/file.c',
+  'lib/io/file.c', 
   'lib/io/dir.c',
 ]
 

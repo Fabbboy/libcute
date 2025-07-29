@@ -8,6 +8,8 @@
 #include <errno.h>
 #endif
 
+CU_OPTIONAL_IMPL(cu_Io_Error, cu_Io_Error)
+CU_RESULT_IMPL(cu_IoSlice, cu_Slice, cu_Io_Error)
 
 cu_Io_Error cu_Io_Error_from_errno(int error_code) {
   cu_Io_ErrorKind kind;

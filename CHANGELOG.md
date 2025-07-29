@@ -16,8 +16,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Documentation
 
-- hide internal structs from Doxygen and remove typedefs - Codex
-
 - expand header documentation - ([22b0a64](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/22b0a6400a4931f70115d747c39ae4ae03c654e7)) - Fabrice
 - setup pages deployment - ([f19eb3a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f19eb3a08e323a8a877b6ea14a1da2327f565382)) - Fabrice
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
@@ -39,18 +37,11 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Features
 
-- cross-platform file stat and directory handling - Codex
-- expanded file stats with inode, type and nanosecond times - Codex
-- define macros for time constants to remove magic numbers - Codex
-
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
-- add state interface with default random implementation for hash map and skip list - Codex
-- add seeded random generator and convenience initializer - Codex
-- improve freestanding seed mixing using stack and return addresses - Codex
 
 ### Refactoring
 
@@ -135,6 +126,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 - add wasm platform macro - ([c3c4cb6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c3c4cb66f54a36485732cfc44be3de07ca48d307)) - Fabrice
 
+### Maintnance
+
+- updated changelog and improved commentation - ([a0c2df6](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a0c2df6b4e7cf0659fa0367a46d32af8df936d8a)) - Fabrice
+
 ### Merge
 
 - integrate master changes - ([986090c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/986090cc13ef015d33112790a6cbfa3ac5bc06e8)) - Fabrice
@@ -162,6 +157,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 - fix optional type usage - ([e9b34c7](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/e9b34c75a41c82580aed5dde975a7c58693e1139)) - Fabrice
 - document api and refine result - ([e12b1be](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/e12b1be52aa0000e991847b8b69c255b9ebca827)) - Fabrice
+
+### Utility
+
+- define time macros - ([a820852](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/a82085269ff4c24e71c690c0b6c00959e42e4435)) - Fabrice
 
 ### Vector
 

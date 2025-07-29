@@ -21,8 +21,6 @@ typedef struct cu_Slice {
 /** Create a slice from a pointer and length without allocating. */
 cu_Slice cu_Slice_create(void *ptr, size_t length);
 
-#include <object/optional.h>
-#include <object/result.h>
 
 void cu_abort(void);
 #ifndef CU_FREESTANDING
