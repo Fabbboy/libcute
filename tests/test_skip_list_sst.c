@@ -5,28 +5,11 @@ static void SkipListSST_Unsupported(void) {}
 #else
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/gpallocator.h"
-#include "memory/page.h"
+#include "test_common.h"
 #include "nostd.h"
 #include "unity.h"
 #include <unity_internals.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-#if CU_FREESTANDING
-  static char buf[32 * 1024];
-  cu_FixedAllocator fa;
-  cu_Allocator backing =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_PageAllocator page;
-  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
-#endif
-  cu_GPAllocator_Config cfg = {0};
-  cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
-  return cu_Allocator_GPAllocator(gpa, cfg);
-}
 
 static int cstring_cmp(const void *a, const void *b) {
   const char *sa = *(const char *const *)a;
@@ -35,8 +18,7 @@ static int cstring_cmp(const void *a, const void *b) {
 }
 
 static void SkipListSST_SortedStrings(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(const char *),
       CU_LAYOUT(const char *), 6, cu_SkipList_CmpFn_Optional_some(cstring_cmp));
@@ -82,7 +64,6 @@ static void SkipListSST_SortedStrings(void) {
   TEST_ASSERT_EQUAL(idx, 5);
 
   cu_SkipList_destroy(&list);
-  cu_GPAllocator_destroy(&gpa);
 }
 #endif
 

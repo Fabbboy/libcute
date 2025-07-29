@@ -5,31 +5,14 @@ static void List_Unsupported(void) {}
 #else
 #include "collection/list.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/gpallocator.h"
-#include "memory/page.h"
+#include "test_common.h"
 #include "unity.h"
 #include <unity_internals.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-#if CU_FREESTANDING
-  static char buf[32 * 1024];
-  cu_FixedAllocator fa;
-  cu_Allocator backing =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_PageAllocator page;
-  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
-#endif
-  cu_GPAllocator_Config cfg = {0};
-  cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
-  return cu_Allocator_GPAllocator(gpa, cfg);
-}
+
 
 static void List_PushPop(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_List_Result res = cu_List_create(alloc, CU_LAYOUT(int));
   TEST_ASSERT_TRUE(cu_List_Result_is_ok(&res));
@@ -50,12 +33,10 @@ static void List_PushPop(void) {
   TEST_ASSERT_TRUE(cu_List_is_empty(&list));
 
   cu_List_destroy(&list);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void List_InsertIter(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_List_Result r = cu_List_create(alloc, CU_LAYOUT(int));
   TEST_ASSERT_TRUE(cu_List_Result_is_ok(&r));
@@ -88,7 +69,6 @@ static void List_InsertIter(void) {
   TEST_ASSERT_EQUAL(idx, CU_ARRAY_LEN(expected));
 
   cu_List_destroy(&list);
-  cu_GPAllocator_destroy(&gpa);
 }
 #endif
 

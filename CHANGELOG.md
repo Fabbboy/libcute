@@ -62,6 +62,7 @@ All notable changes to this project will be documented in this file. See [conven
 - add gtest suite - ([bf83735](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/bf83735d2a293626e755afb04c0a0a5e530aedbe)) - Fabrice
 - extend gpa stress test - ([f8d3fee](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f8d3feea274351cf999d84d6c93a115619072d4f)) - Fabrice
 - stress arena reuse - ([2e502f9](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2e502f95e766ee9e63e6ca13f0282b6a92397651)) - Fabrice
+- initialize global allocator for unity tests - (unreleased) - Codex
 
 ### Allocator
 

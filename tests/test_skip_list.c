@@ -5,27 +5,10 @@ static void SkipList_Unsupported(void) {}
 #else
 #include "collection/skip_list.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/gpallocator.h"
-#include "memory/page.h"
+#include "test_common.h"
 #include "unity.h"
 #include <unity_internals.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-#if CU_FREESTANDING
-  static char buf[32 * 1024];
-  cu_FixedAllocator fa;
-  cu_Allocator backing =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_PageAllocator page;
-  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
-#endif
-  cu_GPAllocator_Config cfg = {0};
-  cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
-  return cu_Allocator_GPAllocator(gpa, cfg);
-}
 
 static int int_cmp(const void *a, const void *b) {
   int ia = *(const int *)a;
@@ -34,8 +17,7 @@ static int int_cmp(const void *a, const void *b) {
 }
 
 static void SkipList_InsertFindRemove(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 8, cu_SkipList_CmpFn_Optional_some(int_cmp));
@@ -62,12 +44,10 @@ static void SkipList_InsertFindRemove(void) {
   TEST_ASSERT_FALSE(cu_SkipList_find(&list, &zero).isSome);
 
   cu_SkipList_destroy(&list);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void SkipList_Iteration(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 6, cu_SkipList_CmpFn_Optional_some(int_cmp));
@@ -90,7 +70,6 @@ static void SkipList_Iteration(void) {
   TEST_ASSERT_EQUAL(iter_sum, sum);
 
   cu_SkipList_destroy(&list);
-  cu_GPAllocator_destroy(&gpa);
 }
 #endif
 

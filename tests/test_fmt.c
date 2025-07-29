@@ -1,21 +1,11 @@
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/wasmallocator.h"
 #include "string/fmt.h"
+#include "test_common.h"
 #include "unity.h"
 #include <unity_internals.h>
 
 static void StrBuilder_AppendFormatted(void) {
-#if CU_PLAT_WASM
-  cu_Allocator alloc = cu_Allocator_WasmAllocator();
-#elif CU_FREESTANDING
-  static char buf[1024];
-  cu_FixedAllocator fa;
-  cu_Allocator alloc =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_Allocator alloc = cu_Allocator_CAllocator();
-#endif
+  cu_Allocator alloc = test_allocator;
   cu_StrBuilder builder = cu_StrBuilder_init(alloc);
   TEST_ASSERT_EQUAL(
       CU_STRING_ERROR_NONE, cu_StrBuilder_appendf(&builder, "number %d", 10));
@@ -30,16 +20,7 @@ static void StrBuilder_AppendFormatted(void) {
 }
 
 static void StrBuilder_AppendAndFinalize(void) {
-#if CU_PLAT_WASM
-  cu_Allocator alloc = cu_Allocator_WasmAllocator();
-#elif CU_FREESTANDING
-  static char buf2[1024];
-  cu_FixedAllocator fa2;
-  cu_Allocator alloc =
-      cu_Allocator_FixedAllocator(&fa2, cu_Slice_create(buf2, sizeof(buf2)));
-#else
-  cu_Allocator alloc = cu_Allocator_CAllocator();
-#endif
+  cu_Allocator alloc = test_allocator;
   cu_StrBuilder builder = cu_StrBuilder_init(alloc);
   cu_StrBuilder_append_slice(&builder, cu_Slice_create((void *)"ab", 2));
   cu_StrBuilder_append_cstr(&builder, "cd");

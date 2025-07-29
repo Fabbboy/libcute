@@ -5,32 +5,13 @@ static void HashMap_Unsupported(void) {}
 #else
 #include "collection/hashmap.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/gpallocator.h"
-#include "memory/page.h"
+#include "test_common.h"
 #include "unity.h"
 #include <stdlib.h>
 #include <unity_internals.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-#if CU_FREESTANDING
-  static char buf[32 * 1024];
-  cu_FixedAllocator fa;
-  cu_Allocator backing =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_PageAllocator page;
-  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
-#endif
-  cu_GPAllocator_Config cfg = {0};
-  cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
-  return cu_Allocator_GPAllocator(gpa, cfg);
-}
-
 static void HashMap_BasicInsertGet(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(8), cu_HashMap_HashFn_Optional_none(),
@@ -50,7 +31,6 @@ static void HashMap_BasicInsertGet(void) {
   }
 
   cu_HashMap_destroy(&map);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static uint64_t int_hash(const void *key, size_t unused) {
@@ -62,8 +42,7 @@ static bool int_eq(const void *a, const void *b, size_t unused) {
 }
 
 static void HashMap_CustomHashIter(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_HashMap_Result res =
       cu_HashMap_create(alloc, CU_LAYOUT(int), CU_LAYOUT(int),
@@ -87,12 +66,10 @@ static void HashMap_CustomHashIter(void) {
   TEST_ASSERT_EQUAL(sum, 10);
 
   cu_HashMap_destroy(&map);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void HashMap_StressRandomAccess(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_HashMap_Result res = cu_HashMap_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), Size_Optional_some(128),
@@ -128,7 +105,6 @@ static void HashMap_StressRandomAccess(void) {
   free(keys);
 
   cu_HashMap_destroy(&map);
-  cu_GPAllocator_destroy(&gpa);
 }
 #endif
 

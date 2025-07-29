@@ -6,31 +6,13 @@ static void Vector_Unsupported(void) {}
 #else
 #include "collection/vector.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
-#include "memory/gpallocator.h"
-#include "memory/page.h"
+#include "test_common.h"
 #include "unity.h"
 #include <unity_internals.h>
 
-static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-#if CU_FREESTANDING
-  static char buf[32 * 1024];
-  cu_FixedAllocator fa;
-  cu_Allocator backing =
-      cu_Allocator_FixedAllocator(&fa, cu_Slice_create(buf, sizeof(buf)));
-#else
-  cu_PageAllocator page;
-  cu_Allocator backing = cu_Allocator_PageAllocator(&page);
-#endif
-  cu_GPAllocator_Config cfg = {0};
-  cfg.bucketSize = CU_GPA_BUCKET_SIZE;
-  cfg.backingAllocator = cu_Allocator_Optional_some(backing);
-  return cu_Allocator_GPAllocator(gpa, cfg);
-}
 
 static void Vector_Create(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
@@ -41,12 +23,10 @@ static void Vector_Create(void) {
   TEST_ASSERT_EQUAL(vec.capacity, 10u);
 
   cu_Vector_destroy(&vec);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void Vector_Resize(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
@@ -64,12 +44,10 @@ static void Vector_Resize(void) {
   TEST_ASSERT_TRUE((cu_Vector_capacity(&vector)) >= (20u));
 
   cu_Vector_destroy(&vector);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void Vector_PushBack(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
       cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
@@ -83,12 +61,10 @@ static void Vector_PushBack(void) {
   TEST_ASSERT_EQUAL(*(int *)((unsigned char *)vector.data.value.ptr), 42);
 
   cu_Vector_destroy(&vector);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void Vector_PopBack(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
       cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
@@ -111,12 +87,10 @@ static void Vector_PopBack(void) {
   TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 0u);
 
   cu_Vector_destroy(&vector);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void Vector_Copy(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
       cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
@@ -145,12 +119,10 @@ static void Vector_Copy(void) {
 
   cu_Vector_destroy(&copy);
   cu_Vector_destroy(&vector);
-  cu_GPAllocator_destroy(&gpa);
 }
 
 static void Vector_ReserveClearAt(void) {
-  cu_GPAllocator gpa;
-  cu_Allocator alloc = create_allocator(&gpa);
+  cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
       cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
@@ -177,7 +149,6 @@ static void Vector_ReserveClearAt(void) {
   TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 0u);
 
   cu_Vector_destroy(&vector);
-  cu_GPAllocator_destroy(&gpa);
 }
 #endif
 
