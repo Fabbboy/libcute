@@ -27,7 +27,7 @@ typedef struct {
   bool create;
   bool append;
   bool truncate;
-} cu_File_OpenOptions;
+} cu_File_Options;
 
 // Seek operations
 typedef enum {
@@ -42,27 +42,27 @@ typedef struct {
 } cu_File_SeekTo;
 
 // Option setters
-static inline void cu_File_OpenOptions_read(cu_File_OpenOptions *options) {
+static inline void cu_File_Options_read(cu_File_Options *options) {
   options->read = true;
 }
 
-static inline void cu_File_OpenOptions_write(cu_File_OpenOptions *options) {
+static inline void cu_File_Options_write(cu_File_Options *options) {
   options->write = true;
 }
 
-static inline void cu_File_OpenOptions_create(cu_File_OpenOptions *options) {
+static inline void cu_File_Options_create(cu_File_Options *options) {
   options->create = true;
 }
 
-static inline void cu_File_OpenOptions_append(cu_File_OpenOptions *options) {
+static inline void cu_File_Options_append(cu_File_Options *options) {
   options->append = true;
 }
 
-static inline void cu_File_OpenOptions_truncate(cu_File_OpenOptions *options) {
+static inline void cu_File_Options_truncate(cu_File_Options *options) {
   options->truncate = true;
 }
 
-cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options);
+cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options);
 void cu_File_close(cu_File *file);
 cu_Io_Error_Optional cu_File_read(cu_File *file, cu_Slice buffer);
 cu_Io_Error_Optional cu_File_write(cu_File *file, cu_Slice data);

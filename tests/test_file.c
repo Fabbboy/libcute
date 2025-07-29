@@ -4,7 +4,7 @@
 #include <unity_internals.h>
 
 static void File_OpenAndClose(void) {
-  cu_File_OpenOptions options = {0};
+  cu_File_Options options = {0};
   cu_File_OpenOptions_read(&options);
   cu_File_OpenOptions_create(&options);
 
@@ -20,7 +20,7 @@ static void File_OpenAndClose(void) {
 }
 
 static void File_WriteAndRead(void) {
-  cu_File_OpenOptions options = {0};
+  cu_File_Options options = {0};
   cu_File_OpenOptions_write(&options);
   cu_File_OpenOptions_create(&options);
   cu_File_OpenOptions_truncate(&options);
@@ -38,7 +38,7 @@ static void File_WriteAndRead(void) {
 
   cu_File_close(&file);
 
-  cu_File_OpenOptions rd = {0};
+  cu_File_Options rd = {0};
   cu_File_OpenOptions_read(&rd);
   res = cu_File_open(path, rd);
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&res));
@@ -55,7 +55,7 @@ static void File_WriteAndRead(void) {
 }
 
 static void File_InvalidOptions(void) {
-  cu_File_OpenOptions options = {0};
+  cu_File_Options options = {0};
   const char lpath[] = "invalid.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
   cu_File_Result res = cu_File_open(path, options);

@@ -20,8 +20,7 @@
 CU_RESULT_IMPL(cu_File, cu_File, cu_Io_Error)
 
 #if CU_PLAT_POSIX
-static int cu_File_OpenOptions_to_posix_flags(
-    const cu_File_OpenOptions *options) {
+static int cu_File_OpenOptions_to_posix_flags(const cu_File_Options *options) {
   int flags = 0;
 
   if (options->read && options->write) {
@@ -78,7 +77,7 @@ static DWORD cu_File_OpenOptions_to_win32_creation(
 }
 #endif
 
-cu_File_Result cu_File_open(cu_Slice path, cu_File_OpenOptions options) {
+cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   if (!options.read && !options.write) {
     cu_Io_Error error = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
