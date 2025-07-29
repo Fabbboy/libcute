@@ -34,7 +34,6 @@ typedef enum {
 } cu_File_Type;
 
 typedef struct {
-  unsigned long long inode;
   unsigned long long size;
   unsigned int mode;
   cu_File_Type kind;
@@ -44,8 +43,8 @@ typedef struct {
 } cu_File_Stat;
 
 #if CU_PLAT_POSIX
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
   struct stat st;
   cu_Memory_memset(&st, 0, sizeof(st));
@@ -55,7 +54,6 @@ static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
     return out;
   }
 
-  out.inode = (unsigned long long)st.st_ino;
   out.size = (unsigned long long)st.st_size;
   out.mode = (unsigned int)st.st_mode;
 
@@ -95,12 +93,12 @@ static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
   out.ctime = (long long)st.st_ctimespec.tv_sec * CU_TIME_NS_PER_SEC +
               st.st_ctimespec.tv_nsec;
 #elif defined(_STATBUF_ST_NSEC) && defined(st_atim)
-  out.atime = (long long)st.st_atim.tv_sec * CU_TIME_NS_PER_SEC +
-              st.st_atim.tv_nsec;
-  out.mtime = (long long)st.st_mtim.tv_sec * CU_TIME_NS_PER_SEC +
-              st.st_mtim.tv_nsec;
-  out.ctime = (long long)st.st_ctim.tv_sec * CU_TIME_NS_PER_SEC +
-              st.st_ctim.tv_nsec;
+  out.atime =
+      (long long)st.st_atim.tv_sec * CU_TIME_NS_PER_SEC + st.st_atim.tv_nsec;
+  out.mtime =
+      (long long)st.st_mtim.tv_sec * CU_TIME_NS_PER_SEC + st.st_mtim.tv_nsec;
+  out.ctime =
+      (long long)st.st_ctim.tv_sec * CU_TIME_NS_PER_SEC + st.st_ctim.tv_nsec;
 #elif defined(_STATBUF_ST_NSEC)
   out.atime = (long long)st.st_atime * CU_TIME_NS_PER_SEC + st.st_atimensec;
   out.mtime = (long long)st.st_mtime * CU_TIME_NS_PER_SEC + st.st_mtimensec;
@@ -126,8 +124,6 @@ static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
   size.HighPart = info.nFileSizeHigh;
   size.LowPart = info.nFileSizeLow;
 
-  out.inode = ((unsigned long long)info.nFileIndexHigh << 32) |
-              info.nFileIndexLow;
   out.size = (unsigned long long)size.QuadPart;
   out.mode = info.dwFileAttributes;
   if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
@@ -145,4 +141,3 @@ static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
   return out;
 }
 #endif
-
