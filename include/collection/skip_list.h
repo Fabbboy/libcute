@@ -6,6 +6,7 @@
 #include "memory/allocator.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "object/destructor.h"
 #include "utility.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -17,21 +18,25 @@ extern "C" {
 typedef int (*cu_SkipList_CmpFn)(const void *a, const void *b);
 CU_OPTIONAL_DECL(cu_SkipList_CmpFn, cu_SkipList_CmpFn)
 
-typedef struct cu_SkipList_Node {
+/** @cond INTERNAL */
+struct cu_SkipList_Node {
   struct cu_SkipList_Node **forward;
   size_t level;
   void *key;
   void *value;
-} cu_SkipList_Node;
+};
+/** @endcond */
 
 typedef struct {
-  cu_SkipList_Node *head;
+  struct cu_SkipList_Node *head;
   size_t level;
   size_t max_level;
   cu_SkipList_CmpFn cmp;
   cu_Layout key_layout;
   cu_Layout value_layout;
   cu_Allocator allocator;
+  cu_Destructor_Optional key_destructor;
+  cu_Destructor_Optional value_destructor;
 } cu_SkipList;
 
 typedef enum {
@@ -46,7 +51,8 @@ CU_OPTIONAL_DECL(cu_SkipList_Error, cu_SkipList_Error)
 
 cu_SkipList_Result cu_SkipList_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout, size_t max_level,
-    cu_SkipList_CmpFn_Optional cmp);
+    cu_SkipList_CmpFn_Optional cmp, cu_Destructor_Optional key_destructor,
+    cu_Destructor_Optional value_destructor);
 
 void cu_SkipList_destroy(cu_SkipList *list);
 
@@ -58,7 +64,7 @@ Ptr_Optional cu_SkipList_find(const cu_SkipList *list, const void *key);
 cu_SkipList_Error_Optional cu_SkipList_remove(
     cu_SkipList *list, const void *key);
 
-bool cu_SkipList_iter(const cu_SkipList *list, cu_SkipList_Node **node,
+bool cu_SkipList_iter(const cu_SkipList *list, struct cu_SkipList_Node **node,
     void **key, void **value);
 
 #ifdef __cplusplus

@@ -7,7 +7,9 @@
 
 #define CU_SLAB_DEFAULT_SIZE 4096 /**< default slab size */
 
+/** @cond INTERNAL */
 struct cu_SlabAllocator_Slab;
+/** @endcond */
 
 /** Runtime state for the slab allocator. */
 typedef struct {

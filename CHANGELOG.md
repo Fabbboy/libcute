@@ -16,6 +16,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Documentation
 
+- hide internal structs from Doxygen and remove typedefs - Codex
+
 - expand header documentation - ([22b0a64](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/22b0a6400a4931f70115d747c39ae4ae03c654e7)) - Fabrice
 - setup pages deployment - ([f19eb3a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/f19eb3a08e323a8a877b6ea14a1da2327f565382)) - Fabrice
 - adjusted readme - ([2ff2771](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ff2771e982a422c6dac77702b199867f0a94869)) - Fabrice
@@ -42,6 +44,11 @@ All notable changes to this project will be documented in this file. See [conven
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
+<<<<<<< ours
+=======
+- add reference counted pointer with optional destructor - (unreleased) - Codex
+- add optional destructors to collection types - (unreleased) - Codex
+>>>>>>> theirs
 
 ### Refactoring
 

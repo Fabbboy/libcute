@@ -6,22 +6,26 @@
 #include "memory/allocator.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "object/destructor.h"
 #include "utility.h"
 #include <nostd.h>
 #include <stddef.h>
 
-typedef struct cu_DList_Node {
+/** @cond INTERNAL */
+struct cu_DList_Node {
   struct cu_DList_Node *prev;
   struct cu_DList_Node *next;
   unsigned char data[];
-} cu_DList_Node;
+};
+/** @endcond */
 
 typedef struct {
-  cu_DList_Node *head;
-  cu_DList_Node *tail;
+  struct cu_DList_Node *head;
+  struct cu_DList_Node *tail;
   size_t length;
   cu_Layout layout;
   cu_Allocator allocator;
+  cu_Destructor_Optional destructor;
 } cu_DList;
 
 typedef enum {
@@ -35,7 +39,8 @@ typedef enum {
 CU_RESULT_DECL(cu_DList, cu_DList, cu_DList_Error)
 CU_OPTIONAL_DECL(cu_DList_Error, cu_DList_Error)
 
-cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout);
+cu_DList_Result cu_DList_create(
+    cu_Allocator allocator, cu_Layout layout, cu_Destructor_Optional destructor);
 void cu_DList_destroy(cu_DList *list);
 
 static inline size_t cu_DList_size(const cu_DList *list) {
@@ -53,8 +58,9 @@ cu_DList_Error_Optional cu_DList_push_back(cu_DList *list, void *elem);
 cu_DList_Error_Optional cu_DList_pop_front(cu_DList *list, void *out_elem);
 cu_DList_Error_Optional cu_DList_pop_back(cu_DList *list, void *out_elem);
 cu_DList_Error_Optional cu_DList_insert_after(
-    cu_DList *list, cu_DList_Node *pos, void *elem);
+    cu_DList *list, struct cu_DList_Node *pos, void *elem);
 cu_DList_Error_Optional cu_DList_insert_before(
-    cu_DList *list, cu_DList_Node *pos, void *elem);
+    cu_DList *list, struct cu_DList_Node *pos, void *elem);
 
-bool cu_DList_iter(const cu_DList *list, cu_DList_Node **node, void **out_elem);
+bool cu_DList_iter(
+    const cu_DList *list, struct cu_DList_Node **node, void **out_elem);

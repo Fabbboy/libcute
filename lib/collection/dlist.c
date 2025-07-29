@@ -5,7 +5,8 @@
 CU_RESULT_IMPL(cu_DList, cu_DList, cu_DList_Error)
 CU_OPTIONAL_IMPL(cu_DList_Error, cu_DList_Error)
 
-cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout) {
+cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout,
+    cu_Destructor_Optional destructor) {
   CU_LAYOUT_CHECK(layout) {
     return cu_DList_Result_error(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
@@ -15,6 +16,7 @@ cu_DList_Result cu_DList_create(cu_Allocator allocator, cu_Layout layout) {
   list.length = 0;
   list.layout = layout;
   list.allocator = allocator;
+  list.destructor = destructor;
   return cu_DList_Result_ok(list);
 }
 
@@ -22,11 +24,15 @@ void cu_DList_destroy(cu_DList *list) {
   if (!list) {
     return;
   }
-  cu_DList_Node *n = list->head;
+  struct cu_DList_Node *n = list->head;
   while (n) {
-    cu_DList_Node *next = n->next;
+    struct cu_DList_Node *next = n->next; 
+    if (cu_Destructor_Optional_is_some(&list->destructor)) {
+      cu_Destructor dtor = cu_Destructor_Optional_unwrap(&list->destructor);
+      dtor(n->data);
+    }
     cu_Allocator_Free(list->allocator,
-        cu_Slice_create(n, sizeof(cu_DList_Node) + list->layout.elem_size));
+        cu_Slice_create(n, sizeof(struct cu_DList_Node) + list->layout.elem_size));
     n = next;
   }
   list->head = NULL;
@@ -35,14 +41,14 @@ void cu_DList_destroy(cu_DList *list) {
 }
 
 static cu_DList_Error_Optional cu_DList_alloc_node(
-    cu_DList *list, void *elem, cu_DList_Node **out_node) {
-  size_t size = sizeof(cu_DList_Node) + list->layout.elem_size;
+    cu_DList *list, void *elem, struct cu_DList_Node **out_node) {
+  size_t size = sizeof(struct cu_DList_Node) + list->layout.elem_size;
   cu_Slice_Result mem = cu_Allocator_Alloc(
-      list->allocator, cu_Layout_create(size, alignof(cu_DList_Node)));
+      list->allocator, cu_Layout_create(size, alignof(struct cu_DList_Node)));
   if (!cu_Slice_Result_is_ok(&mem)) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_OOM);
   }
-  cu_DList_Node *node = (cu_DList_Node *)mem.value.ptr;
+  struct cu_DList_Node *node = (struct cu_DList_Node *)mem.value.ptr;
   cu_Memory_memcpy(node->data,
       cu_Slice_create((void *)elem, list->layout.elem_size));
   node->prev = NULL;
@@ -58,7 +64,7 @@ cu_DList_Error_Optional cu_DList_push_front(cu_DList *list, void *elem) {
   CU_LAYOUT_CHECK(list->layout) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
-  cu_DList_Node *node = NULL;
+  struct cu_DList_Node *node = NULL;
   cu_DList_Error_Optional err = cu_DList_alloc_node(list, elem, &node);
   if (cu_DList_Error_Optional_is_some(&err)) {
     return err;
@@ -81,7 +87,7 @@ cu_DList_Error_Optional cu_DList_push_back(cu_DList *list, void *elem) {
   CU_LAYOUT_CHECK(list->layout) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
-  cu_DList_Node *node = NULL;
+  struct cu_DList_Node *node = NULL;
   cu_DList_Error_Optional err = cu_DList_alloc_node(list, elem, &node);
   if (cu_DList_Error_Optional_is_some(&err)) {
     return err;
@@ -107,7 +113,7 @@ cu_DList_Error_Optional cu_DList_pop_front(cu_DList *list, void *out_elem) {
   if (list->length == 0) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_EMPTY);
   }
-  cu_DList_Node *node = list->head;
+  struct cu_DList_Node *node = list->head;
   cu_Memory_memcpy(out_elem,
       cu_Slice_create(node->data, list->layout.elem_size));
   list->head = node->next;
@@ -117,8 +123,12 @@ cu_DList_Error_Optional cu_DList_pop_front(cu_DList *list, void *out_elem) {
     list->tail = NULL;
   }
   list->length--;
+  if (cu_Destructor_Optional_is_some(&list->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&list->destructor);
+    dtor(node->data);
+  }
   cu_Allocator_Free(list->allocator,
-      cu_Slice_create(node, sizeof(cu_DList_Node) + list->layout.elem_size));
+      cu_Slice_create(node, sizeof(struct cu_DList_Node) + list->layout.elem_size));
   return cu_DList_Error_Optional_none();
 }
 
@@ -132,7 +142,7 @@ cu_DList_Error_Optional cu_DList_pop_back(cu_DList *list, void *out_elem) {
   if (list->length == 0) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_EMPTY);
   }
-  cu_DList_Node *node = list->tail;
+  struct cu_DList_Node *node = list->tail;
   cu_Memory_memcpy(out_elem,
       cu_Slice_create(node->data, list->layout.elem_size));
   list->tail = node->prev;
@@ -142,20 +152,24 @@ cu_DList_Error_Optional cu_DList_pop_back(cu_DList *list, void *out_elem) {
     list->head = NULL;
   }
   list->length--;
+  if (cu_Destructor_Optional_is_some(&list->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&list->destructor);
+    dtor(node->data);
+  }
   cu_Allocator_Free(list->allocator,
-      cu_Slice_create(node, sizeof(cu_DList_Node) + list->layout.elem_size));
+      cu_Slice_create(node, sizeof(struct cu_DList_Node) + list->layout.elem_size));
   return cu_DList_Error_Optional_none();
 }
 
 cu_DList_Error_Optional cu_DList_insert_after(
-    cu_DList *list, cu_DList_Node *pos, void *elem) {
+    cu_DList *list, struct cu_DList_Node *pos, void *elem) {
   CU_IF_NULL(list) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID);
   }
   CU_LAYOUT_CHECK(list->layout) {
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
-  cu_DList_Node *node = NULL;
+  struct cu_DList_Node *node = NULL;
   cu_DList_Error_Optional err = cu_DList_alloc_node(list, elem, &node);
   if (cu_DList_Error_Optional_is_some(&err)) {
     return err;
@@ -185,7 +199,7 @@ cu_DList_Error_Optional cu_DList_insert_after(
 }
 
 cu_DList_Error_Optional cu_DList_insert_before(
-    cu_DList *list, cu_DList_Node *pos, void *elem) {
+    cu_DList *list, struct cu_DList_Node *pos, void *elem) {
   if (!pos) {
     return cu_DList_insert_after(list, NULL, elem);
   }
@@ -196,7 +210,7 @@ cu_DList_Error_Optional cu_DList_insert_before(
     return cu_DList_Error_Optional_some(CU_DLIST_ERROR_INVALID_LAYOUT);
   }
 
-  cu_DList_Node *node = NULL;
+  struct cu_DList_Node *node = NULL;
   cu_DList_Error_Optional err = cu_DList_alloc_node(list, elem, &node);
   if (cu_DList_Error_Optional_is_some(&err)) {
     return err;
@@ -215,13 +229,13 @@ cu_DList_Error_Optional cu_DList_insert_before(
 }
 
 bool cu_DList_iter(
-    const cu_DList *list, cu_DList_Node **node, void **out_elem) {
+    const cu_DList *list, struct cu_DList_Node **node, void **out_elem) {
   CU_IF_NULL(list) { return false; }
   CU_IF_NULL(node) { return false; }
   CU_IF_NULL(out_elem) { return false; }
   CU_LAYOUT_CHECK(list->layout) { return false; }
 
-  cu_DList_Node *cur = *node ? (*node)->next : list->head;
+  struct cu_DList_Node *cur = *node ? (*node)->next : list->head;
   if (!cur) {
     return false;
   }

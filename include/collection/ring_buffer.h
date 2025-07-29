@@ -7,6 +7,7 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "object/destructor.h"
 #include "utility.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -21,6 +22,7 @@ typedef struct {
   size_t length;          /**< number of stored elements */
   cu_Layout layout;       /**< element layout */
   cu_Allocator allocator; /**< backing allocator */
+  cu_Destructor_Optional destructor; /**< optional element destructor */
 } cu_RingBuffer;
 
 /** Error codes returned by ring buffer operations. */
@@ -37,7 +39,8 @@ CU_RESULT_DECL(cu_RingBuffer, cu_RingBuffer, cu_RingBuffer_Error)
 CU_OPTIONAL_DECL(cu_RingBuffer_Error, cu_RingBuffer_Error)
 
 cu_RingBuffer_Result cu_RingBuffer_create(
-    cu_Allocator allocator, cu_Layout layout, size_t capacity);
+    cu_Allocator allocator, cu_Layout layout, size_t capacity,
+    cu_Destructor_Optional destructor);
 
 void cu_RingBuffer_destroy(cu_RingBuffer *rb);
 

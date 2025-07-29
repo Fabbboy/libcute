@@ -6,6 +6,7 @@
 #include "memory/allocator.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "object/destructor.h"
 #include "utility.h"
 #include <nostd.h>
 #include <stddef.h>
@@ -22,10 +23,11 @@ typedef struct cu_List_Node {
  * @brief Singly linked list container.
  */
 typedef struct {
-  cu_List_Node *head; /**< first node in the list */
-  size_t length;      /**< number of elements */
-  cu_Layout layout;   /**< layout of each element */
-  cu_Allocator allocator; /**< allocator used for storage */
+  cu_List_Node *head;             /**< first node in the list */
+  size_t length;                  /**< number of elements */
+  cu_Layout layout;               /**< layout of each element */
+  cu_Allocator allocator;         /**< allocator used for storage */
+  cu_Destructor_Optional destructor; /**< optional element destructor */
 } cu_List;
 
 /**
@@ -47,9 +49,12 @@ CU_OPTIONAL_DECL(cu_List_Error, cu_List_Error)
  *
  * @param allocator allocator used for node storage
  * @param layout layout describing each element
+ * @param destructor optional element destructor
  * @return Result containing the created list on success
  */
-cu_List_Result cu_List_create(cu_Allocator allocator, cu_Layout layout);
+cu_List_Result cu_List_create(
+    cu_Allocator allocator, cu_Layout layout,
+    cu_Destructor_Optional destructor);
 
 /**
  * @brief Destroy a list and free all nodes.
@@ -75,7 +80,7 @@ cu_List_Error_Optional cu_List_insert_after(
     cu_List *list, cu_List_Node *node, void *elem);
 /** Insert a new element before @p node. */
 cu_List_Error_Optional cu_List_insert_before(
-    cu_List *list, cu_List_Node *node, void *elem);
+    cu_List *list, struct cu_List_Node *node, void *elem);
 
 /**
  * @brief Iterate over the list.

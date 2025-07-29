@@ -27,6 +27,7 @@ extern "C" {
 #include "hash/hash.h"
 #include "nostd.h"
 #include "object/optional.h"
+#include "object/destructor.h"
 #include "object/result.h"
 #include "string/fmt.h"
 #include "object/rc.h"

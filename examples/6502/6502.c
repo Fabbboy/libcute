@@ -33,7 +33,8 @@ static void update_zn(cu_6502 *cpu, uint8_t value) {
 
 cu_6502_Result cu_6502_create(cu_Allocator allocator) {
   cu_Vector_Result vec_res = cu_Vector_create(
-      allocator, CU_LAYOUT(uint8_t), Size_Optional_some(0x10000));
+      allocator, CU_LAYOUT(uint8_t), Size_Optional_some(0x10000),
+      cu_Destructor_Optional_none());
   if (!cu_Vector_Result_is_ok(&vec_res)) {
     return cu_6502_Result_error(CU_6502_ERROR_OOM);
   }

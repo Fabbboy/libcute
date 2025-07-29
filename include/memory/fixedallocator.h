@@ -5,9 +5,11 @@
 #include "memory/allocator.h"
 #include "nostd.h"
 
+/** @cond INTERNAL */
 struct cu_FixedAllocator_Header {
   size_t prev_offset;
 };
+/** @endcond */
 
 /** Runtime state for the fixed allocator. */
 typedef struct {

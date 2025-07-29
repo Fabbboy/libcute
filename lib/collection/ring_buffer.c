@@ -5,8 +5,8 @@
 CU_RESULT_IMPL(cu_RingBuffer, cu_RingBuffer, cu_RingBuffer_Error)
 CU_OPTIONAL_IMPL(cu_RingBuffer_Error, cu_RingBuffer_Error)
 
-cu_RingBuffer_Result cu_RingBuffer_create(
-    cu_Allocator allocator, cu_Layout layout, size_t capacity) {
+cu_RingBuffer_Result cu_RingBuffer_create(cu_Allocator allocator,
+    cu_Layout layout, size_t capacity, cu_Destructor_Optional destructor) {
   CU_LAYOUT_CHECK(layout) {
     return cu_RingBuffer_Result_error(CU_RINGBUFFER_ERROR_INVALID_LAYOUT);
   }
@@ -29,6 +29,7 @@ cu_RingBuffer_Result cu_RingBuffer_create(
   rb.length = 0;
   rb.layout = layout;
   rb.allocator = allocator;
+  rb.destructor = destructor;
 
   return cu_RingBuffer_Result_ok(rb);
 }
@@ -38,6 +39,15 @@ void cu_RingBuffer_destroy(cu_RingBuffer *rb) {
     return;
   }
   if (cu_Slice_Optional_is_some(&rb->data)) {
+    if (cu_Destructor_Optional_is_some(&rb->destructor)) {
+      cu_Destructor dtor = cu_Destructor_Optional_unwrap(&rb->destructor);
+      for (size_t i = 0; i < rb->length; ++i) {
+        size_t idx = (rb->head + i) % rb->capacity;
+        void *ptr = (unsigned char *)rb->data.value.ptr +
+                    idx * rb->layout.elem_size;
+        dtor(ptr);
+      }
+    }
     cu_Allocator_Free(rb->allocator, cu_Slice_create(rb->data.value.ptr,
                                          rb->capacity * rb->layout.elem_size));
     rb->data = cu_Slice_Optional_none();
@@ -83,6 +93,10 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_pop(
       (unsigned char *)rb->data.value.ptr + rb->head * rb->layout.elem_size;
   cu_Memory_memcpy(out_elem,
       cu_Slice_create(src, rb->layout.elem_size));
+  if (cu_Destructor_Optional_is_some(&rb->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&rb->destructor);
+    dtor(src);
+  }
   rb->head = (rb->head + 1) % rb->capacity;
   rb->length--;
   return cu_RingBuffer_Error_Optional_none();

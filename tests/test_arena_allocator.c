@@ -18,12 +18,14 @@ static void ArenaAllocator_LifoVectors(void) {
   cu_Allocator alloc = cu_Allocator_ArenaAllocator(&arena, cfg);
 
   cu_Vector_Result r1 =
-      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(4));
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(4),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&r1));
   cu_Vector v1 = cu_Vector_Result_unwrap(&r1);
 
   cu_Vector_Result r2 =
-      cu_Vector_create(alloc, CU_LAYOUT(float), Size_Optional_some(4));
+      cu_Vector_create(alloc, CU_LAYOUT(float), Size_Optional_some(4),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&r2));
   cu_Vector v2 = cu_Vector_Result_unwrap(&r2);
 

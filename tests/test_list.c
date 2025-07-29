@@ -14,7 +14,8 @@ static void List_Unsupported(void) {}
 static void List_PushPop(void) {
   cu_Allocator alloc = test_allocator;
 
-  cu_List_Result res = cu_List_create(alloc, CU_LAYOUT(int));
+  cu_List_Result res =
+      cu_List_create(alloc, CU_LAYOUT(int), cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_List_Result_is_ok(&res));
   cu_List list = cu_List_Result_unwrap(&res);
 
@@ -38,7 +39,8 @@ static void List_PushPop(void) {
 static void List_InsertIter(void) {
   cu_Allocator alloc = test_allocator;
 
-  cu_List_Result r = cu_List_create(alloc, CU_LAYOUT(int));
+  cu_List_Result r =
+      cu_List_create(alloc, CU_LAYOUT(int), cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_List_Result_is_ok(&r));
   cu_List list = cu_List_Result_unwrap(&r);
 
@@ -46,7 +48,7 @@ static void List_InsertIter(void) {
     cu_List_push_front(&list, &i); // 2,1,0
   }
 
-  cu_List_Node *node = list.head;
+  struct cu_List_Node *node = list.head;
   int val = 42;
   cu_List_Error_Optional err = cu_List_insert_after(&list, node, &val);
   TEST_ASSERT_TRUE(cu_List_Error_Optional_is_none(&err)); // list:2,42,1,0
@@ -60,7 +62,7 @@ static void List_InsertIter(void) {
 
   int expected[] = {2, 42, 1, 99, 0};
   size_t idx = 0;
-  cu_List_Node *it = NULL;
+  struct cu_List_Node *it = NULL;
   void *elem = NULL;
   while (cu_List_iter(&list, &it, &elem)) {
     TEST_ASSERT_TRUE((idx) < (CU_ARRAY_LEN(expected)));

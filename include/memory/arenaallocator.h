@@ -8,6 +8,7 @@
 /** default size for new chunks */
 #define CU_ARENA_CHUNK_SIZE 4096
 
+/** @cond INTERNAL */
 /** Metadata for each arena chunk. */
 struct cu_ArenaAllocator_Chunk {
   struct cu_ArenaAllocator_Chunk *prev; /**< previous chunk */
@@ -21,6 +22,7 @@ struct cu_ArenaAllocator_Header {
   struct cu_ArenaAllocator_Chunk *chunk; /**< owning chunk */
   size_t prev_offset;                    /**< previous used offset */
 };
+/** @endcond */
 
 /** Runtime state for the arena allocator. */
 typedef struct {

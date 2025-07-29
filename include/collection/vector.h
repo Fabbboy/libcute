@@ -2,10 +2,10 @@
 #pragma once
 
 #include "macro.h"
-#include "memory/allocator.h"
-#include "nostd.h"
+#include "memory/allocator.h" 
 #include "object/optional.h"
 #include "object/result.h"
+#include "object/destructor.h"
 #include "utility.h"
 #include <stddef.h>
 
@@ -21,6 +21,7 @@ typedef struct {
   size_t capacity;        /**< allocated element capacity */
   cu_Layout layout;       /**< layout of each element */
   cu_Allocator allocator; /**< allocator used for storage */
+  cu_Destructor_Optional destructor; /**< optional element destructor */
 } cu_Vector;
 
 /**
@@ -39,7 +40,8 @@ CU_OPTIONAL_DECL(cu_Vector_Error, cu_Vector_Error)
 
 /** Create a new vector. */
 cu_Vector_Result cu_Vector_create(
-    cu_Allocator allocator, cu_Layout layout, Size_Optional initial_capacity);
+    cu_Allocator allocator, cu_Layout layout, Size_Optional initial_capacity,
+    cu_Destructor_Optional destructor);
 /**
  * @brief Change the number of stored elements.
  *

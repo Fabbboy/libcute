@@ -11,6 +11,7 @@
 #define CU_GPA_NUM_SMALL_BUCKETS 16 /**< number of size classes */
 #define CU_GPA_CANARY 0x9232a6ff85dff10fULL /**< bucket canary value */
 
+/** @cond INTERNAL */
 struct cu_GPAllocator_BucketHeader;
 
 /** Object pool used by buckets to track slot usage. */
@@ -36,6 +37,7 @@ struct cu_GPAllocator_LargeAlloc {
   struct cu_GPAllocator_LargeAlloc *next; /**< next entry */
   cu_Slice slice;                         /**< allocated memory slice */
 };
+/** @endcond */
 
 /** Runtime state for the general purpose allocator. */
 typedef struct {

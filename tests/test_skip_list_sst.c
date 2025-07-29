@@ -21,7 +21,8 @@ static void SkipListSST_SortedStrings(void) {
   cu_Allocator alloc = test_allocator;
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(const char *),
-      CU_LAYOUT(const char *), 6, cu_SkipList_CmpFn_Optional_some(cstring_cmp));
+      CU_LAYOUT(const char *), 6, cu_SkipList_CmpFn_Optional_some(cstring_cmp),
+      cu_Destructor_Optional_none(), cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
   cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
@@ -35,7 +36,7 @@ static void SkipListSST_SortedStrings(void) {
     TEST_ASSERT_TRUE(cu_SkipList_Error_Optional_is_none(&err));
   }
 
-  cu_SkipList_Node *n = NULL;
+  struct cu_SkipList_Node *n = NULL;
   void *k;
   void *v;
   int idx = 0;

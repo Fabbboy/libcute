@@ -11,8 +11,8 @@
 CU_RESULT_IMPL(cu_Vector, cu_Vector, cu_Vector_Error)
 CU_OPTIONAL_IMPL(cu_Vector_Error, cu_Vector_Error)
 
-cu_Vector_Result cu_Vector_create(
-    cu_Allocator allocator, cu_Layout layout, Size_Optional initial_capacity) {
+cu_Vector_Result cu_Vector_create(cu_Allocator allocator, cu_Layout layout,
+    Size_Optional initial_capacity, cu_Destructor_Optional destructor) {
   CU_LAYOUT_CHECK(layout) {
     return cu_Vector_Result_error(CU_VECTOR_ERROR_INVALID_LAYOUT);
   }
@@ -36,6 +36,7 @@ cu_Vector_Result cu_Vector_create(
   vector.capacity = cap;
   vector.layout = layout;
   vector.allocator = allocator;
+  vector.destructor = destructor;
 
   return cu_Vector_Result_ok(vector);
 }
@@ -100,6 +101,14 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t size) {
       return err;
     }
   }
+  if (size < vector->length && cu_Destructor_Optional_is_some(&vector->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
+    for (size_t i = size; i < vector->length; ++i) {
+      void *ptr = (unsigned char *)vector->data.value.ptr +
+                  i * vector->layout.elem_size;
+      dtor(ptr);
+    }
+  }
 
   vector->length = size;
   return cu_Vector_Error_Optional_none();
@@ -107,6 +116,14 @@ cu_Vector_Error_Optional cu_Vector_resize(cu_Vector *vector, size_t size) {
 
 void cu_Vector_destroy(cu_Vector *vector) {
   if (cu_Slice_Optional_is_some(&vector->data)) {
+    if (cu_Destructor_Optional_is_some(&vector->destructor)) {
+      cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
+      for (size_t i = 0; i < vector->length; ++i) {
+        void *ptr = (unsigned char *)vector->data.value.ptr +
+                    i * vector->layout.elem_size;
+        dtor(ptr);
+      }
+    }
     cu_Allocator_Free(vector->allocator, vector->data.value);
     vector->data = cu_Slice_Optional_none();
   }
@@ -156,6 +173,10 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
   void *src = (unsigned char *)vector->data.value.ptr +
               vector->length * vector->layout.elem_size;
   cu_Memory_memcpy(out_elem, cu_Slice_create(src, vector->layout.elem_size));
+  if (cu_Destructor_Optional_is_some(&vector->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
+    dtor(src);
+  }
 
   if (vector->length == 0) {
     cu_Vector_shrink_to_fit(vector);
@@ -207,6 +228,10 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
 
   void *src = vector->data.value.ptr;
   cu_Memory_memcpy(out_elem, cu_Slice_create(src, vector->layout.elem_size));
+  if (cu_Destructor_Optional_is_some(&vector->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
+    dtor(src);
+  }
 
   void *dest =
       (unsigned char *)vector->data.value.ptr + vector->layout.elem_size;
@@ -228,7 +253,8 @@ cu_Vector_Result cu_Vector_copy(const cu_Vector *src) {
   }
 
   cu_Vector_Result result = cu_Vector_create(
-      src->allocator, src->layout, Size_Optional_some(src->capacity));
+      src->allocator, src->layout, Size_Optional_some(src->capacity),
+      src->destructor);
   if (!cu_Vector_Result_is_ok(&result)) {
     return result;
   }
@@ -262,6 +288,14 @@ cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector) {
 
 void cu_Vector_clear(cu_Vector *vector) {
   CU_IF_NULL(vector) { return; }
+  if (cu_Destructor_Optional_is_some(&vector->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&vector->destructor);
+    for (size_t i = 0; i < vector->length; ++i) {
+      void *ptr = (unsigned char *)vector->data.value.ptr +
+                  i * vector->layout.elem_size;
+      dtor(ptr);
+    }
+  }
   vector->length = 0;
   cu_Vector_shrink_to_fit(vector);
 }

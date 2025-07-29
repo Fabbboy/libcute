@@ -19,7 +19,8 @@ static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
 static void DList_PushPop(void) {
   cu_Allocator alloc = create_allocator(NULL);
 
-  cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
+  cu_DList_Result res =
+      cu_DList_create(alloc, CU_LAYOUT(int), cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_DList_Result_is_ok(&res));
   cu_DList list = cu_DList_Result_unwrap(&res);
 
@@ -44,7 +45,8 @@ static void DList_PushPop(void) {
 static void DList_InsertIter(void) {
   cu_Allocator alloc = create_allocator(NULL);
 
-  cu_DList_Result res = cu_DList_create(alloc, CU_LAYOUT(int));
+  cu_DList_Result res =
+      cu_DList_create(alloc, CU_LAYOUT(int), cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_DList_Result_is_ok(&res));
   cu_DList list = cu_DList_Result_unwrap(&res);
 
@@ -52,7 +54,7 @@ static void DList_InsertIter(void) {
     cu_DList_push_back(&list, &i); // 0,1
   }
 
-  cu_DList_Node *node = list.head;
+  struct cu_DList_Node *node = list.head;
   int v = 42;
   cu_DList_insert_after(&list, node, &v); // 0,42,1
 
@@ -61,7 +63,7 @@ static void DList_InsertIter(void) {
 
   int expected[] = {99, 0, 42, 1};
   size_t idx = 0;
-  cu_DList_Node *it = NULL;
+  struct cu_DList_Node *it = NULL;
   void *elem = NULL;
   while (cu_DList_iter(&list, &it, &elem)) {
     TEST_ASSERT_TRUE((idx) < (CU_ARRAY_LEN(expected)));

@@ -202,7 +202,8 @@ fail:
 cu_HttpServer_Result cu_HttpServer_create(
     cu_Allocator allocator, uint16_t port) {
   cu_Vector_Result vec_res =
-      cu_Vector_create(allocator, CU_LAYOUT(int), Size_Optional_some(16));
+      cu_Vector_create(allocator, CU_LAYOUT(int), Size_Optional_some(16),
+          cu_Destructor_Optional_none());
   if (!cu_Vector_Result_is_ok(&vec_res)) {
     return cu_HttpServer_Result_error(CU_HTTP_ERROR_EPOLL);
   }

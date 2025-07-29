@@ -10,6 +10,7 @@ includes = include_directories('include')
 
 sources = [
   'lib/object/optional.c',
+  'lib/object/destructor.c',
   'lib/memory/allocator.c',
   'lib/memory/page.c',
   'lib/memory/arenaallocator.c',

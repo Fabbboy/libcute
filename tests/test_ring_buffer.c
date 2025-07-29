@@ -7,7 +7,9 @@
 static void RingBuffer_PushPop(void) {
   cu_Allocator alloc = test_allocator;
 
-  cu_RingBuffer_Result res = cu_RingBuffer_create(alloc, CU_LAYOUT(int), 4);
+  cu_RingBuffer_Result res =
+      cu_RingBuffer_create(alloc, CU_LAYOUT(int), 4,
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_RingBuffer_Result_is_ok(&res));
   cu_RingBuffer rb = cu_RingBuffer_Result_unwrap(&res);
 

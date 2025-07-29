@@ -16,7 +16,8 @@ static void Vector_Create(void) {
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
-      cu_Vector_create(alloc, layout, Size_Optional_some(10));
+      cu_Vector_create(alloc, layout, Size_Optional_some(10),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vec = cu_Vector_Result_unwrap(&res);
   TEST_ASSERT_EQUAL(vec.length, 0u);
@@ -30,7 +31,8 @@ static void Vector_Resize(void) {
 
   cu_Layout layout = CU_LAYOUT(int);
   cu_Vector_Result res =
-      cu_Vector_create(alloc, layout, Size_Optional_some(10));
+      cu_Vector_create(alloc, layout, Size_Optional_some(10),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -46,11 +48,33 @@ static void Vector_Resize(void) {
   cu_Vector_destroy(&vector);
 }
 
+static int drop_count; // NOLINT
+static void dtor(void *ptr) { drop_count++; } // NOLINT
+
+static void Vector_Destructor(void) {
+  cu_Allocator alloc = test_allocator;
+
+  cu_Vector_Result res = cu_Vector_create(alloc, CU_LAYOUT(int),
+      Size_Optional_some(0), cu_Destructor_Optional_some(dtor));
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vec = cu_Vector_Result_unwrap(&res);
+
+  int v = 1;
+  cu_Vector_push_back(&vec, &v);
+  drop_count = 0;
+  int out;
+  cu_Vector_pop_back(&vec, &out);
+  TEST_ASSERT_EQUAL(drop_count, 1);
+  cu_Vector_destroy(&vec);
+  TEST_ASSERT_EQUAL(drop_count, 1);
+}
+
 static void Vector_PushBack(void) {
   cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
-      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -67,7 +91,8 @@ static void Vector_PopBack(void) {
   cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
-      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -93,7 +118,8 @@ static void Vector_Copy(void) {
   cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
-      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5));
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(5),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
 
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
@@ -125,7 +151,8 @@ static void Vector_ReserveClearAt(void) {
   cu_Allocator alloc = test_allocator;
 
   cu_Vector_Result res =
-      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0));
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0),
+          cu_Destructor_Optional_none());
   TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
   cu_Vector vector = cu_Vector_Result_unwrap(&res);
 
@@ -163,6 +190,7 @@ int main(void) {
   RUN_TEST(Vector_PopBack);
   RUN_TEST(Vector_Copy);
   RUN_TEST(Vector_ReserveClearAt);
+  RUN_TEST(Vector_Destructor);
 #endif
   return UNITY_END();
 }
