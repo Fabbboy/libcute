@@ -5,6 +5,7 @@
 
 typedef struct {
   cu_Handle handle;
+  cu_File_Stat stat;
 } cu_Dir;
 
 CU_RESULT_DECL(cu_Dir, cu_Dir, cu_Io_Error)
