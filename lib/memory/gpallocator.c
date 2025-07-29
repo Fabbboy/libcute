@@ -249,17 +249,19 @@ static void cu_gpa_free_small(cu_GPAllocator *gpa,
   }
   if (bucket->objects.usedCount == 0) {
     int idx = cu_gpa_index_from_size(bucket->objects.objectSize);
-    if (bucket->prev) {
-      bucket->prev->next = bucket->next;
-    } else {
-      gpa->smallBuckets[idx] = bucket->next;
+    if (gpa->smallBuckets[idx] != bucket || bucket->next != NULL) {
+      if (bucket->prev) {
+        bucket->prev->next = bucket->next;
+      } else {
+        gpa->smallBuckets[idx] = bucket->next;
+      }
+      if (bucket->next) {
+        bucket->next->prev = bucket->prev;
+      } else {
+        gpa->smallBucketTails[idx] = bucket->prev;
+      }
+      cu_gpa_destroy_bucket(gpa, bucket);
     }
-    if (bucket->next) {
-      bucket->next->prev = bucket->prev;
-    } else {
-      gpa->smallBucketTails[idx] = bucket->prev;
-    }
-    cu_gpa_destroy_bucket(gpa, bucket);
   }
 }
 

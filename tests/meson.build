@@ -31,7 +31,8 @@ test_files = [
   'test_skip_list_sst.c',
   'test_rc.c',
   'test_file.c',
-  'test_dir.c'
+  'test_dir.c',
+  'gpa_string_debug.c'
 ]
 
 foreach test_file : test_files
