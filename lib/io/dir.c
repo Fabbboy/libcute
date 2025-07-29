@@ -24,7 +24,8 @@
 
 CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 
-cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
+cu_Dir_Result cu_Dir_open(
+    cu_Slice path, bool create, cu_Allocator allocator) {
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
   size_t path_len;
   if (path.length < (CU_FILE_MAX_PATH_LENGTH - 1)) {
@@ -60,6 +61,14 @@ cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
   }
 
   stat = cu_File_Stat_from_handle(handle);
+  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
+  if (!cu_String_Result_is_ok(&pres)) {
+    close(handle);
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+        .errnum = Size_Optional_none()};
+    return cu_Dir_Result_error(err);
+  }
+  stat.path = pres.value;
 
 #else
   DWORD access = FILE_LIST_DIRECTORY;
@@ -79,6 +88,14 @@ cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
   }
 
   stat = cu_File_Stat_from_handle(handle);
+  pres = cu_String_from_cstr(allocator, lpath);
+  if (!cu_String_Result_is_ok(&pres)) {
+    CloseHandle(handle);
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+        .errnum = Size_Optional_none()};
+    return cu_Dir_Result_error(err);
+  }
+  stat.path = pres.value;
 #endif
 
   cu_Dir dir;
@@ -97,6 +114,7 @@ void cu_Dir_close(cu_Dir *dir) {
   CloseHandle(dir->handle);
 #endif
   dir->handle = CU_INVALID_HANDLE;
+  cu_File_Stat_destroy(&dir->stat);
 }
 
 cu_String_Optional cu_Dir_Home(cu_Allocator allocator) {

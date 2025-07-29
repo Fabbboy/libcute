@@ -4,6 +4,7 @@
 #include <nostd.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "string/string.h"
 
 #if CU_PLAT_POSIX
 typedef int cu_Handle;
@@ -34,6 +35,7 @@ typedef enum {
 } cu_File_Type;
 
 typedef struct {
+  cu_String path;
   unsigned long long size;
   unsigned int mode;
   cu_File_Type kind;
@@ -41,6 +43,11 @@ typedef struct {
   long long mtime;
   long long ctime;
 } cu_File_Stat;
+
+static inline void cu_File_Stat_destroy(cu_File_Stat *stat) {
+  cu_String_destroy(&stat->path);
+  cu_Memory_memset(stat, 0, sizeof(*stat));
+}
 
 #if CU_PLAT_POSIX
 #include <sys/stat.h>

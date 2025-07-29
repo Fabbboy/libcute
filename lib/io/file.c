@@ -1,6 +1,7 @@
 #include "io/file.h"
 #include "io/error.h"
 #include "io/fd.h"
+#include "string/string.h"
 #include "macro.h"
 #include "nostd.h"
 #include "object/optional.h"
@@ -78,7 +79,8 @@ static DWORD cu_File_OpenOptions_to_win32_creation(
 }
 #endif
 
-cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
+cu_File_Result cu_File_open(
+    cu_Slice path, cu_File_Options options, cu_Allocator allocator) {
   if (!options.read && !options.write) {
     cu_Io_Error error = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
@@ -112,6 +114,14 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   }
 
   stat = cu_File_Stat_from_handle(handle);
+  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
+  if (!cu_String_Result_is_ok(&pres)) {
+    close(handle);
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+        .errnum = Size_Optional_none()};
+    return cu_File_Result_error(err);
+  }
+  stat.path = pres.value;
 
 #else
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
@@ -126,6 +136,14 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   }
 
   stat = cu_File_Stat_from_handle(handle);
+  pres = cu_String_from_cstr(allocator, lpath);
+  if (!cu_String_Result_is_ok(&pres)) {
+    CloseHandle(handle);
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
+        .errnum = Size_Optional_none()};
+    return cu_File_Result_error(err);
+  }
+  stat.path = pres.value;
 #endif
 
   cu_File file;
@@ -147,6 +165,7 @@ void cu_File_close(cu_File *file) {
 #endif
 
   file->handle = CU_INVALID_HANDLE;
+  cu_File_Stat_destroy(&file->stat);
 }
 
 cu_Io_Error_Optional cu_File_read(cu_File *file, cu_Slice buffer) {

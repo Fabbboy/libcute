@@ -10,13 +10,16 @@ static void File_OpenAndClose(void) {
 
   const char lpath[] = "test.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
-  cu_File_Result res = cu_File_open(path, options);
+  cu_File_Result res = cu_File_open(path, options, cu_Allocator_CAllocator());
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&res));
   cu_File file = cu_File_Result_unwrap(&res);
   TEST_ASSERT_TRUE((file.handle) != (CU_INVALID_HANDLE));
+  TEST_ASSERT_EQUAL(file.stat.path.length, sizeof(lpath) - 1);
+  TEST_ASSERT_EQUAL_STRING(file.stat.path.data, lpath);
 
   cu_File_close(&file);
   TEST_ASSERT_EQUAL(file.handle, CU_INVALID_HANDLE);
+  TEST_ASSERT_NULL(file.stat.path.data);
 }
 
 static void File_WriteAndRead(void) {
@@ -27,9 +30,10 @@ static void File_WriteAndRead(void) {
 
   const char lpath[] = "io_test.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
-  cu_File_Result res = cu_File_open(path, options);
+  cu_File_Result res = cu_File_open(path, options, cu_Allocator_CAllocator());
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&res));
   cu_File file = cu_File_Result_unwrap(&res);
+  TEST_ASSERT_EQUAL_STRING(file.stat.path.data, lpath);
 
   const char data[] = "hello";
   cu_Slice data_slice = cu_Slice_create((void *)data, sizeof(data) - 1);
@@ -40,9 +44,10 @@ static void File_WriteAndRead(void) {
 
   cu_File_Options rd = {0};
   cu_File_Options_read(&rd);
-  res = cu_File_open(path, rd);
+  res = cu_File_open(path, rd, cu_Allocator_CAllocator());
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&res));
   file = cu_File_Result_unwrap(&res);
+  TEST_ASSERT_EQUAL_STRING(file.stat.path.data, lpath);
 
   char buffer[6] = {0};
   cu_Slice buffer_slice = cu_Slice_create(buffer, sizeof(data) - 1);
@@ -52,13 +57,14 @@ static void File_WriteAndRead(void) {
   TEST_ASSERT_EQUAL_STRING(buffer, data);
 
   cu_File_close(&file);
+  TEST_ASSERT_NULL(file.stat.path.data);
 }
 
 static void File_InvalidOptions(void) {
   cu_File_Options options = {0};
   const char lpath[] = "invalid.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
-  cu_File_Result res = cu_File_open(path, options);
+  cu_File_Result res = cu_File_open(path, options, cu_Allocator_CAllocator());
   TEST_ASSERT_FALSE(cu_File_Result_is_ok(&res));
 }
 

@@ -123,6 +123,8 @@ All notable changes to this project will be documented in this file. See [conven
 
 - populated io error - ([912c4a3](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/912c4a3ee8e0c1e07551ab512156688ec4b47b8c)) - Fabrice
 - rename errno field to errnum - ([c8731ed](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/c8731edf91be95ce975d645858c703aa400657fe)) - Fabrice
+- carry file path in file stat - Fabrice
+- pass allocator to open functions - Fabrice
 
 ### Macro
 

@@ -14,7 +14,8 @@ typedef struct {
 
 CU_RESULT_DECL(cu_Dir, cu_Dir, cu_Io_Error)
 
-cu_Dir_Result cu_Dir_open(cu_Slice path, bool create);
+cu_Dir_Result cu_Dir_open(
+    cu_Slice path, bool create, cu_Allocator allocator);
 void cu_Dir_close(cu_Dir *dir);
 
 cu_String_Optional cu_Dir_Home(cu_Allocator allocator);

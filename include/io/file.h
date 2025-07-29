@@ -59,7 +59,8 @@ static inline void cu_File_Options_truncate(cu_File_Options *options) {
   options->truncate = true;
 }
 
-cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options);
+cu_File_Result cu_File_open(
+    cu_Slice path, cu_File_Options options, cu_Allocator allocator);
 cu_File_Result cu_Dir_openat(
     cu_Dir *dir, cu_Slice path, cu_File_Options options);
 
