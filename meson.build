@@ -29,6 +29,7 @@ sources = [
   'lib/collection/skip_list.c',
   'lib/collection/vector.c',
   'lib/collection/hashmap.c',
+  'lib/state.c',
   'lib/io/error.c',
   'lib/io/file.c',
 ]

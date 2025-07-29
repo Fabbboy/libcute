@@ -18,10 +18,12 @@ static int int_cmp(const void *a, const void *b) {
 
 static void SkipList_InsertFindRemove(void) {
   cu_Allocator alloc = test_allocator;
+  cu_RandomState rng;
+  cu_State st = cu_RandomState_init(&rng, 1);
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 8, cu_SkipList_CmpFn_Optional_some(int_cmp),
-      cu_Destructor_Optional_none(), cu_Destructor_Optional_none());
+      cu_Destructor_Optional_none(), cu_Destructor_Optional_none(), st);
   TEST_ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
   cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
@@ -49,10 +51,12 @@ static void SkipList_InsertFindRemove(void) {
 
 static void SkipList_Iteration(void) {
   cu_Allocator alloc = test_allocator;
+  cu_RandomState rng;
+  cu_State st = cu_RandomState_init(&rng, 1);
 
   cu_SkipList_Result res = cu_SkipList_create(alloc, CU_LAYOUT(int),
       CU_LAYOUT(int), 6, cu_SkipList_CmpFn_Optional_some(int_cmp),
-      cu_Destructor_Optional_none(), cu_Destructor_Optional_none());
+      cu_Destructor_Optional_none(), cu_Destructor_Optional_none(), st);
   TEST_ASSERT_TRUE(cu_SkipList_Result_is_ok(&res));
   cu_SkipList list = cu_SkipList_Result_unwrap(&res);
 
