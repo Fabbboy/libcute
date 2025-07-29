@@ -5,6 +5,8 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "string/string.h"
+#include <stdlib.h>
 #if CU_PLAT_POSIX
 #include <errno.h>
 #include <fcntl.h>
@@ -17,6 +19,8 @@
 #else
 #include <windows.h>
 #endif
+
+#ifndef CU_FREESTANDING
 
 CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 
@@ -66,8 +70,8 @@ cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
     CreateDirectoryA(lpath, NULL);
   }
 
-  handle = CreateFileA(lpath, access, FILE_SHARE_READ | FILE_SHARE_WRITE |
-                                       FILE_SHARE_DELETE, NULL, creation,
+  handle = CreateFileA(lpath, access,
+      FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, creation,
       attributes, NULL);
 
   if (handle == INVALID_HANDLE_VALUE) {
@@ -94,3 +98,9 @@ void cu_Dir_close(cu_Dir *dir) {
 #endif
   dir->handle = CU_INVALID_HANDLE;
 }
+
+cu_String_Optional cu_Dir_Home(void) { return cu_String_Optional_none(); }
+cu_String_Optional cu_Dir_Tmp(void) { return cu_String_Optional_none(); }
+cu_String_Optional cu_Dir_Config(void) { return cu_String_Optional_none(); }
+
+#endif

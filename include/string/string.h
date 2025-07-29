@@ -5,8 +5,8 @@
 
 #include "memory/allocator.h"
 #include "nostd.h"
+#include "object/optional.h"
 #include "object/result.h"
-#include "io/error.h"
 
 /**
  * @brief Error codes returned by string operations.
@@ -28,7 +28,7 @@ typedef struct cu_String {
   size_t capacity;        /**< allocated capacity */
 } cu_String;
 CU_RESULT_DECL(cu_String, cu_String, cu_String_Error)
-CU_RESULT_DECL(cu_IoString, cu_String, cu_Io_Error)
+CU_OPTIONAL_DECL(cu_String, cu_String)
 
 /** Initialize an empty string using the given allocator. */
 cu_String cu_String_init(cu_Allocator allocator);

@@ -1,8 +1,8 @@
 #include "string/string.h"
-#include "macro.h"
 #include <nostd.h>
 
 CU_RESULT_IMPL(cu_String, cu_String, cu_String_Error)
+CU_OPTIONAL_IMPL(cu_String, cu_String)
 
 cu_String cu_String_init(cu_Allocator allocator) {
   cu_String str;
