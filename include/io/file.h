@@ -9,14 +9,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#if CU_PLAT_POSIX
-#define CU_FILE_MAX_PATH_LENGTH 4096
-#else
-#define CU_FILE_MAX_PATH_LENGTH 260
-#endif
-
 typedef struct {
   cu_Handle handle;
+  cu_File_Stat stat;
 } cu_File;
 
 CU_RESULT_DECL(cu_File, cu_File, cu_Io_Error)

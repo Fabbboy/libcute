@@ -1,5 +1,6 @@
 #include "io/file.h"
 #include "io/error.h"
+#include "io/fd.h"
 #include "macro.h"
 #include "nostd.h"
 #include "object/optional.h"
@@ -86,7 +87,6 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
     return cu_File_Result_error(error);
   }
 
-  // Convert path to null-terminated string
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
   size_t path_len;
   if (path.length < (CU_FILE_MAX_PATH_LENGTH - 1)) {
@@ -99,6 +99,7 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   lpath[path_len] = '\0';
 
   cu_Handle handle = CU_INVALID_HANDLE;
+  cu_File_Stat stat = {0};
 
 #if CU_PLAT_POSIX
   int flags = cu_File_OpenOptions_to_posix_flags(&options);
@@ -108,6 +109,15 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   if (handle == -1) {
     return cu_File_Result_error(cu_Io_Error_from_errno(errno));
   }
+
+  struct stat st;
+  if (fstat(handle, &st) == -1) {
+    close(handle);
+    return cu_File_Result_error(cu_Io_Error_from_errno(errno));
+  }
+
+  stat = cu_File_Stat_from(&st);
+
 #else
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
   DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);

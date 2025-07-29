@@ -32,6 +32,7 @@ sources = [
   'lib/state.c',
   'lib/io/error.c',
   'lib/io/file.c',
+  'lib/io/dir.c',
 ]
 
 freestanding = get_option('freestanding')

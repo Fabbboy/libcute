@@ -5,8 +5,8 @@
 
 static void File_OpenAndClose(void) {
   cu_File_Options options = {0};
-  cu_File_OpenOptions_read(&options);
-  cu_File_OpenOptions_create(&options);
+  cu_File_Options_read(&options);
+  cu_File_Options_create(&options);
 
   const char lpath[] = "test.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
@@ -21,9 +21,9 @@ static void File_OpenAndClose(void) {
 
 static void File_WriteAndRead(void) {
   cu_File_Options options = {0};
-  cu_File_OpenOptions_write(&options);
-  cu_File_OpenOptions_create(&options);
-  cu_File_OpenOptions_truncate(&options);
+  cu_File_Options_write(&options);
+  cu_File_Options_create(&options);
+  cu_File_Options_truncate(&options);
 
   const char lpath[] = "io_test.txt";
   cu_Slice path = cu_Slice_create((void *)lpath, sizeof(lpath) - 1);
@@ -39,7 +39,7 @@ static void File_WriteAndRead(void) {
   cu_File_close(&file);
 
   cu_File_Options rd = {0};
-  cu_File_OpenOptions_read(&rd);
+  cu_File_Options_read(&rd);
   res = cu_File_open(path, rd);
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&res));
   file = cu_File_Result_unwrap(&res);
