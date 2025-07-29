@@ -43,6 +43,7 @@ All notable changes to this project will be documented in this file. See [conven
 - adds faulty vector type - ([05563aa](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/05563aa26c7bf347d5cbd4f4d204d58b81be650f)) - Fabrice
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
 - implement directory path helpers - Fabrice
+- add cu_Dir_openat using portable path construction - Fabrice
 
 ### Refactoring
 
