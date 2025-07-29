@@ -27,6 +27,8 @@ typedef struct cu_String {
   size_t length;          /**< string length without null terminator */
   size_t capacity;        /**< allocated capacity */
 } cu_String;
+
+CU_RESULT_DECL(cu_IoString, cu_String, cu_String_Error)
 CU_RESULT_DECL(cu_String, cu_String, cu_String_Error)
 CU_OPTIONAL_DECL(cu_String, cu_String)
 

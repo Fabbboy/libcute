@@ -1,6 +1,7 @@
 #include "string/string.h"
 #include <nostd.h>
 
+CU_RESULT_IMPL(cu_IoString, cu_String, cu_String_Error)
 CU_RESULT_IMPL(cu_String, cu_String, cu_String_Error)
 CU_OPTIONAL_IMPL(cu_String, cu_String)
 
