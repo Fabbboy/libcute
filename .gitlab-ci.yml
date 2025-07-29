@@ -11,7 +11,7 @@ test:
     - apt-get install -y clang clang-tools build-essential git ninja-build tar python3 curl wget python3-pip 
     - apt-get install -y doxygen graphviz python3-pip ninja-build
     - pip3 install --break-system-packages --user meson
-    - meson setup build --buildtype=release -Dtests=enabled
+    - /root/.local/bin/meson setup build --buildtype=release -Dtests=enabled
     - ninja -C build
     - ninja -C build test
   tags:
@@ -23,7 +23,7 @@ pages:
     - apt-get update
     - apt-get install -y doxygen graphviz ninja-build python3 tar python3-pip 
     - pip3 install --break-system-packages --user meson
-    - meson setup build --buildtype=release -Dtests=disabled
+    - /root/.local/bin/meson setup build 
     - ninja -C build docs
     - mv build/docs/html public
   artifacts:
