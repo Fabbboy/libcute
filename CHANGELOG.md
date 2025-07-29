@@ -39,6 +39,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 ### Features
 
+- cross-platform file stat and directory handling - Codex
+- expanded file stats with inode, type and nanosecond times - Codex
+- define macros for time constants to remove magic numbers - Codex
+
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice
 - adds bitset, starts implementing gpa, fixes macros - ([931d391](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/931d391a6551b651af0f4170bf7e3d2b792b5440)) - Fabrice
 - adds bitmap type - ([d0b722c](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/d0b722cc539b83a4dd722960faba92a604548b6f)) - Fabrice
