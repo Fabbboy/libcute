@@ -3,6 +3,9 @@
 #include "io/fd.h"
 #include "macro.h"
 #include "nostd.h"
+#include "object/optional.h"
+#include "object/result.h"
+#if CU_PLAT_POSIX
 #include <errno.h>
 #include <fcntl.h>
 #include <fcntl.h> // for O_RDONLY, O_DIRECTORY, openat, AT_FDCWD
@@ -11,9 +14,11 @@
 #include <sys/types.h> // technically optional, but traditional
 #include <unistd.h>
 #include <unistd.h> // for close()
+#else
+#include <windows.h>
+#endif
 
-// POSIX IMPL ONLY
-//  TODO: ADD WINDOWS IMPL
+CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 
 cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
@@ -28,39 +33,54 @@ cu_Dir_Result cu_Dir_open(cu_Slice path, bool create) {
   lpath[path_len] = '\0';
 
   cu_Handle handle = CU_INVALID_HANDLE;
+  cu_File_Stat stat;
+  cu_Memory_memset(&stat, 0, sizeof(stat));
 #if CU_PLAT_POSIX
   int flags = O_RDONLY;
-  if (create) {
-    flags |= O_CREAT;
-  }
-
+#ifdef O_DIRECTORY
+  flags |= O_DIRECTORY;
+#endif
   int mode =
       S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH;
 
-  handle = open(lpath, flags, mode);
+  if (create) {
+    if (mkdir(lpath, mode) != 0 && errno != EEXIST) {
+      return cu_Dir_Result_error(cu_Io_Error_from_errno(errno));
+    }
+  }
+
+  handle = open(lpath, flags);
 
   if (handle == CU_INVALID_HANDLE) {
     return cu_Dir_Result_error(cu_Io_Error_from_errno(errno));
   }
 
-  struct stat st;
-  if (fstat(handle, &st) == -1) {
-    close(handle);
-    return cu_Dir_Result_error(cu_Io_Error_from_errno(errno));
-  }
-
-  if (!S_ISDIR(st.st_mode)) {
-    close(handle);
-    return cu_Dir_Result_error(
-        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
-            .errnum = Size_Optional_none()});
-  }
+  stat = cu_File_Stat_from_handle(handle);
 
 #else
-#error "Windows implementation not yet supported"
+  DWORD access = FILE_LIST_DIRECTORY;
+  DWORD creation = create ? OPEN_ALWAYS : OPEN_EXISTING;
+  DWORD attributes = FILE_FLAG_BACKUP_SEMANTICS;
+
+  if (create) {
+    CreateDirectoryA(lpath, NULL);
+  }
+
+  handle = CreateFileA(lpath, access, FILE_SHARE_READ | FILE_SHARE_WRITE |
+                                       FILE_SHARE_DELETE, NULL, creation,
+      attributes, NULL);
+
+  if (handle == INVALID_HANDLE_VALUE) {
+    return cu_Dir_Result_error(cu_Io_Error_from_win32(GetLastError()));
+  }
+
+  stat = cu_File_Stat_from_handle(handle);
 #endif
 
-  cu_Dir dir = {.handle = handle};
+  cu_Dir dir;
+  cu_Memory_memset(&dir, 0, sizeof(dir));
+  dir.handle = handle;
+  dir.stat = stat;
   return cu_Dir_Result_ok(dir);
 }
 
@@ -70,6 +90,7 @@ void cu_Dir_close(cu_Dir *dir) {
 #if CU_PLAT_POSIX
   close(dir->handle);
 #else
-#error "Windows implementation not yet supported"
+  CloseHandle(dir->handle);
 #endif
+  dir->handle = CU_INVALID_HANDLE;
 }

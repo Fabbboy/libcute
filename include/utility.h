@@ -37,3 +37,13 @@ static inline cu_Layout cu_Layout_create(size_t elem_size, size_t alignment) {
 #define CU_LAYOUT(T) cu_Layout_create(sizeof(T), _Alignof(T))
 #define CU_LAYOUT_CHECK(layout)                                                \
   if ((layout).elem_size == 0 || (layout).alignment == 0)
+
+#define CU_TIME_NS_PER_SEC 1000000000ULL
+#if CU_PLAT_WINDOWS
+#define CU_TIME_WINDOWS_TICKS_PER_SEC 10000000ULL
+#define CU_TIME_WINDOWS_EPOCH_DIFF 116444736000000000ULL
+#define CU_TIME_WINDOWS_TICK_NS 100ULL
+#include <windows.h>
+long long cu_Time_filetime_to_unix(FILETIME ft);
+FILETIME cu_Time_unix_to_filetime(long long ns);
+#endif

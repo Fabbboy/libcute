@@ -23,6 +23,7 @@ sources = [
   'lib/string/string.c',
   'lib/string/fmt.c',
   'lib/nostd.c',
+  'lib/utility.c',
   'lib/collection/ring_buffer.c',
   'lib/collection/list.c',
   'lib/collection/dlist.c',

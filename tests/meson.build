@@ -30,7 +30,8 @@ test_files = [
   'test_skip_list.c',
   'test_skip_list_sst.c',
   'test_rc.c',
-  'test_file.c'
+  'test_file.c',
+  'test_dir.c'
 ]
 
 foreach test_file : test_files

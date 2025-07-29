@@ -99,7 +99,8 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   lpath[path_len] = '\0';
 
   cu_Handle handle = CU_INVALID_HANDLE;
-  cu_File_Stat stat = {0};
+  cu_File_Stat stat;
+  cu_Memory_memset(&stat, 0, sizeof(stat));
 
 #if CU_PLAT_POSIX
   int flags = cu_File_OpenOptions_to_posix_flags(&options);
@@ -110,13 +111,7 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
     return cu_File_Result_error(cu_Io_Error_from_errno(errno));
   }
 
-  struct stat st;
-  if (fstat(handle, &st) == -1) {
-    close(handle);
-    return cu_File_Result_error(cu_Io_Error_from_errno(errno));
-  }
-
-  stat = cu_File_Stat_from(&st);
+  stat = cu_File_Stat_from_handle(handle);
 
 #else
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
@@ -129,9 +124,14 @@ cu_File_Result cu_File_open(cu_Slice path, cu_File_Options options) {
   if (handle == INVALID_HANDLE_VALUE) {
     return cu_File_Result_error(cu_Io_Error_from_win32(GetLastError()));
   }
+
+  stat = cu_File_Stat_from_handle(handle);
 #endif
 
-  cu_File file = {.handle = handle};
+  cu_File file;
+  cu_Memory_memset(&file, 0, sizeof(file));
+  file.handle = handle;
+  file.stat = stat;
   return cu_File_Result_ok(file);
 }
 
