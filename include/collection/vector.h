@@ -72,9 +72,12 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem);
 /** Remove the last element and copy it into @p out_elem. */
 cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem);
 
+/** Insert an element at the beginning of the vector. */
 cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem);
+/** Remove the first element and copy it into @p out_elem. */
 cu_Vector_Error_Optional cu_Vector_pop_front(cu_Vector *vector, void *out_elem);
 
+/** Duplicate the contents of @p src into a new vector. */
 cu_Vector_Result cu_Vector_copy(const cu_Vector *src);
 
 static inline bool cu_Vector_is_empty(const cu_Vector *vector) {
@@ -89,6 +92,19 @@ cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector);
 /** Reset the vector. */
 void cu_Vector_clear(cu_Vector *vector);
 
+/**
+ * @brief Return a pointer to the element at @p index.
+ *
+ * If the index is out of bounds the optional contains none.
+ */
 Ptr_Optional cu_Vector_at(const cu_Vector *vector, size_t index);
 
+/**
+ * @brief Iterate over the vector elements.
+ *
+ * @param vector vector to iterate
+ * @param index current index, pass NULL for the first call
+ * @param out_elem receives a pointer to the element
+ * @return true when another element was produced
+ */
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem);

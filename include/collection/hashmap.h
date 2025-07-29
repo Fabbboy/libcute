@@ -49,14 +49,34 @@ typedef enum {
 CU_RESULT_DECL(cu_HashMap, cu_HashMap, cu_HashMap_Error)
 CU_OPTIONAL_DECL(cu_HashMap_Error, cu_HashMap_Error)
 
+/**
+ * @brief Create a new hashmap.
+ *
+ * @param allocator allocator used for storage
+ * @param key_layout layout describing the key type
+ * @param value_layout layout describing the value type
+ * @param initial_capacity optional initial bucket count
+ * @param hash_fn hashing function, defaults to FNV-1a when none
+ * @param equals_fn equality predicate, defaults to bytewise compare
+ */
 cu_HashMap_Result cu_HashMap_create(cu_Allocator allocator,
     cu_Layout key_layout, cu_Layout value_layout,
     Size_Optional initial_capacity, cu_HashMap_HashFn_Optional hash_fn,
     cu_HashMap_EqualsFn_Optional equals_fn);
+/** Release resources held by @p map. */
 void cu_HashMap_destroy(cu_HashMap *map);
 
+/**
+ * @brief Insert a new key-value pair.
+ */
 cu_HashMap_Error_Optional cu_HashMap_insert(
     cu_HashMap *map, void *key, void *value);
+/**
+ * @brief Retrieve the value stored for @p key.
+ */
 Ptr_Optional cu_HashMap_get(const cu_HashMap *map, const void *key);
+/**
+ * @brief Iterate over all stored pairs.
+ */
 bool cu_HashMap_iter(
     const cu_HashMap *map, size_t *index, void **key, void **value);
