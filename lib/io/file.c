@@ -22,7 +22,7 @@
 CU_RESULT_IMPL(cu_File, cu_File, cu_Io_Error)
 
 #if CU_PLAT_POSIX
-static int cu_File_OpenOptions_to_posix_flags(const cu_File_Options *options) {
+static int cu_File_Options_to_posix_flags(const cu_File_Options *options) {
   int flags = 0;
 
   if (options->read && options->write) {
@@ -50,7 +50,7 @@ static int cu_File_OpenOptions_to_posix_flags(const cu_File_Options *options) {
 #endif
 
 #if CU_PLAT_WINDOWS
-static DWORD cu_File_OpenOptions_to_win32_access(
+static DWORD cu_File_Options_to_win32(
     const cu_File_OpenOptions *options) {
   DWORD access = 0;
 
@@ -98,7 +98,7 @@ cu_File_Result cu_File_open(
   cu_Memory_memset(&stat, 0, sizeof(stat));
 
 #if CU_PLAT_POSIX
-  int flags = cu_File_OpenOptions_to_posix_flags(&options);
+  int flags = cu_File_Options_to_posix_flags(&options);
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH; // 644
 
   handle = open(lpath, flags, mode);
@@ -117,7 +117,7 @@ cu_File_Result cu_File_open(
   stat.path = pres.value;
 
 #else
-  DWORD access = cu_File_OpenOptions_to_win32_access(&options);
+  DWORD access = cu_File_Options_to_win32(&options);
   DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);
   DWORD attributes = FILE_ATTRIBUTE_NORMAL;
 
@@ -330,7 +330,7 @@ cu_File_Result cu_Dir_openat(
   cu_Memory_smemcpy(fullpath_slice, lpath_slice);
 
 #if CU_PLAT_POSIX
-  int flags = cu_File_OpenOptions_to_posix_flags(&options);
+  int flags = cu_File_Options_to_posix_flags(&options);
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
 
   handle = open(fullpath, flags, mode);
@@ -349,7 +349,7 @@ cu_File_Result cu_Dir_openat(
   }
   stat.path = pres.value;
 #else
-  DWORD access = cu_File_OpenOptions_to_win32_access(&options);
+  DWORD access = cu_File_Options_to_win32(&options);
   DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);
   DWORD attributes = FILE_ATTRIBUTE_NORMAL;
 
