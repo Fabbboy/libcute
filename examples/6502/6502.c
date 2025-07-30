@@ -62,11 +62,11 @@ void cu_6502_load(cu_6502 *cpu, cu_Slice program, uint16_t addr) {
   cpu->pc = addr;
 }
 
-bool cu_6502_load_file(cu_6502 *cpu, const char *path, uint16_t addr) {
+bool cu_6502_load_file(
+    cu_6502 *cpu, const char *path, uint16_t addr, cu_Allocator allocator) {
   cu_File_Options opts = {0};
   cu_File_Options_read(&opts);
-  cu_File_Result fres =
-      cu_File_open(CU_SLICE_CSTR(path), opts, cu_Allocator_CAllocator());
+  cu_File_Result fres = cu_File_open(CU_SLICE_CSTR(path), opts, allocator);
   if (!cu_File_Result_is_ok(&fres)) {
     return false;
   }

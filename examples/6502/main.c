@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   }
 
   if (argc > 1) {
-    if (!cu_6502_load_file(&cpu, argv[1], addr)) {
+    if (!cu_6502_load_file(&cpu, argv[1], addr, alloc)) {
       fprintf(stderr, "failed to load %s\n", argv[1]);
       cu_6502_destroy(&cpu);
       return 1;
