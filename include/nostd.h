@@ -11,6 +11,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#if CU_PLAT_WINDOWS
+// Microsoft doesn't define max_align_t in C, so we fake it
+typedef struct {
+    long long ll;
+    long double ld;
+} cu_max_align_t;
+#else
+#include <stddef.h>
+typedef max_align_t cu_max_align_t;
+#endif
 
 /** Non-owning memory view. */
 typedef struct cu_Slice {
