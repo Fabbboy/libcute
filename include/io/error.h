@@ -31,6 +31,7 @@ typedef struct {
 
 CU_OPTIONAL_DECL(cu_Io_Error, cu_Io_Error)
 CU_RESULT_DECL(cu_IoSlice, cu_Slice, cu_Io_Error)
+CU_RESULT_DECL(cu_IoSize, size_t, cu_Io_Error)
 
 #ifndef CU_FREESTANDING
 cu_Io_Error cu_Io_Error_from_errno(int error_code);
