@@ -110,3 +110,10 @@ Ptr_Optional cu_Vector_at(const cu_Vector *vector, size_t index);
  * @return true when another element was produced
  */
 bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem);
+
+/** View the entire vector as a byte slice. */
+cu_Slice_Optional cu_Vector_slice(const cu_Vector *vector);
+
+/** Obtain a slice starting at @p index covering @p count elements. */
+cu_Slice_Optional cu_Vector_subslice(const cu_Vector *vector, size_t index,
+    size_t count);

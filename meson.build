@@ -32,8 +32,10 @@ sources = [
   'lib/collection/hashmap.c',
   'lib/state.c',
   'lib/io/error.c',
-  'lib/io/file.c', 
+  'lib/io/file.c',
   'lib/io/dir.c',
+  'lib/io/fstream.c',
+  'lib/io/memstream.c',
 ]
 
 freestanding = get_option('freestanding')

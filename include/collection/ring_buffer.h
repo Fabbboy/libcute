@@ -5,9 +5,9 @@
 #include "macro.h"
 #include "memory/allocator.h"
 #include "nostd.h"
+#include "object/destructor.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include "object/destructor.h"
 #include "utility.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,12 +16,12 @@
  * @brief Ring buffer storing elements in FIFO order.
  */
 typedef struct {
-  cu_Slice_Optional data; /**< element storage */
-  size_t capacity;        /**< maximum elements */
-  size_t head;            /**< index of first element */
-  size_t length;          /**< number of stored elements */
-  cu_Layout layout;       /**< element layout */
-  cu_Allocator allocator; /**< backing allocator */
+  cu_Slice_Optional data;            /**< element storage */
+  size_t capacity;                   /**< maximum elements */
+  size_t head;                       /**< index of first element */
+  size_t length;                     /**< number of stored elements */
+  cu_Layout layout;                  /**< element layout */
+  cu_Allocator allocator;            /**< backing allocator */
   cu_Destructor_Optional destructor; /**< optional element destructor */
 } cu_RingBuffer;
 
@@ -38,9 +38,8 @@ typedef enum {
 CU_RESULT_DECL(cu_RingBuffer, cu_RingBuffer, cu_RingBuffer_Error)
 CU_OPTIONAL_DECL(cu_RingBuffer_Error, cu_RingBuffer_Error)
 
-cu_RingBuffer_Result cu_RingBuffer_create(
-    cu_Allocator allocator, cu_Layout layout, size_t capacity,
-    cu_Destructor_Optional destructor);
+cu_RingBuffer_Result cu_RingBuffer_create(cu_Allocator allocator,
+    cu_Layout layout, size_t capacity, cu_Destructor_Optional destructor);
 
 void cu_RingBuffer_destroy(cu_RingBuffer *rb);
 
@@ -68,3 +67,6 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_push(cu_RingBuffer *rb, void *elem);
 
 cu_RingBuffer_Error_Optional cu_RingBuffer_pop(
     cu_RingBuffer *rb, void *out_elem);
+
+/** Clear all elements from the ring buffer. */
+void cu_RingBuffer_clear(cu_RingBuffer *rb);

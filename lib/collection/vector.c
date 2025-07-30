@@ -359,3 +359,27 @@ bool cu_Vector_iter(const cu_Vector *vector, size_t *index, void **out_elem) {
   (*index)++;
   return true;
 }
+
+cu_Slice_Optional cu_Vector_slice(const cu_Vector *vector) {
+  CU_IF_NULL(vector) { return cu_Slice_Optional_none(); }
+  if (!cu_Slice_Optional_is_some(&vector->data)) {
+    return cu_Slice_Optional_none();
+  }
+  return cu_Slice_Optional_some(cu_Slice_create(vector->data.value.ptr,
+      vector->length * vector->layout.elem_size));
+}
+
+cu_Slice_Optional cu_Vector_subslice(const cu_Vector *vector, size_t index,
+    size_t count) {
+  CU_IF_NULL(vector) { return cu_Slice_Optional_none(); }
+  if (!cu_Slice_Optional_is_some(&vector->data) || index > vector->length) {
+    return cu_Slice_Optional_none();
+  }
+  if (index + count > vector->length) {
+    count = vector->length - index;
+  }
+  return cu_Slice_Optional_some(cu_Slice_create(
+      (unsigned char *)vector->data.value.ptr +
+          index * vector->layout.elem_size,
+      count * vector->layout.elem_size));
+}

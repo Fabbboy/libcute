@@ -98,3 +98,18 @@ cu_RingBuffer_Error_Optional cu_RingBuffer_pop(
   rb->length--;
   return cu_RingBuffer_Error_Optional_none();
 }
+
+void cu_RingBuffer_clear(cu_RingBuffer *rb) {
+  CU_IF_NULL(rb) { return; }
+  if (cu_Destructor_Optional_is_some(&rb->destructor)) {
+    cu_Destructor dtor = cu_Destructor_Optional_unwrap(&rb->destructor);
+    for (size_t i = 0; i < rb->length; ++i) {
+      size_t idx = (rb->head + i) % rb->capacity;
+      void *ptr =
+          (unsigned char *)rb->data.value.ptr + idx * rb->layout.elem_size;
+      dtor(ptr);
+    }
+  }
+  rb->head = 0;
+  rb->length = 0;
+}

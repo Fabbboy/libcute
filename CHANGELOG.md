@@ -165,6 +165,12 @@ All notable changes to this project will be documented in this file. See [conven
 ### Stream
 
 - adds stream - ([65e2c6b](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/65e2c6b813ff7186840831f781311419a6926448)) - Fabrice
+- use ring buffer for file streams - internal
+- rename file stream to fstream and handle file ownership - internal
+- drop from_file helper and refactor buffer flushing - internal
+- automatically flush buffers on seek and close - internal
+- rename `cu_FStream_as_stream` to `cu_FStream_stream` - internal
+- add `cu_MemStream` for in-memory streams - internal
 
 ### String
 
@@ -178,6 +184,7 @@ All notable changes to this project will be documented in this file. See [conven
 ### Vector
 
 - refine api and tests - ([2ccb068](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ccb06814598b8ecab7adfda64812fd9a379dfdf)) - Fabrice
+ 
 - add capacity shrink helper and remove ternaries - Codex
 - auto shrink vector capacity when underutilized - Codex
 - use macros for vector grow and shrink thresholds - Codex
