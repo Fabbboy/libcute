@@ -19,7 +19,11 @@ static void cu_wasm_free(void *self, cu_Slice mem);
 
 #define CU_WASM_BIGPAGE_SIZE (64 * 1024)
 #define CU_WASM_PAGES_PER_BIGPAGE (CU_WASM_BIGPAGE_SIZE / CU_WASM_PAGE_SIZE)
-#define CU_WASM_MIN_CLASS ((sizeof(size_t) == 8) ? 4 : 3)
+#if SIZE_MAX > UINT32_MAX
+#define CU_WASM_MIN_CLASS 4
+#else
+#define CU_WASM_MIN_CLASS 3
+#endif
 #define CU_WASM_SIZE_CLASS_COUNT (16 - CU_WASM_MIN_CLASS)
 #define CU_WASM_BIG_SIZE_CLASS_COUNT ((sizeof(size_t) * 8) - 16)
 
@@ -119,40 +123,61 @@ static cu_IoSlice_Result cu_wasm_alloc(void *self, cu_Layout layout) {
   return cu_IoSlice_Result_ok(cu_Slice_create(base + user_offset, size));
 }
 
-static cu_IoSlice_Result cu_wasm_resize(
-    void *self, cu_Slice mem, cu_Layout layout) {
-  CU_IF_NULL(mem.ptr) { return cu_wasm_alloc(self, layout); }
-  if (layout.elem_size == 0) {
-    cu_wasm_free(self, mem);
-    cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_IoSlice_Result_error(err);
+static cu_IoSlice_Result cu_wasm_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  CU_IF_NULL(old_mem.ptr) {
+    return cu_wasm_alloc(self, new_layout);
   }
-  size_t size = layout.elem_size;
-  size_t alignment = layout.alignment;
-  if (alignment == 0) {
-    alignment = 1;
-  }
+  size_t alignment = new_layout.alignment;
+  size_t size = new_layout.elem_size;
 
   struct cu_WasmAllocator_Header *hdr =
-      (struct cu_WasmAllocator_Header *)((unsigned char *)mem.ptr -
+      (struct cu_WasmAllocator_Header *)((unsigned char *)old_mem.ptr -
                                          sizeof(
                                              struct cu_WasmAllocator_Header));
   size_t slot_size = hdr->slot_size;
   size_t offset = hdr->offset + sizeof(struct cu_WasmAllocator_Header);
-  if (((uintptr_t)mem.ptr % alignment) == 0 &&
+  if (((uintptr_t)old_mem.ptr % alignment) == 0 &&
       offset + size + sizeof(size_t) <= slot_size) {
-    return cu_IoSlice_Result_ok(cu_Slice_create(mem.ptr, size));
+    return cu_IoSlice_Result_ok(cu_Slice_create(old_mem.ptr, size));
   }
 
-  cu_IoSlice_Result new_mem =
-      cu_wasm_alloc(self, cu_Layout_create(size, alignment));
+  cu_IoSlice_Result new_mem = cu_wasm_alloc(self, new_layout);
   if (!cu_IoSlice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
-  cu_Memory_memcpy(new_mem.value.ptr,
-      cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
-  cu_wasm_free(self, mem);
+  cu_Memory_smemcpy(new_mem.value,
+      cu_Slice_create(old_mem.ptr, CU_MIN(old_mem.length, size)));
+  cu_wasm_free(self, old_mem);
+  return new_mem;
+}
+
+static cu_IoSlice_Result cu_wasm_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  CU_IF_NULL(old_mem.ptr) {
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
+    return cu_IoSlice_Result_error(err);
+  }
+  struct cu_WasmAllocator_Header *hdr =
+      (struct cu_WasmAllocator_Header *)((unsigned char *)old_mem.ptr -
+                                         sizeof(struct cu_WasmAllocator_Header));
+  size_t slot_size = hdr->slot_size;
+  size_t offset = hdr->offset + sizeof(struct cu_WasmAllocator_Header);
+  if (((uintptr_t)old_mem.ptr % new_layout.alignment) == 0 &&
+      offset + new_layout.elem_size + sizeof(size_t) <= slot_size) {
+    return cu_IoSlice_Result_ok(
+        cu_Slice_create(old_mem.ptr, new_layout.elem_size));
+  }
+
+  cu_IoSlice_Result new_mem = cu_wasm_alloc(self, new_layout);
+  if (!cu_IoSlice_Result_is_ok(&new_mem)) {
+    return new_mem;
+  }
+  cu_Memory_smemcpy(new_mem.value,
+      cu_Slice_create(old_mem.ptr,
+          CU_MIN(new_layout.elem_size, old_mem.length)));
+  cu_wasm_free(self, old_mem);
   return new_mem;
 }
 
@@ -185,7 +210,8 @@ cu_Allocator cu_Allocator_WasmAllocator(void) {
   cu_Allocator a = {0};
   a.self = NULL;
   a.allocFn = cu_wasm_alloc;
-  a.resizeFn = cu_wasm_resize;
+  a.growFn = cu_wasm_grow;
+  a.shrinkFn = cu_wasm_shrink;
   a.freeFn = cu_wasm_free;
   return a;
 }

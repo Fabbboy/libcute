@@ -48,7 +48,10 @@ static cu_HashMap_Bucket *cu_HashMap_find_slot(
   for (;;) {
     cu_HashMap_Bucket *b = &map->buckets[idx];
     if (!b->used) {
-      return first_del ? first_del : b;
+      if (first_del) {
+        return first_del;
+      }
+      return b;
     }
     if (b->deleted) {
       if (!first_del) {
@@ -226,7 +229,10 @@ Ptr_Optional cu_HashMap_get(const cu_HashMap *map, const void *key) {
   }
   uint64_t hash = map->hash_fn(key, map->key_layout.elem_size) ^ map->seed;
   cu_HashMap_Bucket *b = cu_HashMap_lookup_bucket(map, key, hash);
-  return b ? Ptr_Optional_some(b->value) : Ptr_Optional_none();
+  if (b) {
+    return Ptr_Optional_some(b->value);
+  }
+  return Ptr_Optional_none();
 }
 
 bool cu_HashMap_iter(

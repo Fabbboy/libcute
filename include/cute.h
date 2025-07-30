@@ -6,8 +6,8 @@ extern "C" {
 
 /** @file cute.h Umbrella header including all of libcute. */
 
-#include "macro.h"
 #include "io/error.h"
+#include "macro.h"
 #include "memory/allocator.h"
 #include "memory/arenaallocator.h"
 #include "memory/fixedallocator.h"
@@ -24,17 +24,20 @@ extern "C" {
 #include "collection/skip_list.h"
 #include "collection/vector.h"
 
-#include "state.h"
 #include "hash/hash.h"
 #include "nostd.h"
-#include "object/optional.h"
 #include "object/destructor.h"
-#include "object/result.h"
-#include "string/fmt.h"
+#include "object/optional.h"
 #include "object/rc.h"
+#include "object/result.h"
+#include "state.h"
+#include "string/fmt.h"
 
 #include "io/fd.h"
 #include "io/file.h"
+#include "io/fstream.h"
+#include "io/memstream.h"
+#include "io/stream.h"
 #include "utility.h"
 #ifdef __cplusplus
 }

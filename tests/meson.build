@@ -32,6 +32,7 @@ test_files = [
   'test_rc.c',
   'test_file.c',
   'test_dir.c',
+  'test_stream.c',
 ]
 
 foreach test_file : test_files

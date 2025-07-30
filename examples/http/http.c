@@ -1,17 +1,27 @@
 #include "http.h"
 #include "collection/vector.h"
+#include "io/file.h"
 #include "macro.h"
 #include "memory/allocator.h"
 #include "object/optional.h"
+#include <nostd.h>
+#if CU_PLAT_WINDOWS
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
 #include <fcntl.h>
 #include <netinet/in.h>
-#include <nostd.h>
-#include <stdio.h> // Add for debugging
-#include <string.h>
 #include <sys/epoll.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
-
+#include <unistd.h>
+#endif
+#include <errno.h>
+#include <stdio.h> // Add for debugging
+#include <string.h>
 // Portable memmem implementation for platforms where it's missing
 static void *portable_memmem(const void *haystack, size_t haystacklen,
     const void *needle, size_t needlelen) {
@@ -25,25 +35,30 @@ static void *portable_memmem(const void *haystack, size_t haystacklen,
   }
   return NULL;
 }
-#include <arpa/inet.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <unistd.h>
 
 #ifndef CU_FREESTANDING
 
 CU_RESULT_IMPL(cu_HttpServer, cu_HttpServer, cu_Http_Error)
 
-static int set_nonblocking(int fd) {
+static int set_nonblocking(cu_socket_t fd) {
+#if CU_PLAT_WINDOWS
+  u_long mode = 1;
+  return ioctlsocket(fd, FIONBIO, &mode);
+#else
   int flags = fcntl(fd, F_GETFL, 0);
   if (flags == -1) {
     return -1;
   }
   return fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#endif
 }
 
-static void close_client(cu_HttpServer *server, int fd) {
+static void close_client(cu_HttpServer *server, cu_socket_t fd) {
+#if CU_PLAT_WINDOWS
+  closesocket(fd);
+#else
   close(fd);
+#endif
   for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
     Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
     if (Ptr_Optional_is_some(&ptr) &&
@@ -59,14 +74,14 @@ static void close_client(cu_HttpServer *server, int fd) {
   }
 }
 
-static void send_simple(int fd, int code, const char *msg) {
+static void send_simple(cu_socket_t fd, int code, const char *msg) {
   char buf[128];
   int len = cu_CString_snprintf(buf, sizeof(buf),
       "HTTP/1.0 %d %s\r\nContent-Length: 0\r\n\r\n", code, msg);
-  write(fd, buf, (size_t)len);
+  send(fd, buf, (int)len, 0);
 }
 
-static void handle_client(cu_HttpServer *server, int fd) {
+static void handle_client(cu_HttpServer *server, cu_socket_t fd) {
   const size_t CHUNK_SIZE = 1024;
   const size_t MAX_REQUEST_SIZE = 8192;
 
@@ -88,12 +103,21 @@ static void handle_client(cu_HttpServer *server, int fd) {
     }
 
     char *chunk = (char *)chunk_res.value.ptr;
+#if CU_PLAT_WINDOWS
+    int r = recv(fd, chunk, CHUNK_SIZE, 0);
+    if (r <= 0) {
+      printf("DEBUG: Read error or client closed (r=%d)\n", r);
+      cu_Allocator_Free(server->slab_alloc, chunk_res.value);
+      goto fail;
+    }
+#else
     ssize_t r = read(fd, chunk, CHUNK_SIZE);
     if (r <= 0) {
       printf("DEBUG: Read error or client closed (r=%zd)\n", r);
       cu_Allocator_Free(server->slab_alloc, chunk_res.value);
       goto fail;
     }
+#endif
 
     // Allocate new buffer
     cu_IoSlice_Result resize_res = cu_Allocator_Alloc(
@@ -146,45 +170,51 @@ static void handle_client(cu_HttpServer *server, int fd) {
   cu_CString_snprintf(fs_path, sizeof(fs_path), ".%s", path);
   printf("DEBUG: File system path: '%s'\n", fs_path);
 
-  int ffd = open(fs_path, O_RDONLY);
-  if (ffd < 0) {
+  cu_File_Options fopts = {0};
+  cu_File_Options_read(&fopts);
+  cu_File_Result fres =
+      cu_File_open(CU_SLICE_CSTR(fs_path), fopts, cu_Allocator_CAllocator());
+  if (!cu_File_Result_is_ok(&fres)) {
     printf("DEBUG: File not found: %s\n", fs_path);
     send_simple(fd, 404, "Not Found");
     goto fail;
   }
 
-  struct stat st;
-  if (fstat(ffd, &st) < 0) {
-    printf("DEBUG: Failed to stat file\n");
-    close(ffd);
-    send_simple(fd, 500, "Internal Server Error");
-    goto fail;
-  }
+  cu_File file = fres.value;
+  unsigned long long fsize = file.stat.size;
 
   char header[256];
   int header_len = cu_CString_snprintf(header, sizeof(header),
-      "HTTP/1.0 200 OK\r\nContent-Length: %ld\r\n\r\n", (long)st.st_size);
+      "HTTP/1.0 200 OK\r\nContent-Length: %llu\r\n\r\n", fsize);
   printf("DEBUG: Sending header: %s", header);
-  write(fd, header, (size_t)header_len);
+  send(fd, header, header_len, 0);
 
   cu_IoSlice_Result buf_res =
       cu_Allocator_Alloc(server->slab_alloc, cu_Layout_create(4096, 1));
   if (!cu_IoSlice_Result_is_ok(&buf_res)) {
     printf("DEBUG: Failed to allocate file buffer\n");
-    close(ffd);
+    cu_File_close(&file);
     goto fail;
   }
 
   char *buf = (char *)buf_res.value.ptr;
-  ssize_t n;
-  ssize_t total_sent = 0;
-  while ((n = read(ffd, buf, buf_res.value.length)) > 0) {
-    write(fd, buf, (size_t)n);
-    total_sent += n;
+  unsigned long long remaining = fsize;
+  while (remaining > 0) {
+    size_t chunk =
+        remaining < buf_res.value.length ? remaining : buf_res.value.length;
+    cu_Io_Error_Optional err = cu_File_read(&file, cu_Slice_create(buf, chunk));
+    if (cu_Io_Error_Optional_is_some(&err)) {
+      printf("DEBUG: Failed to read file\n");
+      cu_File_close(&file);
+      cu_Allocator_Free(server->slab_alloc, buf_res.value);
+      goto fail;
+    }
+    send(fd, buf, (int)chunk, 0);
+    remaining -= chunk;
   }
 
-  printf("DEBUG: Sent %ld bytes of file content\n", total_sent);
-  close(ffd);
+  printf("DEBUG: Sent %llu bytes of file content\n", fsize);
+  cu_File_close(&file);
   cu_Allocator_Free(server->slab_alloc, buf_res.value);
   cu_Allocator_Free(
       server->slab_alloc, (cu_Slice){.ptr = full_req, .length = total});
@@ -207,31 +237,59 @@ cu_HttpServer_Result cu_HttpServer_create(
     return cu_HttpServer_Result_error(CU_HTTP_ERROR_EPOLL);
   }
 
-  int sfd = socket(AF_INET, SOCK_STREAM, 0);
+#if CU_PLAT_WINDOWS
+  WSADATA ws;
+  if (WSAStartup(MAKEWORD(2, 2), &ws) != 0) {
+    cu_Vector_destroy(&vec_res.value);
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
+  }
+  cu_socket_t sfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+  if (sfd == INVALID_SOCKET) {
+    cu_Vector_destroy(&vec_res.value);
+    WSACleanup();
+    return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
+  }
+#else
+  cu_socket_t sfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sfd < 0) {
     cu_Vector_destroy(&vec_res.value);
     return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
+#endif
+
   set_nonblocking(sfd);
 
   int opt = 1;
-  setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+  setsockopt(sfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&opt, sizeof(opt));
   struct sockaddr_in addr = {0};
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = htonl(INADDR_ANY);
   addr.sin_port = htons(port);
   if (bind(sfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+#if CU_PLAT_WINDOWS
+    closesocket(sfd);
+    WSACleanup();
+#else
     close(sfd);
+#endif
     cu_Vector_destroy(&vec_res.value);
     return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
   if (listen(sfd, 16) < 0) {
+#if CU_PLAT_WINDOWS
+    closesocket(sfd);
+    WSACleanup();
+#else
     close(sfd);
+#endif
     cu_Vector_destroy(&vec_res.value);
     return cu_HttpServer_Result_error(CU_HTTP_ERROR_SOCKET);
   }
 
-  int epfd = epoll_create1(0);
+#if CU_PLAT_WINDOWS
+  cu_socket_t epfd = 0;
+#else
+  cu_socket_t epfd = epoll_create1(0);
   if (epfd < 0) {
     close(sfd);
     cu_Vector_destroy(&vec_res.value);
@@ -241,6 +299,7 @@ cu_HttpServer_Result cu_HttpServer_create(
   ev.events = EPOLLIN;
   ev.data.fd = sfd;
   epoll_ctl(epfd, EPOLL_CTL_ADD, sfd, &ev);
+#endif
 
   cu_HttpServer server = {0};
   server.listen_fd = sfd;
@@ -256,49 +315,99 @@ cu_HttpServer_Result cu_HttpServer_create(
 }
 
 void cu_HttpServer_destroy(cu_HttpServer *server) {
+#if CU_PLAT_WINDOWS
+  closesocket(server->listen_fd);
+#else
   close(server->listen_fd);
   close(server->epoll_fd);
+#endif
   for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
     Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
     if (Ptr_Optional_is_some(&ptr)) {
-      int *fd = CU_AS(Ptr_Optional_unwrap(&ptr), int *);
-      printf("DEBUG: Closing client fd=%d\n", *fd);
+      cu_socket_t *fd = CU_AS(Ptr_Optional_unwrap(&ptr), cu_socket_t *);
+      printf("DEBUG: Closing client fd=%ld\n", (long)*fd);
+#if CU_PLAT_WINDOWS
+      closesocket(*fd);
+#else
       close(*fd);
+#endif
     }
   }
   cu_Vector_destroy(&server->clients);
   cu_SlabAllocator_destroy(&server->slab);
+#if CU_PLAT_WINDOWS
+  WSACleanup();
+#endif
 }
 
 void cu_HttpServer_run(cu_HttpServer *server) {
+#if CU_PLAT_WINDOWS
+  printf("DEBUG: Server running, waiting for connections...\n");
+  while (true) {
+    fd_set readfds;
+    FD_ZERO(&readfds);
+    FD_SET(server->listen_fd, &readfds);
+    cu_socket_t maxfd = server->listen_fd;
+    for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
+      Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
+      if (Ptr_Optional_is_some(&ptr)) {
+        cu_socket_t *fd = CU_AS(Ptr_Optional_unwrap(&ptr), cu_socket_t *);
+        FD_SET(*fd, &readfds);
+        if (*fd > maxfd) {
+          maxfd = *fd;
+        }
+      }
+    }
+
+    int n = select((int)(maxfd + 1), &readfds, NULL, NULL, NULL);
+    if (n <= 0) {
+      continue;
+    }
+
+    if (FD_ISSET(server->listen_fd, &readfds)) {
+      cu_socket_t cfd = accept(server->listen_fd, NULL, NULL);
+      if (cfd != INVALID_SOCKET) {
+        set_nonblocking(cfd);
+        cu_Vector_push_back(&server->clients, &cfd);
+      }
+    }
+
+    for (size_t i = 0; i < cu_Vector_size(&server->clients); ++i) {
+      Ptr_Optional ptr = cu_Vector_at(&server->clients, i);
+      if (Ptr_Optional_is_some(&ptr)) {
+        cu_socket_t fd = *CU_AS(Ptr_Optional_unwrap(&ptr), cu_socket_t *);
+        if (FD_ISSET(fd, &readfds)) {
+          handle_client(server, fd);
+          int dummy;
+          cu_Vector_pop_back(&server->clients, &dummy);
+        }
+      }
+    }
+  }
+#else
   struct epoll_event events[16];
   printf("DEBUG: Server running, waiting for connections...\n");
   while (true) {
     int n = epoll_wait(server->epoll_fd, events, CU_ARRAY_LEN(events), -1);
-    printf("DEBUG: epoll_wait returned %d events\n", n);
     for (int i = 0; i < n; ++i) {
       int fd = events[i].data.fd;
       if (fd == server->listen_fd) {
-        printf("DEBUG: New connection on listen socket\n");
         int cfd = accept(server->listen_fd, NULL, NULL);
         if (cfd >= 0) {
-          printf("DEBUG: Accepted connection, fd=%d\n", cfd);
           set_nonblocking(cfd);
           struct epoll_event ev = {0};
           ev.events = EPOLLIN;
           ev.data.fd = cfd;
           epoll_ctl(server->epoll_fd, EPOLL_CTL_ADD, cfd, &ev);
           cu_Vector_push_back(&server->clients, &cfd);
-        } else {
-          printf("DEBUG: Failed to accept connection\n");
         }
       } else {
-        printf("DEBUG: Data available on client fd=%d\n", fd);
         handle_client(server, fd);
         epoll_ctl(server->epoll_fd, EPOLL_CTL_DEL, fd, NULL);
       }
     }
   }
+#endif
 }
 
 #endif

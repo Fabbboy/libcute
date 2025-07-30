@@ -20,9 +20,13 @@ static cu_String_Error cu_string_alloc(cu_String *str, size_t cap) {
   if (str->data == NULL) {
     mem = cu_Allocator_Alloc(str->allocator, cu_Layout_create(cap + 1, 1));
   } else {
-    mem = cu_Allocator_Resize(str->allocator,
-        cu_Slice_create(str->data, str->capacity + 1),
-        cu_Layout_create(cap + 1, 1));
+    cu_Slice old = cu_Slice_create(str->data, str->capacity + 1);
+    cu_Layout layout = cu_Layout_create(cap + 1, 1);
+    if (layout.elem_size > old.length) {
+      mem = cu_Allocator_Grow(str->allocator, old, layout);
+    } else {
+      mem = cu_Allocator_Shrink(str->allocator, old, layout);
+    }
   }
   if (!cu_IoSlice_Result_is_ok(&mem)) {
     return CU_STRING_ERROR_OOM;
@@ -51,7 +55,10 @@ void cu_String_clear(cu_String *str) {
 
 cu_String_Result cu_String_from_cstr(cu_Allocator allocator, const char *cstr) {
   cu_String str = cu_String_init(allocator);
-  size_t len = cstr ? cu_CString_length(cstr) : 0;
+  size_t len = 0;
+  if (cstr) {
+    len = cu_CString_length(cstr);
+  }
   if (cu_string_alloc(&str, len) != CU_STRING_ERROR_NONE) {
     return cu_String_Result_error(CU_STRING_ERROR_OOM);
   }
@@ -90,7 +97,12 @@ cu_String_Error cu_String_reserve(cu_String *str, size_t capacity) {
 cu_String_Error cu_String_append_slice(cu_String *str, cu_Slice slice) {
   size_t new_len = str->length + slice.length;
   if (new_len > str->capacity) {
-    size_t new_cap = str->capacity ? str->capacity * 2 : slice.length;
+    size_t new_cap;
+    if (str->capacity) {
+      new_cap = str->capacity * 2;
+    } else {
+      new_cap = slice.length;
+    }
     if (new_cap < new_len) {
       new_cap = new_len;
     }
@@ -109,7 +121,10 @@ cu_String_Error cu_String_append_slice(cu_String *str, cu_Slice slice) {
 }
 
 cu_String_Error cu_String_append_cstr(cu_String *str, const char *cstr) {
-  size_t len = cstr ? cu_CString_length(cstr) : 0;
+  size_t len = 0;
+  if (cstr) {
+    len = cu_CString_length(cstr);
+  }
   return cu_String_append_slice(str, cu_Slice_create((void *)cstr, len));
 }
 

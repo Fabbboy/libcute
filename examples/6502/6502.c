@@ -3,9 +3,8 @@
 
 #include "macro.h"
 
-#include <fcntl.h>
+#include "io/file.h"
 #include <nostd.h>
-#include <unistd.h>
 
 #define FLAG_CARRY 0x01
 #define FLAG_ZERO 0x02
@@ -33,9 +32,8 @@ static void update_zn(cu_6502 *cpu, uint8_t value) {
 }
 
 cu_6502_Result cu_6502_create(cu_Allocator allocator) {
-  cu_Vector_Result vec_res = cu_Vector_create(
-      allocator, CU_LAYOUT(uint8_t), Size_Optional_some(0x10000),
-      cu_Destructor_Optional_none());
+  cu_Vector_Result vec_res = cu_Vector_create(allocator, CU_LAYOUT(uint8_t),
+      Size_Optional_some(0x10000), cu_Destructor_Optional_none());
   if (!cu_Vector_Result_is_ok(&vec_res)) {
     return cu_6502_Result_error(CU_6502_ERROR_OOM);
   }
@@ -65,21 +63,29 @@ void cu_6502_load(cu_6502 *cpu, cu_Slice program, uint16_t addr) {
 }
 
 bool cu_6502_load_file(cu_6502 *cpu, const char *path, uint16_t addr) {
-  int fd = open(path, O_RDONLY);
-  if (fd < 0) {
+  cu_File_Options opts = {0};
+  cu_File_Options_read(&opts);
+  cu_File_Result fres =
+      cu_File_open(CU_SLICE_CSTR(path), opts, cu_Allocator_CAllocator());
+  if (!cu_File_Result_is_ok(&fres)) {
     return false;
   }
-  long sz = lseek(fd, 0, SEEK_END);
-  lseek(fd, 0, SEEK_SET);
+
+  cu_File file = fres.value;
+  unsigned long long sz = file.stat.size;
   if (addr + (uint16_t)sz > cpu->memory.length) {
-    close(fd);
+    cu_File_close(&file);
     return false;
   }
-  ssize_t r =
-      read(fd, (uint8_t *)cpu->memory.data.value.ptr + addr, (size_t)sz);
-  close(fd);
-  if (r != sz)
+
+  cu_Io_Error_Optional err = cu_File_read(
+      &file, cu_Slice_create(
+                 (uint8_t *)cpu->memory.data.value.ptr + addr, (size_t)sz));
+  cu_File_close(&file);
+  if (cu_Io_Error_Optional_is_some(&err)) {
     return false;
+  }
+
   cpu->pc = addr;
   return true;
 }

@@ -7,8 +7,10 @@
 
 /* Helper forward declarations */
 static cu_IoSlice_Result cu_gpa_alloc(void *self, cu_Layout layout);
-static cu_IoSlice_Result cu_gpa_resize(
-    void *self, cu_Slice mem, cu_Layout layout);
+static cu_IoSlice_Result cu_gpa_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
+static cu_IoSlice_Result cu_gpa_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
 static void cu_gpa_free(void *self, cu_Slice mem);
 static void cu_gpa_destroy_bucket(
     cu_GPAllocator *gpa, struct cu_GPAllocator_BucketHeader *bucket);
@@ -18,7 +20,10 @@ static void cu_gpa_destroy_bucket(
 /* -------------------------------------------------------------------------- */
 
 static size_t cu_gpa_calc_slot_count(cu_GPAllocator *gpa, size_t obj_size) {
-  size_t max_data = gpa->bucketSize ? gpa->bucketSize : CU_GPA_BUCKET_SIZE;
+  size_t max_data = gpa->bucketSize;
+  if (max_data == 0) {
+    max_data = CU_GPA_BUCKET_SIZE;
+  }
   size_t count = max_data / obj_size;
   if (count == 0) {
     count = 1;
@@ -63,7 +68,10 @@ static int cu_gpa_index_from_size(size_t size) {
     s <<= 1;
     idx++;
   }
-  return (idx < CU_GPA_NUM_SMALL_BUCKETS) ? idx : -1;
+  if (idx < CU_GPA_NUM_SMALL_BUCKETS) {
+    return idx;
+  }
+  return -1;
 }
 
 static struct cu_GPAllocator_BucketHeader *cu_gpa_find_bucket(
@@ -178,7 +186,7 @@ static cu_IoSlice_Result cu_gpa_alloc(void *self, cu_Layout layout) {
     alignment = 1;
   }
 
-  size_t need = size > alignment ? size : alignment;
+  size_t need = CU_MAX(size, alignment);
   size_t obj_size = cu_next_pow2(need);
 
   int idx = cu_gpa_index_from_size(obj_size);
@@ -192,32 +200,26 @@ static cu_IoSlice_Result cu_gpa_alloc(void *self, cu_Layout layout) {
 /* Resize and free */
 /* -------------------------------------------------------------------------- */
 
-static cu_IoSlice_Result cu_gpa_resize(
-    void *self, cu_Slice mem, cu_Layout layout) {
+static cu_IoSlice_Result cu_gpa_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
   cu_GPAllocator *gpa = (cu_GPAllocator *)self;
-  CU_IF_NULL(mem.ptr) { return cu_gpa_alloc(self, layout); }
-  if (layout.elem_size == 0) {
-    cu_gpa_free(self, mem);
-    cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_IoSlice_Result_error(err);
+  CU_IF_NULL(old_mem.ptr) {
+    return cu_gpa_alloc(self, new_layout);
   }
-
-  size_t size = layout.elem_size;
-  size_t alignment = layout.alignment;
 
   size_t slot;
   struct cu_GPAllocator_BucketHeader *bucket =
-      cu_gpa_find_bucket(gpa, mem.ptr, &slot);
+      cu_gpa_find_bucket(gpa, old_mem.ptr, &slot);
   if (!bucket) {
-    struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, mem.ptr);
+    struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, old_mem.ptr);
     if (!meta) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
           .errnum = Size_Optional_none()};
       return cu_IoSlice_Result_error(err);
     }
-    cu_IoSlice_Result resized = cu_Allocator_Resize(
-        gpa->backingAllocator, meta->slice, cu_Layout_create(size, alignment));
+    cu_IoSlice_Result resized = cu_Allocator_Grow(
+        gpa->backingAllocator, meta->slice,
+        cu_Layout_create(new_layout.elem_size, new_layout.alignment));
     if (!cu_IoSlice_Result_is_ok(&resized)) {
       return resized;
     }
@@ -225,20 +227,51 @@ static cu_IoSlice_Result cu_gpa_resize(
     return resized;
   }
 
-  if (size <= bucket->objects.objectSize &&
-      alignment <= bucket->objects.objectSize) {
-    return cu_IoSlice_Result_ok(cu_Slice_create(mem.ptr, size));
+  if (new_layout.elem_size <= bucket->objects.objectSize) {
+    return cu_IoSlice_Result_ok(
+        cu_Slice_create(old_mem.ptr, new_layout.elem_size));
   }
 
-  cu_IoSlice_Result new_mem =
-      cu_gpa_alloc(self, cu_Layout_create(size, alignment));
+  cu_IoSlice_Result new_mem = cu_gpa_alloc(self, new_layout);
   if (!cu_IoSlice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
-  size_t copy = mem.length < size ? mem.length : size;
-  cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
-  cu_gpa_free(self, mem);
+  cu_Memory_smemcpy(new_mem.value, old_mem);
+  cu_gpa_free(self, old_mem);
   return new_mem;
+}
+
+static cu_IoSlice_Result cu_gpa_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  cu_GPAllocator *gpa = (cu_GPAllocator *)self;
+  CU_IF_NULL(old_mem.ptr) {
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none()};
+    return cu_IoSlice_Result_error(err);
+  }
+
+  size_t slot;
+  struct cu_GPAllocator_BucketHeader *bucket =
+      cu_gpa_find_bucket(gpa, old_mem.ptr, &slot);
+  if (!bucket) {
+    struct cu_GPAllocator_LargeAlloc *meta = cu_gpa_find_large(gpa, old_mem.ptr);
+    if (!meta) {
+      cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+          .errnum = Size_Optional_none()};
+      return cu_IoSlice_Result_error(err);
+    }
+    cu_IoSlice_Result resized = cu_Allocator_Shrink(
+        gpa->backingAllocator, meta->slice,
+        cu_Layout_create(new_layout.elem_size, new_layout.alignment));
+    if (!cu_IoSlice_Result_is_ok(&resized)) {
+      return resized;
+    }
+    meta->slice = resized.value;
+    return resized;
+  }
+
+  return cu_IoSlice_Result_ok(
+      cu_Slice_create(old_mem.ptr, new_layout.elem_size));
 }
 
 static void cu_gpa_free_small(cu_GPAllocator *gpa,
@@ -313,8 +346,10 @@ cu_Allocator cu_Allocator_GPAllocator(
     alloc->backingAllocator = cu_Allocator_NullAllocator();
 #endif
   }
-  alloc->bucketSize =
-      config.bucketSize ? config.bucketSize : CU_GPA_BUCKET_SIZE;
+  alloc->bucketSize = config.bucketSize;
+  if (alloc->bucketSize == 0) {
+    alloc->bucketSize = CU_GPA_BUCKET_SIZE;
+  }
   for (int i = 0; i < CU_GPA_NUM_SMALL_BUCKETS; ++i) {
     alloc->smallBuckets[i] = NULL;
     alloc->smallBucketTails[i] = NULL;
@@ -324,7 +359,8 @@ cu_Allocator cu_Allocator_GPAllocator(
   cu_Allocator a = {0};
   a.self = alloc;
   a.allocFn = cu_gpa_alloc;
-  a.resizeFn = cu_gpa_resize;
+  a.growFn = cu_gpa_grow;
+  a.shrinkFn = cu_gpa_shrink;
   a.freeFn = cu_gpa_free;
   return a;
 }
