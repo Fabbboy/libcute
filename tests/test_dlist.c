@@ -2,13 +2,13 @@
 #if CU_FREESTANDING
 #include "unity.h"
 #include <unity_internals.h>
-static void DList_Unsupported(void) {}
+static void DList_Unsupported(void) {
+  TEST_IGNORE_MESSAGE("DList tests are not supported in freestanding mode");
+}
 #else
 #include "collection/dlist.h"
 #include "memory/allocator.h"
-#include "memory/fixedallocator.h"
 #include "memory/gpallocator.h"
-#include "memory/page.h"
 #include "unity.h"
 #include <unity_internals.h>
 

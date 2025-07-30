@@ -28,6 +28,7 @@ cu_FStream_Result cu_FStream_openat(cu_Dir *dir, cu_Slice path,
 cu_Stream cu_FStream_stream(cu_FStream *fs);
 cu_Io_Error_Optional cu_FStream_flush(cu_FStream *stream);
 cu_Io_Error_Optional cu_FStream_seek(cu_FStream *stream, cu_File_SeekTo to);
+cu_IoSize_Result cu_FStream_tell(cu_FStream *stream);
 /** Release stream resources and close the file. */
 void cu_FStream_close(cu_FStream *stream);
 

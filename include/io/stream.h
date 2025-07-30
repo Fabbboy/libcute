@@ -13,6 +13,7 @@ typedef cu_Io_Error_Optional (*cu_Stream_WriteFn)(void *self, cu_Slice data);
 typedef cu_Io_Error_Optional (*cu_Stream_FlushFn)(void *self);
 typedef void (*cu_Stream_CloseFn)(void *self);
 typedef cu_Io_Error_Optional (*cu_Stream_SeekFn)(void *self, cu_File_SeekTo to);
+typedef cu_IoSize_Result (*cu_Stream_TellFn)(void *self);
 
 /** Generic stream interface. */
 typedef struct {
@@ -22,6 +23,7 @@ typedef struct {
   cu_Stream_FlushFn flushFn;
   cu_Stream_CloseFn closeFn;
   cu_Stream_SeekFn seekFn;
+  cu_Stream_TellFn tellFn;
 } cu_Stream;
 
 static inline cu_Io_Error_Optional cu_Stream_read(
@@ -45,6 +47,10 @@ static inline void cu_Stream_close(cu_Stream *stream) {
 static inline cu_Io_Error_Optional cu_Stream_seek(
     cu_Stream *stream, cu_File_SeekTo to) {
   return stream->seekFn(stream->self, to);
+}
+
+static inline cu_IoSize_Result cu_Stream_tell(cu_Stream *stream) {
+  return stream->tellFn(stream->self);
 }
 
 #ifdef __cplusplus

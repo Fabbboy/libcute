@@ -68,5 +68,6 @@ void cu_File_close(cu_File *file);
 cu_Io_Error_Optional cu_File_read(cu_File *file, cu_Slice buffer);
 cu_Io_Error_Optional cu_File_write(cu_File *file, cu_Slice data);
 cu_Io_Error_Optional cu_File_seek(cu_File *file, cu_File_SeekTo seek_to);
+cu_IoSize_Result cu_File_tell(cu_File *file);
 
 #endif // CU_FREESTANDING

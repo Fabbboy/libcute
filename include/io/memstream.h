@@ -23,6 +23,7 @@ cu_MemStream_Result cu_MemStream_create(
 cu_Stream cu_MemStream_stream(cu_MemStream *ms);
 cu_Io_Error_Optional cu_MemStream_flush(cu_MemStream *ms);
 cu_Io_Error_Optional cu_MemStream_seek(cu_MemStream *ms, cu_File_SeekTo to);
+cu_IoSize_Result cu_MemStream_tell(const cu_MemStream *ms);
 void cu_MemStream_close(cu_MemStream *ms);
 
 /** View the entire contents as a slice. */

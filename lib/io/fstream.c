@@ -31,7 +31,8 @@ static cu_Io_Error_Optional cu_FStream_flush_buffer(cu_FStream *fs) {
   return err;
 }
 
-static cu_Io_Error_Optional cu_FStream_flush_impl(cu_FStream *fs) {
+static cu_Io_Error_Optional cu_FStream_flush_impl(void *self) {
+  cu_FStream *fs = (cu_FStream *)self;
   if (!fs->reading) {
     return cu_FStream_flush_buffer(fs);
   }
@@ -108,10 +109,6 @@ static cu_Io_Error_Optional cu_FStream_write(void *self, cu_Slice data) {
   return cu_Io_Error_Optional_none();
 }
 
-static cu_Io_Error_Optional cu_FStream_flush_iface(void *self) {
-  return cu_FStream_flush_impl((cu_FStream *)self);
-}
-
 static cu_Io_Error_Optional cu_FStream_seek_impl(
     void *self, cu_File_SeekTo to) {
   cu_FStream *fs = (cu_FStream *)self;
@@ -123,9 +120,14 @@ static cu_Io_Error_Optional cu_FStream_seek_impl(
   return cu_File_seek(&fs->file, to);
 }
 
+static cu_IoSize_Result cu_FStream_tell_impl(void *self) {
+  cu_FStream *fs = (cu_FStream *)self;
+  return cu_File_tell(&fs->file);
+}
+
 static void cu_FStream_close_impl(void *self) {
   cu_FStream *fs = (cu_FStream *)self;
-  (void)cu_FStream_flush_impl(fs);
+  CU_UNUSED(cu_FStream_flush_impl(fs));
   cu_File_close(&fs->file);
   cu_RingBuffer_destroy(&fs->buffer);
 }
@@ -187,9 +189,10 @@ cu_Stream cu_FStream_stream(cu_FStream *fs) {
   iface.self = fs;
   iface.readFn = cu_FStream_read;
   iface.writeFn = cu_FStream_write;
-  iface.flushFn = cu_FStream_flush_iface;
+  iface.flushFn = cu_FStream_flush_impl;
   iface.closeFn = cu_FStream_close_impl;
   iface.seekFn = cu_FStream_seek_impl;
+  iface.tellFn = cu_FStream_tell_impl;
   return iface;
 }
 
@@ -199,6 +202,10 @@ cu_Io_Error_Optional cu_FStream_flush(cu_FStream *stream) {
 
 cu_Io_Error_Optional cu_FStream_seek(cu_FStream *stream, cu_File_SeekTo to) {
   return cu_FStream_seek_impl(stream, to);
+}
+
+cu_IoSize_Result cu_FStream_tell(cu_FStream *stream) {
+  return cu_File_tell(&stream->file);
 }
 
 void cu_FStream_close(cu_FStream *stream) { cu_FStream_close_impl(stream); }

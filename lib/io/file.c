@@ -288,6 +288,24 @@ cu_Io_Error_Optional cu_File_seek(cu_File *file, cu_File_SeekTo seek_to) {
   return cu_Io_Error_Optional_none();
 }
 
+cu_IoSize_Result cu_File_tell(cu_File *file) {
+  CU_IF_NULL(file) {
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none(),
+    };
+    return cu_IoSize_Result_error(err);
+  }
+  if (file->handle == CU_INVALID_HANDLE) {
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none(),
+    };
+    return cu_IoSize_Result_error(err);
+  }
+  return cu_Fd_tell(file->handle);
+}
+
 cu_File_Result cu_Dir_openat(
     cu_Dir *dir, cu_Slice path, cu_File_Options options) {
   CU_IF_NULL(dir) {

@@ -151,6 +151,38 @@ static void File_OpenAt_Tmp(void) {
   cu_String_destroy(&tmpdir);
 }
 
+static void File_Tell(void) {
+  cu_File_Options opt = {0};
+  cu_File_Options_write(&opt);
+  cu_File_Options_create(&opt);
+  cu_File_Options_truncate(&opt);
+
+  const char fname[] = "tell.txt";
+  cu_File_Result fres = cu_File_open(
+      CU_SLICE_CSTR(fname), opt, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_File_Result_is_ok(&fres));
+  cu_File file = cu_File_Result_unwrap(&fres);
+
+  const char data[] = "abcd";
+  cu_Io_Error_Optional err = cu_File_write(&file, CU_SLICE_CSTR(data));
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+
+  cu_IoSize_Result posres = cu_File_tell(&file);
+  TEST_ASSERT_TRUE(cu_IoSize_Result_is_ok(&posres));
+  size_t pos = cu_IoSize_Result_unwrap(&posres);
+  TEST_ASSERT_EQUAL_INT64(4, pos);
+
+  err = cu_File_seek(&file, (cu_File_SeekTo){.whence = CU_FILE_SEEK_START,
+                                 .offset = Size_Optional_none()});
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+  posres = cu_File_tell(&file);
+  TEST_ASSERT_TRUE(cu_IoSize_Result_is_ok(&posres));
+  pos = cu_IoSize_Result_unwrap(&posres);
+  TEST_ASSERT_EQUAL_INT64(0, pos);
+
+  cu_File_close(&file);
+}
+
 static void File_InvalidOptions(void) {
   cu_File_Options options = {0};
   const char lpath[] = "invalid.txt";
@@ -165,6 +197,7 @@ int main(void) {
   RUN_TEST(File_WriteAndRead);
   RUN_TEST(File_OpenAt);
   RUN_TEST(File_OpenAt_Tmp);
+  RUN_TEST(File_Tell);
   RUN_TEST(File_InvalidOptions);
   return UNITY_END();
 }

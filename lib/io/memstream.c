@@ -101,6 +101,11 @@ static cu_Io_Error_Optional cu_MemStream_seek_impl(
   return cu_Io_Error_Optional_none();
 }
 
+static cu_IoSize_Result cu_MemStream_tell_impl(void *self) {
+  cu_MemStream *ms = (cu_MemStream *)self;
+  return cu_IoSize_Result_ok(ms->pos);
+}
+
 static void cu_MemStream_close_impl(void *self) {
   cu_MemStream *ms = (cu_MemStream *)self;
   cu_Vector_destroy(&ms->buffer);
@@ -111,9 +116,10 @@ cu_Stream cu_MemStream_stream(cu_MemStream *ms) {
   iface.self = ms;
   iface.readFn = cu_MemStream_read;
   iface.writeFn = cu_MemStream_write;
-  iface.flushFn = cu_MemStream_flush_impl;
+  iface.flushFn =  cu_MemStream_flush_impl;
   iface.closeFn = cu_MemStream_close_impl;
   iface.seekFn = cu_MemStream_seek_impl;
+  iface.tellFn = cu_MemStream_tell_impl;
   return iface;
 }
 
@@ -123,6 +129,10 @@ cu_Io_Error_Optional cu_MemStream_flush(cu_MemStream *ms) {
 
 cu_Io_Error_Optional cu_MemStream_seek(cu_MemStream *ms, cu_File_SeekTo to) {
   return cu_MemStream_seek_impl(ms, to);
+}
+
+cu_IoSize_Result cu_MemStream_tell(const cu_MemStream *ms) {
+  return cu_IoSize_Result_ok(ms->pos);
 }
 
 void cu_MemStream_close(cu_MemStream *ms) { cu_MemStream_close_impl(ms); }

@@ -1,16 +1,20 @@
 #pragma once
 #include "macro.h"
 #include "utility.h"
+#include "io/error.h"
 #include <nostd.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include "string/string.h"
 
 #if CU_PLAT_POSIX
+#include <unistd.h>
+#include <errno.h>
 typedef int cu_Handle;
 #define CU_INVALID_HANDLE -1
 #else
 #include <windows.h>
+#include <io.h>
 typedef HANDLE cu_Handle;
 #define CU_INVALID_HANDLE INVALID_HANDLE_VALUE
 #endif
@@ -154,3 +158,19 @@ static inline cu_File_Stat cu_File_Stat_from_handle(cu_Handle handle) {
   return out;
 }
 #endif
+
+static inline cu_IoSize_Result cu_Fd_tell(cu_Handle handle) {
+#if CU_PLAT_POSIX
+  off_t pos = lseek(handle, 0, SEEK_CUR);
+  if (pos == (off_t)-1) {
+    return cu_IoSize_Result_error(cu_Io_Error_from_errno(errno));
+  }
+  return cu_IoSize_Result_ok((size_t)pos);
+#else
+  long long pos = _lseeki64(handle, 0, SEEK_CUR);
+  if (pos == -1) {
+    return cu_IoSize_Result_error(cu_Io_Error_from_win32(GetLastError()));
+  }
+  return cu_IoSize_Result_ok((size_t)pos);
+#endif
+}

@@ -122,6 +122,31 @@ static void MemStream_Grow(void) {
   cu_Stream_close(&s);
 }
 
+static void MemStream_Tell(void) {
+  cu_MemStream_Result res = cu_MemStream_create(4, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_MemStream_Result_is_ok(&res));
+  cu_MemStream ms = cu_MemStream_Result_unwrap(&res);
+  cu_Stream s = cu_MemStream_stream(&ms);
+
+  const char msg[] = "abc";
+  cu_Io_Error_Optional err = cu_Stream_write(&s, CU_SLICE_CSTR(msg));
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+
+  cu_IoSize_Result posres = cu_Stream_tell(&s);
+  TEST_ASSERT_TRUE(cu_IoSize_Result_is_ok(&posres));
+  size_t pos = cu_IoSize_Result_unwrap(&posres);
+  TEST_ASSERT_EQUAL_INT64(3, pos);
+
+  err = cu_Stream_seek(&s, (cu_File_SeekTo){.whence = CU_FILE_SEEK_START,
+                               .offset = Size_Optional_none()});
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+  posres = cu_Stream_tell(&s);
+  TEST_ASSERT_TRUE(cu_IoSize_Result_is_ok(&posres));
+  pos = cu_IoSize_Result_unwrap(&posres);
+  TEST_ASSERT_EQUAL_INT64(0, pos);
+  cu_Stream_close(&s);
+}
+
 static void FStream_OpenAt(void) {
   cu_Dir_Result dres =
       cu_Dir_open(CU_SLICE_CSTR("fsdir"), true, cu_Allocator_CAllocator());
@@ -169,6 +194,7 @@ int main(void) {
   RUN_TEST(Stream_Seek);
   RUN_TEST(MemStream_Roundtrip);
   RUN_TEST(MemStream_Grow);
+  RUN_TEST(MemStream_Tell);
   RUN_TEST(FStream_OpenAt);
   return UNITY_END();
 }

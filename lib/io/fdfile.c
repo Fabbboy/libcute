@@ -1,4 +1,5 @@
 #include "io/fdfile.h"
+#include "io/error.h"
 #include "macro.h"
 #include "nostd.h"
 
