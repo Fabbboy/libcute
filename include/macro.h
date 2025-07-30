@@ -24,10 +24,9 @@
 
 #define CU_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define CU_MAX(a, b) ((a) > (b) ? (a) : (b))
-
-#include <nostd.h>
+ 
 /** Platform detection macros */
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) 
 #define CU_PLAT_WINDOWS 1
 #else
 #define CU_PLAT_WINDOWS 0
