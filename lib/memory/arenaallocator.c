@@ -10,7 +10,7 @@ static struct cu_ArenaAllocator_Chunk *cu_arena_create_chunk(
     cu_ArenaAllocator *arena, size_t size) {
   size_t total = sizeof(struct cu_ArenaAllocator_Chunk) + size;
   cu_IoSlice_Result mem = cu_Allocator_Alloc(
-      arena->backingAllocator, cu_Layout_create(total, alignof(max_align_t)));
+      arena->backingAllocator, cu_Layout_create(total, alignof(cu_max_align_t)));
   if (!cu_IoSlice_Result_is_ok(&mem)) {
     return NULL;
   }

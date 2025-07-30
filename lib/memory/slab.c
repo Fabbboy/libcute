@@ -1,8 +1,7 @@
 #include "memory/slab.h"
 #include "collection/bitmap.h"
 #include "io/error.h"
-#include "macro.h"
-#include "memory/wasmallocator.h"
+#include "macro.h" 
 #include <nostd.h>
 #include <stdalign.h>
 
@@ -56,7 +55,7 @@ static struct cu_SlabAllocator_Slab *cu_create_slab(
     cu_SlabAllocator *alloc, size_t count) {
   size_t total = sizeof(struct cu_SlabAllocator_Slab) + count * alloc->slabSize;
   cu_IoSlice_Result mem = cu_Allocator_Alloc(
-      alloc->backingAllocator, cu_Layout_create(total, alignof(max_align_t)));
+      alloc->backingAllocator, cu_Layout_create(total, alignof(cu_max_align_t)));
   if (!cu_IoSlice_Result_is_ok(&mem)) {
     return NULL;
   }
