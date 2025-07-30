@@ -122,11 +122,53 @@ static void MemStream_Grow(void) {
   cu_Stream_close(&s);
 }
 
+static void FStream_OpenAt(void) {
+  cu_Dir_Result dres =
+      cu_Dir_open(CU_SLICE_CSTR("fsdir"), true, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_Dir_Result_is_ok(&dres));
+  cu_Dir dir = cu_Dir_Result_unwrap(&dres);
+
+  cu_File_Options opt = {0};
+  cu_File_Options_write(&opt);
+  cu_File_Options_create(&opt);
+  cu_File_Options_truncate(&opt);
+
+  const char name[] = "note.txt";
+  cu_FStream_Result fres = cu_FStream_openat(
+      &dir, CU_SLICE_CSTR(name), opt, 8, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_FStream_Result_is_ok(&fres));
+  cu_FStream fs = cu_FStream_Result_unwrap(&fres);
+  cu_Stream s = cu_FStream_stream(&fs);
+
+  const char msg[] = "ok";
+  cu_Io_Error_Optional err = cu_Stream_write(&s, CU_SLICE_CSTR(msg));
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+  cu_Stream_close(&s);
+
+  cu_File_Options rd = {0};
+  cu_File_Options_read(&rd);
+  fres = cu_FStream_openat(
+      &dir, CU_SLICE_CSTR(name), rd, 4, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_FStream_Result_is_ok(&fres));
+  fs = cu_FStream_Result_unwrap(&fres);
+  s = cu_FStream_stream(&fs);
+
+  char buf[3] = {0};
+  err = cu_Stream_read(&s, cu_Slice_create(buf, 2));
+  TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
+  buf[2] = '\0';
+  TEST_ASSERT_EQUAL_STRING(buf, msg);
+  cu_Stream_close(&s);
+
+  cu_Dir_close(&dir);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(Stream_WriteRead);
   RUN_TEST(Stream_Seek);
   RUN_TEST(MemStream_Roundtrip);
   RUN_TEST(MemStream_Grow);
+  RUN_TEST(FStream_OpenAt);
   return UNITY_END();
 }
