@@ -59,8 +59,6 @@ libcute_dep = declare_dependency(
   link_with: cute_lib,
 )
 
-meson.override_dependency('libcute', libcute_dep)
-
 if get_option('tests').enabled()
   subdir('tests')
 endif
