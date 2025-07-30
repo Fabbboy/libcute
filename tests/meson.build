@@ -1,5 +1,5 @@
 # Build tests respecting the freestanding option
-unity_dep = dependency('unity')
+unity_dep = dependency('unity', required: true)
 
 # Determine whether to compile in freestanding mode
 freestanding = get_option('freestanding')
@@ -41,7 +41,7 @@ foreach test_file : test_files
   exe = executable(
     test_name,
     [test_file, 'test_common.c'],
-    dependencies: [cute_dep, unity_dep],
+    dependencies: [libcute_dep, unity_dep],
     include_directories: includes,
     c_args: test_args,
   )
