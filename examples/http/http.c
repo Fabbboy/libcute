@@ -1,6 +1,8 @@
+#include "macro.h"
+#if CU_PLAT_POSIX
+
 #include "http.h"
 #include "collection/vector.h"
-#include "macro.h"
 #include "memory/allocator.h"
 #include "object/optional.h"
 #include <fcntl.h>
@@ -301,4 +303,5 @@ void cu_HttpServer_run(cu_HttpServer *server) {
   }
 }
 
+#endif
 #endif
