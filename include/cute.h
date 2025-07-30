@@ -34,6 +34,7 @@ extern "C" {
 #include "string/fmt.h"
 
 #include "io/fd.h"
+#include "io/fdfile.h"
 #include "io/file.h"
 #include "io/fstream.h"
 #include "io/memstream.h"

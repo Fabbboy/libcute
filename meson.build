@@ -35,6 +35,7 @@ sources = [
   'lib/io/file.c',
   'lib/io/dir.c',
   'lib/io/fstream.c',
+  'lib/io/fdfile.c',
   'lib/io/memstream.c',
 ]
 
