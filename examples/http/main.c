@@ -12,8 +12,9 @@ int main(int argc, char **argv) {
     return 1;
   }
   cu_HttpServer server = res.value;
+  /* fixup allocator self pointer after struct copy */
+  server.slab_alloc.self = &server.slab;
   cu_HttpServer_run(&server);
   cu_HttpServer_destroy(&server);
   return 0;
 }
- 

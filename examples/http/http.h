@@ -7,9 +7,16 @@
 
 /**\@file http.h Simple epoll-based HTTP 1.0 server using libcute types. */
 
+#if CU_PLAT_WINDOWS
+#include <winsock2.h>
+typedef SOCKET cu_socket_t;
+#else
+typedef int cu_socket_t;
+#endif
+
 typedef struct {
-  int listen_fd;
-  int epoll_fd;
+  cu_socket_t listen_fd;
+  cu_socket_t epoll_fd;
   cu_Vector clients;       /**< stores client sockets */
   cu_SlabAllocator slab;   /**< slab allocator for buffers */
   cu_Allocator slab_alloc; /**< allocator derived from slab */
