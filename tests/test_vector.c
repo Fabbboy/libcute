@@ -114,6 +114,38 @@ static void Vector_PopBack(void) {
   cu_Vector_destroy(&vector);
 }
 
+static void Vector_AutoShrink(void) {
+  cu_Allocator alloc = test_allocator;
+
+  cu_Vector_Result res =
+      cu_Vector_create(alloc, CU_LAYOUT(int), Size_Optional_some(0),
+          cu_Destructor_Optional_none());
+  TEST_ASSERT_TRUE(cu_Vector_Result_is_ok(&res));
+  cu_Vector vector = cu_Vector_Result_unwrap(&res);
+
+  int v = 0;
+  for (int i = 0; i < 8; ++i) {
+    cu_Vector_push_back(&vector, &v);
+  }
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 8u);
+
+  for (int i = 0; i < 6; ++i) {
+    cu_Vector_pop_back(&vector, &v);
+  }
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 2u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 4u);
+
+  cu_Vector_pop_back(&vector, &v);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 1u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 2u);
+
+  cu_Vector_pop_back(&vector, &v);
+  TEST_ASSERT_EQUAL(cu_Vector_size(&vector), 0u);
+  TEST_ASSERT_EQUAL(cu_Vector_capacity(&vector), 0u);
+
+  cu_Vector_destroy(&vector);
+}
+
 static void Vector_Copy(void) {
   cu_Allocator alloc = test_allocator;
 
@@ -188,6 +220,7 @@ int main(void) {
   RUN_TEST(Vector_Resize);
   RUN_TEST(Vector_PushBack);
   RUN_TEST(Vector_PopBack);
+  RUN_TEST(Vector_AutoShrink);
   RUN_TEST(Vector_Copy);
   RUN_TEST(Vector_ReserveClearAt);
   RUN_TEST(Vector_Destructor);

@@ -28,8 +28,10 @@ struct cu_SlabAllocator_Slab {
 };
 
 static cu_IoSlice_Result cu_slab_alloc(void *self, cu_Layout layout);
-static cu_IoSlice_Result cu_slab_resize(
-    void *self, cu_Slice mem, cu_Layout layout);
+static cu_IoSlice_Result cu_slab_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
+static cu_IoSlice_Result cu_slab_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
 static void cu_slab_free(void *self, cu_Slice mem);
 
 static unsigned char *cu_slab_data(struct cu_SlabAllocator_Slab *slab) {
@@ -112,7 +114,7 @@ static cu_IoSlice_Result cu_slab_alloc(void *self, cu_Layout layout) {
     if (def == 0) {
       def = 1;
     }
-    size_t count = need > def ? need : def;
+    size_t count = CU_MAX(need, def);
     slab = cu_create_slab(alloc, count);
     if (!slab) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
@@ -145,39 +147,71 @@ static cu_IoSlice_Result cu_slab_alloc(void *self, cu_Layout layout) {
   return cu_IoSlice_Result_ok(cu_Slice_create(data + user_pos, size));
 }
 
-static cu_IoSlice_Result cu_slab_resize(
-    void *self, cu_Slice mem, cu_Layout layout) {
+static cu_IoSlice_Result cu_slab_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
   cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
-  CU_IF_NULL(mem.ptr) { return cu_slab_alloc(self, layout); }
-  if (layout.elem_size == 0) {
-    cu_slab_free(self, mem);
+  CU_IF_NULL(old_mem.ptr) {
+    return cu_slab_alloc(self, new_layout);
+  }
+
+  struct cu_SlabAllocator_Header *hdr =
+      (struct cu_SlabAllocator_Header *)((unsigned char *)old_mem.ptr -
+                                         sizeof(struct cu_SlabAllocator_Header));
+  unsigned char *base = cu_slab_data(hdr->slab) + hdr->index * alloc->slabSize;
+  size_t prefix = (unsigned char *)old_mem.ptr - base;
+  size_t current = hdr->count * alloc->slabSize - prefix;
+  if (new_layout.elem_size <= current) {
+    return cu_IoSlice_Result_ok(
+        cu_Slice_create(old_mem.ptr, new_layout.elem_size));
+  }
+
+  cu_IoSlice_Result new_mem = cu_slab_alloc(self, new_layout);
+  if (!cu_IoSlice_Result_is_ok(&new_mem)) {
+    return new_mem;
+  }
+  size_t copy = CU_MIN(old_mem.length, new_layout.elem_size);
+  cu_Memory_smemcpy(cu_Slice_create(new_mem.value.ptr, copy),
+      cu_Slice_create(old_mem.ptr, copy));
+  cu_slab_free(self, old_mem);
+  return new_mem;
+}
+
+static cu_IoSlice_Result cu_slab_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  cu_SlabAllocator *alloc = (cu_SlabAllocator *)self;
+  CU_IF_NULL(old_mem.ptr) {
     cu_Io_Error err = {
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_IoSlice_Result_error(err);
   }
 
-  size_t size = layout.elem_size;
-  size_t alignment = layout.alignment;
-
   struct cu_SlabAllocator_Header *hdr =
-      (struct cu_SlabAllocator_Header *)((unsigned char *)mem.ptr -
-                                         sizeof(
-                                             struct cu_SlabAllocator_Header));
+      (struct cu_SlabAllocator_Header *)((unsigned char *)old_mem.ptr -
+                                         sizeof(struct cu_SlabAllocator_Header));
   unsigned char *base = cu_slab_data(hdr->slab) + hdr->index * alloc->slabSize;
-  size_t prefix = (unsigned char *)mem.ptr - base;
+  size_t prefix = (unsigned char *)old_mem.ptr - base;
   size_t current = hdr->count * alloc->slabSize - prefix;
-  if (size <= current && alignment <= alloc->slabSize) {
-    return cu_IoSlice_Result_ok(cu_Slice_create(mem.ptr, size));
+  if (new_layout.elem_size <= current) {
+    size_t need = CU_DIV_CEIL(prefix + new_layout.elem_size, alloc->slabSize);
+    if (need < hdr->count) {
+      for (size_t i = hdr->index + need; i < hdr->index + hdr->count; ++i) {
+        cu_Bitmap_clear(&hdr->slab->used, i);
+      }
+      hdr->slab->freeCount += hdr->count - need;
+      hdr->count = need;
+    }
+    return cu_IoSlice_Result_ok(
+        cu_Slice_create(old_mem.ptr, new_layout.elem_size));
   }
 
-  cu_IoSlice_Result new_mem =
-      cu_slab_alloc(self, cu_Layout_create(size, alignment));
+  cu_IoSlice_Result new_mem = cu_slab_alloc(self, new_layout);
   if (!cu_IoSlice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
-  cu_Memory_memcpy(new_mem.value.ptr,
-      cu_Slice_create(mem.ptr, mem.length < size ? mem.length : size));
-  cu_slab_free(self, mem);
+  size_t copy = CU_MIN(new_layout.elem_size, old_mem.length);
+  cu_Memory_smemcpy(cu_Slice_create(new_mem.value.ptr, copy),
+      cu_Slice_create(old_mem.ptr, copy));
+  cu_slab_free(self, old_mem);
   return new_mem;
 }
 
@@ -211,12 +245,16 @@ cu_Allocator cu_Allocator_SlabAllocator(
   }
   alloc->slabs = NULL;
   alloc->current = NULL;
-  alloc->slabSize = cfg.slabSize ? cfg.slabSize : CU_SLAB_DEFAULT_SIZE;
+  alloc->slabSize = cfg.slabSize;
+  if (alloc->slabSize == 0) {
+    alloc->slabSize = CU_SLAB_DEFAULT_SIZE;
+  }
 
   cu_Allocator a = {0};
   a.self = alloc;
   a.allocFn = cu_slab_alloc;
-  a.resizeFn = cu_slab_resize;
+  a.growFn = cu_slab_grow;
+  a.shrinkFn = cu_slab_shrink;
   a.freeFn = cu_slab_free;
   return a;
 }

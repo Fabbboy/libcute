@@ -103,8 +103,18 @@ int cu_CString_cmp(const char *a, const char *b) {
   const unsigned char *p1 = (const unsigned char *)a;
   const unsigned char *p2 = (const unsigned char *)b;
 
-  CU_IF_NULL(p1) { return p2 ? -1 : 0; }
-  CU_IF_NULL(p2) { return p1 ? 1 : 0; }
+  CU_IF_NULL(p1) {
+    if (p2) {
+      return -1;
+    }
+    return 0;
+  }
+  CU_IF_NULL(p2) {
+    if (p1) {
+      return 1;
+    }
+    return 0;
+  }
 
   while (*p1 && *p1 == *p2) {
     p1++;
@@ -137,7 +147,12 @@ static int format_number(char *buf, size_t bufsize, unsigned long long num,
   if (bufsize == 0)
     return 0;
 
-  const char *digits = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+  const char *digits;
+  if (uppercase) {
+    digits = "0123456789ABCDEF";
+  } else {
+    digits = "0123456789abcdef";
+  }
   char temp[64]; // Enough for 64-bit number in any base
   int temp_pos = 0;
   int result_len = 0;
@@ -371,7 +386,12 @@ int cu_CString_vsnprintf(
   }
 
   if (!measuring && size > 0) {
-    size_t idx = pos < size ? pos : size - 1;
+    size_t idx;
+    if (pos < size) {
+      idx = pos;
+    } else {
+      idx = size - 1;
+    }
     dst[idx] = '\0';
   }
 
@@ -501,7 +521,10 @@ unsigned long cu_CString_strtoul(const char *nptr, char **endptr, int base) {
     *endptr = (char *)s;
   }
 
-  return neg ? (unsigned long)(-(long)result) : result;
+  if (neg) {
+    return (unsigned long)(-(long)result);
+  }
+  return result;
 }
 
 cu_Slice cu_Slice_create(void *ptr, size_t length) {

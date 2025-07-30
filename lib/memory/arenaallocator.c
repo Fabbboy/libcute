@@ -36,7 +36,10 @@ static cu_IoSlice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   }
 
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
-  size_t chunk_size = arena->chunkSize ? arena->chunkSize : CU_ARENA_CHUNK_SIZE;
+  size_t chunk_size = arena->chunkSize;
+  if (chunk_size == 0) {
+    chunk_size = CU_ARENA_CHUNK_SIZE;
+  }
   size_t needed = alignment - 1 + size + header_size;
 
   struct cu_ArenaAllocator_Chunk *chunk = arena->current;
@@ -51,7 +54,7 @@ static cu_IoSlice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   }
 
   if (!target) {
-    size_t new_size = (needed > chunk_size) ? needed : chunk_size;
+    size_t new_size = CU_MAX(needed, chunk_size);
     target = cu_arena_create_chunk(arena, new_size);
     if (!target) {
       cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
@@ -73,43 +76,78 @@ static cu_IoSlice_Result cu_arena_alloc(void *self, cu_Layout layout) {
   return cu_IoSlice_Result_ok(cu_Slice_create(chunk->data + start, size));
 }
 
-static cu_IoSlice_Result cu_arena_resize(
-    void *self, cu_Slice mem, cu_Layout layout) {
-  CU_IF_NULL(mem.ptr) { return cu_arena_alloc(self, layout); }
-  if (layout.elem_size == 0) {
-    cu_arena_free(self, mem);
-    cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
-    return cu_IoSlice_Result_error(err);
+
+static cu_IoSlice_Result cu_arena_grow(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  if (old_mem.ptr == NULL) {
+    return cu_arena_alloc(self, new_layout);
   }
-  size_t size = layout.elem_size; 
+
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   struct cu_ArenaAllocator_Header *hdr =
-      (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
+      (struct cu_ArenaAllocator_Header *)((unsigned char *)old_mem.ptr -
                                           header_size);
   struct cu_ArenaAllocator_Chunk *chunk = hdr->chunk;
   if (!chunk) {
-    cu_Io_Error err = {
-        .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none()};
     return cu_IoSlice_Result_error(err);
   }
-  if ((unsigned char *)mem.ptr + mem.length == chunk->data + chunk->used) {
-    size_t avail = chunk->size - (chunk->used - mem.length);
-    if (size <= mem.length + avail) {
-      chunk->used = (chunk->used - mem.length) + size;
-      return cu_IoSlice_Result_ok(cu_Slice_create(mem.ptr, size));
+
+  unsigned char *mem_end = (unsigned char *)old_mem.ptr + old_mem.length;
+  if (mem_end == chunk->data + chunk->used) {
+    size_t avail = chunk->size - chunk->used;
+    if (new_layout.elem_size <= old_mem.length + avail) {
+      size_t start = (unsigned char *)old_mem.ptr - chunk->data;
+      chunk->used = start + new_layout.elem_size;
+      return cu_IoSlice_Result_ok(
+          cu_Slice_create(old_mem.ptr, new_layout.elem_size));
     }
-    // not enough space, fall through
   }
 
-  cu_IoSlice_Result new_mem = cu_arena_alloc(self, layout);
+  cu_IoSlice_Result new_mem = cu_arena_alloc(self, new_layout);
   if (!cu_IoSlice_Result_is_ok(&new_mem)) {
     return new_mem;
   }
-  size_t copy = mem.length < size ? mem.length : size;
-  cu_Memory_memmove(new_mem.value.ptr, cu_Slice_create(mem.ptr, copy));
-  cu_arena_free(self, mem);
+  if (old_mem.length > 0) {
+    cu_Memory_smemcpy(new_mem.value, old_mem);
+  }
+  cu_arena_free(self, old_mem);
   return new_mem;
+}
+
+static cu_IoSlice_Result cu_arena_shrink(
+    void *self, cu_Slice old_mem, cu_Layout new_layout) {
+  if (old_mem.ptr == NULL) {
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none()};
+    return cu_IoSlice_Result_error(err);
+  }
+
+  const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
+  struct cu_ArenaAllocator_Header *hdr =
+      (struct cu_ArenaAllocator_Header *)((unsigned char *)old_mem.ptr -
+                                          header_size);
+  struct cu_ArenaAllocator_Chunk *chunk = hdr->chunk;
+  if (!chunk) {
+    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+        .errnum = Size_Optional_none()};
+    return cu_IoSlice_Result_error(err);
+  }
+
+  unsigned char *mem_end = (unsigned char *)old_mem.ptr + old_mem.length;
+  if (mem_end == chunk->data + chunk->used) {
+    size_t start = (unsigned char *)old_mem.ptr - chunk->data;
+    chunk->used = start + new_layout.elem_size;
+  }
+
+  if (new_layout.elem_size == 0) {
+    cu_arena_free(self, old_mem);
+    return cu_IoSlice_Result_ok(cu_Slice_create(NULL, 0));
+  }
+
+  return cu_IoSlice_Result_ok(
+      cu_Slice_create(old_mem.ptr, new_layout.elem_size));
 }
 
 static void cu_arena_free(void *self, cu_Slice mem) {
@@ -148,13 +186,17 @@ cu_Allocator cu_Allocator_ArenaAllocator(
     arena->backingAllocator = cu_Allocator_NullAllocator();
 #endif
   }
-  arena->chunkSize = config.chunkSize ? config.chunkSize : CU_ARENA_CHUNK_SIZE;
+  arena->chunkSize = config.chunkSize;
+  if (arena->chunkSize == 0) {
+    arena->chunkSize = CU_ARENA_CHUNK_SIZE;
+  }
   arena->current = NULL;
 
   cu_Allocator a = {0};
   a.self = arena;
   a.allocFn = cu_arena_alloc;
-  a.resizeFn = cu_arena_resize;
+  a.growFn = cu_arena_grow;
+  a.shrinkFn = cu_arena_shrink;
   a.freeFn = cu_arena_free;
   return a;
 }

@@ -5,24 +5,27 @@
 #include <stddef.h>
 
 #include "io/error.h"
-#include "io/error.h"
 #include "nostd.h"
 #include "utility.h"
 
 /** Allocation function signature. */
 typedef cu_IoSlice_Result (*cu_Allocator_AllocFunc)(
     void *self, cu_Layout layout);
-/** Resize function signature. */
-typedef cu_IoSlice_Result (*cu_Allocator_ResizeFunc)(
-    void *self, cu_Slice mem, cu_Layout layout);
+/** Grow function signature. */
+typedef cu_IoSlice_Result (*cu_Allocator_GrowFunc)(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
+/** Shrink function signature. */
+typedef cu_IoSlice_Result (*cu_Allocator_ShrinkFunc)(
+    void *self, cu_Slice old_mem, cu_Layout new_layout);
 /** Free function signature. */
 typedef void (*cu_Allocator_FreeFunc)(void *self, cu_Slice mem);
 
 /** Generic allocator with user-provided callbacks. */
 typedef struct {
   void *self;                       /**< implementation specific data */
-  cu_Allocator_AllocFunc allocFn;   /**< allocate memory */
-  cu_Allocator_ResizeFunc resizeFn; /**< resize previously allocated memory */
+  cu_Allocator_AllocFunc allocFn;    /**< allocate memory */
+  cu_Allocator_GrowFunc growFn;      /**< grow previously allocated memory */
+  cu_Allocator_ShrinkFunc shrinkFn;  /**< shrink previously allocated memory */
   cu_Allocator_FreeFunc freeFn;     /**< free memory */
 } cu_Allocator;
 CU_OPTIONAL_DECL(cu_Allocator, cu_Allocator)
@@ -33,10 +36,16 @@ static inline cu_IoSlice_Result cu_Allocator_Alloc(
   return allocator.allocFn(allocator.self, layout);
 }
 
-/** Resize a previously allocated block. */
-static inline cu_IoSlice_Result cu_Allocator_Resize(
-    cu_Allocator allocator, cu_Slice mem, cu_Layout layout) {
-  return allocator.resizeFn(allocator.self, mem, layout);
+/** Grow a previously allocated block. */
+static inline cu_IoSlice_Result cu_Allocator_Grow(
+    cu_Allocator allocator, cu_Slice old_mem, cu_Layout new_layout) {
+  return allocator.growFn(allocator.self, old_mem, new_layout);
+}
+
+/** Shrink a previously allocated block. */
+static inline cu_IoSlice_Result cu_Allocator_Shrink(
+    cu_Allocator allocator, cu_Slice old_mem, cu_Layout new_layout) {
+  return allocator.shrinkFn(allocator.self, old_mem, new_layout);
 }
 
 /** Free memory obtained from this allocator. */
