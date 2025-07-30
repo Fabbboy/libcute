@@ -1,3 +1,4 @@
+#include "macro.h"
 #if CU_FREESTANDING
 #include "unity.h"
 #include <unity_internals.h>
@@ -12,7 +13,7 @@ static void DList_Unsupported(void) {}
 #include <unity_internals.h>
 
 static cu_Allocator create_allocator(cu_GPAllocator *gpa) {
-  (void)gpa;
+ CU_UNUSED(gpa);
   return cu_Allocator_CAllocator();
 }
 

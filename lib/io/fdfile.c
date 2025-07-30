@@ -145,7 +145,7 @@ static cu_Io_Error_Optional cu_stream_write(void *self, cu_Slice data) {
 }
 
 static cu_Io_Error_Optional cu_stream_flush(void *self) {
-  (void)self;
+  CU_UNUSED(self);
   return cu_Io_Error_Optional_none();
 }
 

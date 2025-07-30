@@ -64,7 +64,7 @@ static cu_Io_Error_Optional cu_MemStream_write(void *self, cu_Slice data) {
 }
 
 static cu_Io_Error_Optional cu_MemStream_flush_impl(void *ms) {
-  (void)ms;
+  CU_UNUSED(ms);
   return cu_Io_Error_Optional_none();
 }
 
