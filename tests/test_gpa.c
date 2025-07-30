@@ -27,13 +27,13 @@ static void Allocator_GPALargeAllocFree(void) {
   cu_Memory_memset(mem.ptr, 0xCD, mem.length);
   cu_Allocator_Free(alloc, mem);
 
-  const size_t small = 4096; // 4 KiB blocks
+  const size_t small_size = 4096; // 4 KiB blocks
   const size_t total = 100 * 1024 * 1024;
-  const size_t count = total / small;
+  const size_t count = total / small_size;
   cu_Slice *blocks = malloc(sizeof(cu_Slice) * count);
   for (size_t i = 0; i < count; ++i) {
     cu_IoSlice_Result s_res =
-        cu_Allocator_Alloc(alloc, cu_Layout_create(small, 16));
+        cu_Allocator_Alloc(alloc, cu_Layout_create(small_size, 16));
     TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&s_res));
     blocks[i] = s_res.value;
     cu_Memory_memset(blocks[i].ptr, 0xEF, blocks[i].length);
