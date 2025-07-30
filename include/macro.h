@@ -99,6 +99,10 @@
   #define CU_COMPILER_LLVM 0
 #endif
 
+#if CU_COMPILER_CLANG && CU_PLAT_WINDOWS
+#undef noreturn
+#endif
+
 #define UNREACHABLE(msg) cu_panic_handler("Unreachable code reached: %s", msg)
 
 #define TODO(msg) cu_panic_handler("TODO: %s", msg)
