@@ -1,5 +1,6 @@
 #pragma once
 #include "collection/ring_buffer.h"
+#include "io/dir.h"
 #include "io/error.h"
 #include "io/file.h"
 #include "io/stream.h"
@@ -21,6 +22,8 @@ CU_RESULT_DECL(cu_FStream, cu_FStream, cu_Io_Error)
 
 cu_FStream_Result cu_FStream_open(cu_Slice path, cu_File_Options options,
     size_t buffer_size, cu_Allocator allocator);
+cu_FStream_Result cu_FStream_openat(cu_Dir *dir, cu_Slice path,
+    cu_File_Options options, size_t buffer_size, cu_Allocator allocator);
 /** View the fstream as a generic stream interface. */
 cu_Stream cu_FStream_stream(cu_FStream *fs);
 cu_Io_Error_Optional cu_FStream_flush(cu_FStream *stream);

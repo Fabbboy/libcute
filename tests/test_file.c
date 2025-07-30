@@ -1,7 +1,7 @@
 #include "cute.h"
+#include "io/dir.h"
 #include "unity.h"
 #include <nostd.h>
-#include "io/dir.h"
 #include <unity_internals.h>
 
 static void File_OpenAndClose(void) {
@@ -62,8 +62,8 @@ static void File_WriteAndRead(void) {
 }
 
 static void File_OpenAt(void) {
-  cu_Dir_Result dres =
-      cu_Dir_open(cu_Slice_create((void *)"somename", 8), true, cu_Allocator_CAllocator());
+  cu_Dir_Result dres = cu_Dir_open(
+      cu_Slice_create((void *)"somename", 8), true, cu_Allocator_CAllocator());
   TEST_ASSERT_TRUE(cu_Dir_Result_is_ok(&dres));
   cu_Dir dir = cu_Dir_Result_unwrap(&dres);
 
@@ -85,9 +85,11 @@ static void File_OpenAt(void) {
   TEST_ASSERT_TRUE(cu_Io_Error_Optional_is_none(&err));
   cu_File_close(&file);
 
+  const char fullpath[] = "somename/config.toml";
+  cu_Slice fpp = cu_Slice_create((void *)fullpath, sizeof(fullpath) - 1);
   cu_File_Options ropt = {0};
   cu_File_Options_read(&ropt);
-  fres = cu_Dir_openat(&dir, fp, ropt);
+  fres = cu_File_open(fpp, ropt, cu_Allocator_CAllocator());
   TEST_ASSERT_TRUE(cu_File_Result_is_ok(&fres));
   file = cu_File_Result_unwrap(&fres);
 
@@ -99,6 +101,54 @@ static void File_OpenAt(void) {
   cu_File_close(&file);
 
   cu_Dir_close(&dir);
+}
+
+static void File_OpenAt_Tmp(void) {
+  cu_String_Optional top = cu_Dir_Tmp(cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_String_Optional_is_some(&top));
+  cu_String tmpdir = cu_String_Optional_unwrap(&top);
+
+  cu_Dir_Result dres = cu_Dir_open(
+      cu_String_as_slice(&tmpdir), false, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_Dir_Result_is_ok(&dres));
+  cu_Dir dir = cu_Dir_Result_unwrap(&dres);
+
+  cu_File_Options opt = {0};
+  cu_File_Options_write(&opt);
+  cu_File_Options_create(&opt);
+  cu_File_Options_truncate(&opt);
+
+  const char fname[] = "openat_tmp_test.txt";
+  cu_Slice fp = cu_Slice_create((void *)fname, sizeof(fname) - 1);
+  cu_File_Result fres = cu_Dir_openat(&dir, fp, opt);
+  TEST_ASSERT_TRUE(cu_File_Result_is_ok(&fres));
+  cu_File file = cu_File_Result_unwrap(&fres);
+  cu_File_close(&file);
+
+  cu_StrBuilder sb = cu_StrBuilder_init(cu_Allocator_CAllocator());
+  TEST_ASSERT_EQUAL(CU_STRING_ERROR_NONE,
+      cu_StrBuilder_append_slice(&sb, cu_String_as_slice(&tmpdir)));
+  if (tmpdir.length > 0 &&
+      ((char *)tmpdir.data)[tmpdir.length - 1] != CU_PATH_SEPARATOR) {
+    char sep = CU_PATH_SEPARATOR;
+    cu_StrBuilder_append_slice(&sb, cu_Slice_create(&sep, 1));
+  }
+  cu_StrBuilder_append_cstr(&sb, fname);
+  cu_String_Result fpres = cu_StrBuilder_finalize(&sb);
+  TEST_ASSERT_TRUE(cu_String_Result_is_ok(&fpres));
+
+  cu_File_Options ropt = {0};
+  cu_File_Options_read(&ropt);
+  fres = cu_File_open(
+      cu_String_as_slice(&fpres.value), ropt, cu_Allocator_CAllocator());
+  TEST_ASSERT_TRUE(cu_File_Result_is_ok(&fres));
+  file = cu_File_Result_unwrap(&fres);
+  cu_File_close(&file);
+
+  cu_String_destroy(&fpres.value);
+  cu_StrBuilder_destroy(&sb);
+  cu_Dir_close(&dir);
+  cu_String_destroy(&tmpdir);
 }
 
 static void File_InvalidOptions(void) {
@@ -114,6 +164,7 @@ int main(void) {
   RUN_TEST(File_OpenAndClose);
   RUN_TEST(File_WriteAndRead);
   RUN_TEST(File_OpenAt);
+  RUN_TEST(File_OpenAt_Tmp);
   RUN_TEST(File_InvalidOptions);
   return UNITY_END();
 }

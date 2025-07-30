@@ -156,6 +156,32 @@ cu_FStream_Result cu_FStream_open(cu_Slice path, cu_File_Options options,
   return cu_FStream_Result_ok(fs);
 }
 
+cu_FStream_Result cu_FStream_openat(cu_Dir *dir, cu_Slice path,
+    cu_File_Options options, size_t buffer_size, cu_Allocator allocator) {
+  cu_File_Result fres = cu_Dir_openat(dir, path, options);
+  if (!cu_File_Result_is_ok(&fres)) {
+    return cu_FStream_Result_error(cu_File_Result_unwrap_error(&fres));
+  }
+  cu_File file = cu_File_Result_unwrap(&fres);
+
+  cu_RingBuffer_Result rbres = cu_RingBuffer_create(allocator,
+      cu_Layout_create(sizeof(unsigned char), 1), buffer_size,
+      cu_Destructor_Optional_none());
+  if (!cu_RingBuffer_Result_is_ok(&rbres)) {
+    cu_File_close(&file);
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
+    return cu_FStream_Result_error(err);
+  }
+
+  cu_FStream fs;
+  fs.file = file;
+  fs.buffer = rbres.value;
+  fs.reading = options.read && !options.write;
+
+  return cu_FStream_Result_ok(fs);
+}
+
 cu_Stream cu_FStream_stream(cu_FStream *fs) {
   cu_Stream iface;
   iface.self = fs;

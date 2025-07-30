@@ -326,8 +326,18 @@ cu_File_Result cu_Dir_openat(
   cu_Slice fullpath_slice = cu_Slice_create(fullpath, CU_FILE_MAX_PATH_LENGTH);
 
   cu_Memory_smemcpy(fullpath_slice, cu_String_as_slice(&dir->stat.path));
-  fullpath_slice.length += dir->stat.path.length;
-  cu_Memory_smemcpy(fullpath_slice, lpath_slice);
+
+  size_t offset = dir->stat.path.length;
+  if (offset > 0 && offset < CU_FILE_MAX_PATH_LENGTH - 1 &&
+      ((char *)fullpath)[offset - 1] != CU_PATH_SEPARATOR &&
+      ((char *)lpath)[0] != CU_PATH_SEPARATOR) {
+    fullpath[offset] = CU_PATH_SEPARATOR;
+    offset += 1;
+  }
+
+  cu_Slice dest =
+      cu_Slice_create(fullpath + offset, CU_FILE_MAX_PATH_LENGTH - offset);
+  cu_Memory_smemcpy(dest, lpath_slice);
 
 #if CU_PLAT_POSIX
   int flags = cu_File_Options_to_posix_flags(&options);

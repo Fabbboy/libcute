@@ -21,6 +21,12 @@ typedef HANDLE cu_Handle;
 #define CU_FILE_MAX_PATH_LENGTH 260
 #endif
 
+#if CU_PLAT_WINDOWS
+#define CU_PATH_SEPARATOR '\\'
+#else
+#define CU_PATH_SEPARATOR '/'
+#endif
+
 typedef enum {
   CU_FILE_TYPE_UNKNOWN,
   CU_FILE_TYPE_FILE,
