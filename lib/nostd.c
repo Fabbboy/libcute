@@ -1,5 +1,6 @@
 #include "nostd.h"
 #include "macro.h"
+#include "object/optional.h"
 #include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
