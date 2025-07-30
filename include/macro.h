@@ -63,6 +63,42 @@
 #define CU_PLAT_POSIX 0
 #endif
 
+#if defined(__clang__)
+  #define CU_COMPILER_CLANG 1
+#else
+  #define CU_COMPILER_CLANG 0
+#endif
+
+#if defined(__GNUC__) && !CU_COMPILER_CLANG
+  #define CU_COMPILER_GCC 1
+#else
+  #define CU_COMPILER_GCC 0
+#endif
+
+#if defined(_MSC_VER)
+  #define CU_COMPILER_MSVC 1
+#else
+  #define CU_COMPILER_MSVC 0
+#endif
+
+#if defined(__TINYC__)
+  #define CU_COMPILER_TCC 1
+#else
+  #define CU_COMPILER_TCC 0
+#endif
+
+#if defined(__INTEL_COMPILER) || defined(__ICC)
+  #define CU_COMPILER_INTEL 1
+#else
+  #define CU_COMPILER_INTEL 0
+#endif
+
+#if defined(__llvm__) && !CU_COMPILER_CLANG
+  #define CU_COMPILER_LLVM 1
+#else
+  #define CU_COMPILER_LLVM 0
+#endif
+
 #define UNREACHABLE(msg) cu_panic_handler("Unreachable code reached: %s", msg)
 
 #define TODO(msg) cu_panic_handler("TODO: %s", msg)
