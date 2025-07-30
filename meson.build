@@ -52,7 +52,7 @@ cute_lib = library(
   c_args: c_args,
 )
 
-cute_dep = declare_dependency(
+libcute_dep = declare_dependency(
   include_directories: includes,
   link_with: cute_lib,
 )
