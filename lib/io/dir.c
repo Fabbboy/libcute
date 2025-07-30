@@ -6,7 +6,6 @@
 #include "object/result.h"
 #include "string/fmt.h"
 #include "string/string.h"
-#include "utility.h"
 #include <stdlib.h>
 #if CU_PLAT_POSIX
 #include <errno.h>

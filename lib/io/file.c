@@ -6,7 +6,6 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
-#include "utility.h"
 
 #ifndef CU_FREESTANDING
 
@@ -353,7 +352,7 @@ cu_File_Result cu_Dir_openat(
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
   DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);
   DWORD attributes = FILE_ATTRIBUTE_NORMAL;
-  
+
   handle = CreateFileA(fullpath, access,
       FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, creation, attributes, NULL);
 
