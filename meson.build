@@ -47,8 +47,8 @@ if freestanding.enabled()
   c_args += ['-DCU_FREESTANDING']
 endif
 
-cute_lib = library(
-  'cute',
+libcute_lib = library(
+  'libcute',
   sources,
   include_directories: includes,
   c_args: c_args,
@@ -56,7 +56,7 @@ cute_lib = library(
 
 libcute_dep = declare_dependency(
   include_directories: includes,
-  link_with: cute_lib,
+  link_with: libcute_lib,
 )
 
 if get_option('tests').enabled()
