@@ -238,7 +238,12 @@ bool cu_DList_iter(
   CU_IF_NULL(out_elem) { return false; }
   CU_LAYOUT_CHECK(list->layout) { return false; }
 
-  struct cu_DList_Node *cur = *node ? (*node)->next : list->head;
+  struct cu_DList_Node *cur;
+  if (*node) {
+    cur = (*node)->next;
+  } else {
+    cur = list->head;
+  }
   if (!cur) {
     return false;
   }

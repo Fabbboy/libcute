@@ -147,7 +147,7 @@ static void ArenaAllocator_ReuseOldChunk(void) {
   cu_ArenaAllocator_destroy(&arena);
 }
 
-static void ArenaAllocator_ResizeGrowInPlace(void) {
+static void ArenaAllocator_GrowInPlace(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
       &fa, cu_Slice_create(backing, sizeof(backing)));
@@ -165,15 +165,14 @@ static void ArenaAllocator_ResizeGrowInPlace(void) {
   void *ptr = block.ptr;
 
   cu_IoSlice_Result resized =
-      cu_Allocator_Resize(alloc, block, cu_Layout_create(32, 8));
+      cu_Allocator_Grow(alloc, block, cu_Layout_create(32, 8));
   TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized));
   TEST_ASSERT_EQUAL(resized.value.ptr, ptr);
 
-  cu_Allocator_Free(alloc, resized.value);
   cu_ArenaAllocator_destroy(&arena);
 }
 
-static void ArenaAllocator_ResizeShrinkInPlace(void) {
+static void ArenaAllocator_ShrinkInPlace(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
       &fa, cu_Slice_create(backing, sizeof(backing)));
@@ -191,15 +190,14 @@ static void ArenaAllocator_ResizeShrinkInPlace(void) {
   void *ptr = block.ptr;
 
   cu_IoSlice_Result resized =
-      cu_Allocator_Resize(alloc, block, cu_Layout_create(16, 8));
+      cu_Allocator_Shrink(alloc, block, cu_Layout_create(16, 8));
   TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized));
   TEST_ASSERT_EQUAL(resized.value.ptr, ptr);
 
-  cu_Allocator_Free(alloc, resized.value);
   cu_ArenaAllocator_destroy(&arena);
 }
 
-static void ArenaAllocator_ResizeAllocNewBlock(void) {
+static void ArenaAllocator_GrowAllocNewBlock(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
       &fa, cu_Slice_create(backing, sizeof(backing)));
@@ -219,12 +217,11 @@ static void ArenaAllocator_ResizeAllocNewBlock(void) {
   void *old_ptr = a.ptr;
 
   cu_IoSlice_Result resized =
-      cu_Allocator_Resize(alloc, a, cu_Layout_create(64, 8));
+      cu_Allocator_Grow(alloc, a, cu_Layout_create(64, 8));
   TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized));
-  TEST_ASSERT_TRUE((resized.value.ptr) != (old_ptr));
+  TEST_ASSERT_NOT_EQUAL(resized.value.ptr, old_ptr);
 
   cu_Allocator_Free(alloc, b);
-  cu_Allocator_Free(alloc, resized.value);
   cu_ArenaAllocator_destroy(&arena);
 }
 
@@ -234,8 +231,8 @@ int main(void) {
   RUN_TEST(ArenaAllocator_NonLifoAlloc);
   RUN_TEST(ArenaAllocator_ChunkReuseStress);
   RUN_TEST(ArenaAllocator_ReuseOldChunk);
-  RUN_TEST(ArenaAllocator_ResizeGrowInPlace);
-  RUN_TEST(ArenaAllocator_ResizeShrinkInPlace);
-  RUN_TEST(ArenaAllocator_ResizeAllocNewBlock);
+  RUN_TEST(ArenaAllocator_GrowInPlace);
+  RUN_TEST(ArenaAllocator_ShrinkInPlace);
+  RUN_TEST(ArenaAllocator_GrowAllocNewBlock);
   return UNITY_END();
 }

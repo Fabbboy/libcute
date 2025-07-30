@@ -11,6 +11,11 @@
 CU_RESULT_IMPL(cu_Vector, cu_Vector, cu_Vector_Error)
 CU_OPTIONAL_IMPL(cu_Vector_Error, cu_Vector_Error)
 
+static void cu_Vector_maybe_shrink(cu_Vector *vector);
+
+#define CU_VECTOR_GROW_FACTOR 2
+#define CU_VECTOR_SHRINK_DIV 4
+
 cu_Vector_Result cu_Vector_create(cu_Allocator allocator, cu_Layout layout,
     Size_Optional initial_capacity, cu_Destructor_Optional destructor) {
   CU_LAYOUT_CHECK(layout) {
@@ -66,10 +71,16 @@ static cu_Vector_Error_Optional cu_Vector_set_capacity(
 
   if (cu_Slice_Optional_is_some(&vector->data)) {
     cu_Slice old_data = cu_Slice_Optional_unwrap(&vector->data);
-    cu_IoSlice_Result new_data =
-        cu_Allocator_Resize(vector->allocator, old_data,
-            cu_Layout_create(
-                capacity * vector->layout.elem_size, vector->layout.alignment));
+    cu_Slice old_slice = cu_Slice_create(
+        old_data.ptr, vector->capacity * vector->layout.elem_size);
+    cu_Layout new_layout = cu_Layout_create(
+        capacity * vector->layout.elem_size, vector->layout.alignment);
+    cu_IoSlice_Result new_data;
+    if (new_layout.elem_size > old_slice.length) {
+      new_data = cu_Allocator_Grow(vector->allocator, old_slice, new_layout);
+    } else {
+      new_data = cu_Allocator_Shrink(vector->allocator, old_slice, new_layout);
+    }
 
     if (!cu_IoSlice_Result_is_ok(&new_data)) {
       return cu_Vector_Error_Optional_some(CU_VECTOR_ERROR_OOM);
@@ -143,7 +154,12 @@ cu_Vector_Error_Optional cu_Vector_push_back(cu_Vector *vector, void *elem) {
   }
 
   if (vector->length >= vector->capacity) {
-    size_t new_cap = vector->capacity == 0 ? 1 : vector->capacity * 2;
+    size_t new_cap;
+    if (vector->capacity == 0) {
+      new_cap = 1;
+    } else {
+      new_cap = vector->capacity * CU_VECTOR_GROW_FACTOR;
+    }
     cu_Vector_Error_Optional err = cu_Vector_reserve(vector, new_cap);
     if (cu_Vector_Error_Optional_is_some(&err)) {
       return err;
@@ -180,9 +196,7 @@ cu_Vector_Error_Optional cu_Vector_pop_back(cu_Vector *vector, void *out_elem) {
     dtor(src);
   }
 
-  if (vector->length == 0) {
-    cu_Vector_shrink_to_fit(vector);
-  }
+  cu_Vector_maybe_shrink(vector);
   return cu_Vector_Error_Optional_none();
 }
 
@@ -196,7 +210,12 @@ cu_Vector_Error_Optional cu_Vector_push_front(cu_Vector *vector, void *elem) {
   }
 
   if (vector->length >= vector->capacity) {
-    size_t new_cap = vector->capacity == 0 ? 1 : vector->capacity * 2;
+    size_t new_cap;
+    if (vector->capacity == 0) {
+      new_cap = 1;
+    } else {
+      new_cap = vector->capacity * CU_VECTOR_GROW_FACTOR;
+    }
     cu_Vector_Error_Optional err = cu_Vector_reserve(vector, new_cap);
     if (cu_Vector_Error_Optional_is_some(&err)) {
       return err;
@@ -241,9 +260,7 @@ cu_Vector_Error_Optional cu_Vector_pop_front(
       cu_Slice_create(src, (vector->length - 1) * vector->layout.elem_size));
 
   vector->length--;
-  if (vector->length == 0) {
-    cu_Vector_shrink_to_fit(vector);
-  }
+  cu_Vector_maybe_shrink(vector);
   return cu_Vector_Error_Optional_none();
 }
 
@@ -287,6 +304,21 @@ cu_Vector_Error_Optional cu_Vector_shrink_to_fit(cu_Vector *vector) {
   return cu_Vector_set_capacity(vector, vector->length);
 }
 
+static void cu_Vector_maybe_shrink(cu_Vector *vector) {
+  if (vector == NULL) {
+    return;
+  }
+  if (vector->length == 0) {
+    cu_Vector_shrink_to_fit(vector);
+    return;
+  }
+  if (vector->capacity > 1 &&
+      vector->length <= vector->capacity / CU_VECTOR_SHRINK_DIV) {
+    size_t new_cap = CU_MAX(vector->capacity / 2, 1u);
+    cu_Vector_set_capacity(vector, new_cap);
+  }
+}
+
 void cu_Vector_clear(cu_Vector *vector) {
   CU_IF_NULL(vector) { return; }
   if (cu_Destructor_Optional_is_some(&vector->destructor)) {
@@ -298,7 +330,7 @@ void cu_Vector_clear(cu_Vector *vector) {
     }
   }
   vector->length = 0;
-  cu_Vector_shrink_to_fit(vector);
+  cu_Vector_maybe_shrink(vector);
 }
 
 Ptr_Optional cu_Vector_at(const cu_Vector *vector, size_t index) {

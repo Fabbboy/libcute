@@ -267,8 +267,12 @@ bool cu_SkipList_iter(const cu_SkipList *list, struct cu_SkipList_Node **node,
   CU_IF_NULL(key) { return false; }
   CU_IF_NULL(value) { return false; }
 
-  struct cu_SkipList_Node *cur =
-      *node ? (*node)->forward[0] : list->head->forward[0];
+  struct cu_SkipList_Node *cur;
+  if (*node) {
+    cur = (*node)->forward[0];
+  } else {
+    cur = list->head->forward[0];
+  }
   if (!cur) {
     return false;
   }

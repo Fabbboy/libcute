@@ -104,6 +104,29 @@ static void Allocator_DoubleFree(void) {
   cu_GPAllocator_destroy(&gpa);
 }
 
+static void Allocator_GrowInPlaceSmall(void) {
+  cu_FixedAllocator fa;
+  cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
+      &fa, cu_Slice_create(backing, sizeof(backing)));
+
+  cu_GPAllocator gpa;
+  cu_GPAllocator_Config cfg = {0};
+  cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
+  cu_Allocator alloc = cu_Allocator_GPAllocator(&gpa, cfg);
+
+  cu_IoSlice_Result res = cu_Allocator_Alloc(alloc, cu_Layout_create(12, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&res));
+  void *ptr = res.value.ptr;
+
+  cu_IoSlice_Result grow = cu_Allocator_Grow(
+      alloc, res.value, cu_Layout_create(15, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&grow));
+  TEST_ASSERT_EQUAL(ptr, grow.value.ptr);
+
+  cu_Allocator_Free(alloc, grow.value);
+  cu_GPAllocator_destroy(&gpa);
+}
+
 static void Allocator_Exhaustion(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
@@ -128,6 +151,7 @@ int main(void) {
   RUN_TEST(Allocator_GPALargeAllocFree);
   RUN_TEST(Allocator_NormalAllocAndFree);
   RUN_TEST(Allocator_DoubleFree);
+  RUN_TEST(Allocator_GrowInPlaceSmall);
   RUN_TEST(Allocator_Exhaustion);
   return UNITY_END();
 }

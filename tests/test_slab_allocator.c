@@ -46,7 +46,7 @@ static void SlabAllocator_BigAllocation(void) {
   cu_SlabAllocator_destroy(&slab);
 }
 
-static void SlabAllocator_Resize(void) {
+static void SlabAllocator_GrowInPlace(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
       &fa, cu_Slice_create(backing, sizeof(backing)));
@@ -64,14 +64,14 @@ static void SlabAllocator_Resize(void) {
   cu_Memory_memset(mem.ptr, 0xAA, mem.length);
 
   cu_IoSlice_Result resized_res =
-      cu_Allocator_Resize(alloc, mem, cu_Layout_create(128, 8));
+      cu_Allocator_Grow(alloc, mem, cu_Layout_create(32, 8));
   TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized_res));
-  TEST_ASSERT_EQUAL(((unsigned char *)resized_res.value.ptr)[0], 0xAA);
+  TEST_ASSERT_EQUAL(resized_res.value.ptr, mem.ptr);
 
   cu_SlabAllocator_destroy(&slab);
 }
 
-static void SlabAllocator_ManyAllocations(void) {
+static void SlabAllocator_GrowFallback(void) {
   cu_FixedAllocator fa;
   cu_Allocator fa_alloc = cu_Allocator_FixedAllocator(
       &fa, cu_Slice_create(backing, sizeof(backing)));
@@ -82,10 +82,14 @@ static void SlabAllocator_ManyAllocations(void) {
   cfg.backingAllocator = cu_Allocator_Optional_some(fa_alloc);
   cu_Allocator alloc = cu_Allocator_SlabAllocator(&slab, cfg);
 
-  for (int i = 0; i < 1000; ++i) {
-    cu_IoSlice_Result s_res = cu_Allocator_Alloc(alloc, cu_Layout_create(8, 4));
-    TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&s_res));
-  }
+  cu_IoSlice_Result mem_res =
+      cu_Allocator_Alloc(alloc, cu_Layout_create(16, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&mem_res));
+  cu_Slice mem = mem_res.value;
+  cu_IoSlice_Result resized =
+      cu_Allocator_Grow(alloc, mem, cu_Layout_create(128, 8));
+  TEST_ASSERT_TRUE(cu_IoSlice_Result_is_ok(&resized));
+  TEST_ASSERT_NOT_EQUAL(resized.value.ptr, mem.ptr);
 
   cu_SlabAllocator_destroy(&slab);
 }
@@ -136,8 +140,8 @@ int main(void) {
   UNITY_BEGIN();
   RUN_TEST(SlabAllocator_Basic);
   RUN_TEST(SlabAllocator_BigAllocation);
-  RUN_TEST(SlabAllocator_Resize);
-  RUN_TEST(SlabAllocator_ManyAllocations);
+  RUN_TEST(SlabAllocator_GrowInPlace);
+  RUN_TEST(SlabAllocator_GrowFallback);
   RUN_TEST(SlabAllocator_ReuseFreed);
   RUN_TEST(SlabAllocator_Alignment);
   return UNITY_END();

@@ -8,4 +8,4 @@ git-cliff-1.0.0/
 git-cliff-1.0.0-x86_64-unknown-linux-gnu.tar.gz
 .venv/
 you-can-find-meson-here-or-by-activating-the-venv.NOTICE
-.cache/
+.cache/ 
