@@ -1,4 +1,4 @@
-# Changelog
+#Changelog
 
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
@@ -113,6 +113,7 @@ All notable changes to this project will be documented in this file. See [conven
 - restructure build - ([12e1a30](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/12e1a3039a1d0fbc68b6e6533f8b719b66df369a)) - Fabrice
 - add epoll http server - ([45dbd40](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/45dbd407dbc80f663b3909ceabdb96ac1984a078)) - Fabrice
 - use slab allocator for http - ([50e5672](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e567217ac3f7f77490fa90005a29234d9e35dc)) - Fabrice
+- make examples portable
 
 ### Fmt
 
