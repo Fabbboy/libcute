@@ -82,8 +82,7 @@ static cu_IoSlice_Result cu_arena_resize(
         .kind = CU_IO_ERROR_KIND_INVALID_INPUT, .errnum = Size_Optional_none()};
     return cu_IoSlice_Result_error(err);
   }
-  size_t size = layout.elem_size;
-  size_t alignment = layout.alignment;
+  size_t size = layout.elem_size; 
   const size_t header_size = sizeof(struct cu_ArenaAllocator_Header);
   struct cu_ArenaAllocator_Header *hdr =
       (struct cu_ArenaAllocator_Header *)((unsigned char *)mem.ptr -
