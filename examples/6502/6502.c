@@ -2,7 +2,6 @@
 #include "6502.h"
 
 #include "macro.h"
-#if CU_PLAT_POSIX
 
 #include <fcntl.h>
 #include <nostd.h>
@@ -140,4 +139,3 @@ void cu_6502_run(cu_6502 *cpu) {
     cu_6502_step(cpu);
   }
 }
-#endif
