@@ -49,6 +49,7 @@ All notable changes to this project will be documented in this file. See [conven
 - copy whole arrays - ([9e54a5f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/9e54a5f1b2b23f8c57c0d661cbcd157b413d2c35)) - Fabrice
 - implement directory path helpers - Fabrice
 - add cu_Dir_openat using portable path construction - Fabrice
+- add cu_FStream_openat for directory relative streams - Codex
 
 ### Refactoring
 
