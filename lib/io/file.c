@@ -6,6 +6,7 @@
 #include "nostd.h"
 #include "object/optional.h"
 #include "object/result.h"
+#include "utility.h"
 
 #ifndef CU_FREESTANDING
 
@@ -21,35 +22,6 @@
 
 CU_RESULT_IMPL(cu_File, cu_File, cu_Io_Error)
 
-#if CU_PLAT_POSIX || CU_PLAT_WINDOWS
-static size_t cu_File_min_size(size_t a, size_t b) {
-  if (a < b)
-    return a;
-  return b;
-}
-
-static size_t cu_File_copy_path(char *dest, cu_Slice src) {
-  size_t len = cu_File_min_size(src.length, CU_FILE_MAX_PATH_LENGTH - 1);
-  cu_Memory_smemcpy(cu_Slice_create(dest, len), cu_Slice_create(src.ptr, len));
-  dest[len] = '\0';
-  return len;
-}
-
-static size_t cu_File_join_path(
-    char *dest, cu_Slice base, cu_Slice name, char sep) {
-  size_t pos = cu_File_copy_path(dest, base);
-  if (pos && dest[pos - 1] != sep && pos < CU_FILE_MAX_PATH_LENGTH - 1) {
-    dest[pos++] = sep;
-  }
-  size_t remain = CU_FILE_MAX_PATH_LENGTH - 1 - pos;
-  size_t cp = cu_File_min_size(name.length, remain);
-  cu_Memory_smemcpy(
-      cu_Slice_create(dest + pos, cp), cu_Slice_create(name.ptr, cp));
-  pos += cp;
-  dest[pos] = '\0';
-  return pos;
-}
-#endif
 #if CU_PLAT_POSIX
 static int cu_File_OpenOptions_to_posix_flags(const cu_File_Options *options) {
   int flags = 0;
@@ -119,7 +91,8 @@ cu_File_Result cu_File_open(
   }
 
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  size_t path_len = cu_File_copy_path(lpath, path);
+  cu_Slice lpath_slice = cu_Slice_create(lpath, CU_FILE_MAX_PATH_LENGTH);
+  cu_Memory_smemcpy(lpath_slice, path);
 
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
@@ -343,21 +316,23 @@ cu_File_Result cu_Dir_openat(
   }
 
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  size_t path_len = cu_File_copy_path(lpath, path);
+  cu_Slice lpath_slice = cu_Slice_create(lpath, CU_FILE_MAX_PATH_LENGTH);
+  cu_Memory_smemcpy(lpath_slice, path);
 
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
   cu_Memory_memset(&stat, 0, sizeof(stat));
 
+  char fullpath[CU_FILE_MAX_PATH_LENGTH] = {0};
+  cu_Slice fullpath_slice = cu_Slice_create(fullpath, CU_FILE_MAX_PATH_LENGTH);
+
+  cu_Memory_smemcpy(fullpath_slice, cu_String_as_slice(&dir->stat.path));
+  fullpath_slice.length += dir->stat.path.length;
+  cu_Memory_smemcpy(fullpath_slice, lpath_slice);
+
 #if CU_PLAT_POSIX
   int flags = cu_File_OpenOptions_to_posix_flags(&options);
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-
-  char fullpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  cu_File_join_path(
-      fullpath,
-      cu_Slice_create(dir->stat.path.data, dir->stat.path.length),
-      cu_Slice_create(lpath, path_len), '/');
 
   handle = open(fullpath, flags, mode);
   if (handle == -1) {
@@ -378,13 +353,7 @@ cu_File_Result cu_Dir_openat(
   DWORD access = cu_File_OpenOptions_to_win32_access(&options);
   DWORD creation = cu_File_OpenOptions_to_win32_creation(&options);
   DWORD attributes = FILE_ATTRIBUTE_NORMAL;
-
-  char fullpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  cu_File_join_path(
-      fullpath,
-      cu_Slice_create(dir->stat.path.data, dir->stat.path.length),
-      cu_Slice_create(lpath, path_len), '\\');
-
+  
   handle = CreateFileA(fullpath, access,
       FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, creation, attributes, NULL);
 

@@ -22,6 +22,9 @@
 #define CU_CONCAT_(a, b) a##b
 #define CU_CONCAT(a, b) CU_CONCAT_(a, b)
 
+#define CU_MIN(a, b) ((a) < (b) ? (a) : (b))
+#define CU_MAX(a, b) ((a) > (b) ? (a) : (b))
+
 #include <nostd.h>
 /** Platform detection macros */
 #if defined(_WIN32) || defined(_WIN64)

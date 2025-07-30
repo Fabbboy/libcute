@@ -35,6 +35,11 @@ All notable changes to this project will be documented in this file. See [conven
 - updated changelog - ([e37689f](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/e37689f40856ee9000a13137b6bbd779c565d067)) - Fabrice
 - note unity test rewrite - ([1a0c845](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/1a0c8450c8042d4a0eff18ad49bc8810c24887e1)) - Fabrice
 
+### Utility
+
+- add generic path utilities
+- refine path helper implementation
+
 ### Features
 
 - adds changelog - ([50e2d9a](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/50e2d9abe8f10fd4afcc764475bcb4258ca85edb)) - Fabrice

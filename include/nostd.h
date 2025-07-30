@@ -20,7 +20,7 @@ typedef struct cu_Slice {
 
 /** Create a slice from a pointer and length without allocating. */
 cu_Slice cu_Slice_create(void *ptr, size_t length);
-
+#define CU_SLICE_CSTR(s) cu_Slice_create((void *)(s), cu_CString_length(s))
 
 void cu_abort(void);
 #ifndef CU_FREESTANDING

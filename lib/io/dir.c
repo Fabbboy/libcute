@@ -6,6 +6,7 @@
 #include "object/result.h"
 #include "string/fmt.h"
 #include "string/string.h"
+#include "utility.h"
 #include <stdlib.h>
 #if CU_PLAT_POSIX
 #include <errno.h>
@@ -27,15 +28,7 @@ CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 cu_Dir_Result cu_Dir_open(
     cu_Slice path, bool create, cu_Allocator allocator) {
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  size_t path_len;
-  if (path.length < (CU_FILE_MAX_PATH_LENGTH - 1)) {
-    path_len = path.length;
-  } else {
-    path_len = CU_FILE_MAX_PATH_LENGTH - 1;
-  }
-  cu_Memory_smemcpy(
-      cu_Slice_create(lpath, path_len), cu_Slice_create(path.ptr, path_len));
-  lpath[path_len] = '\0';
+  cu_Path_copy(lpath, path, CU_FILE_MAX_PATH_LENGTH);
 
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
@@ -72,7 +65,10 @@ cu_Dir_Result cu_Dir_open(
 
 #else
   DWORD access = FILE_LIST_DIRECTORY;
-  DWORD creation = create ? OPEN_ALWAYS : OPEN_EXISTING;
+  DWORD creation = OPEN_EXISTING;
+  if (create) {
+    creation = OPEN_ALWAYS;
+  }
   DWORD attributes = FILE_FLAG_BACKUP_SEMANTICS;
 
   if (create) {

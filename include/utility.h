@@ -47,3 +47,4 @@ static inline cu_Layout cu_Layout_create(size_t elem_size, size_t alignment) {
 long long cu_Time_filetime_to_unix(FILETIME ft);
 FILETIME cu_Time_unix_to_filetime(long long ns);
 #endif
+

@@ -1,5 +1,4 @@
 #include "nostd.h"
-#include "io/error.h"
 #include "macro.h"
 #include <limits.h>
 #include <stdarg.h>
@@ -60,7 +59,6 @@ void cu_Memory_memcpy(void *dest, cu_Slice src) {
   CU_IF_NULL(d) return;
   CU_IF_NULL(s) return;
 
-  // Note: memcpy assumes no overlap, but this is still safe
   while (n--) {
     *d++ = *s++;
   }
@@ -69,12 +67,11 @@ void cu_Memory_memcpy(void *dest, cu_Slice src) {
 void cu_Memory_smemcpy(cu_Slice dest, cu_Slice src) {
   unsigned char *d = (unsigned char *)dest.ptr;
   unsigned char *s = (unsigned char *)src.ptr;
-  size_t n = src.length;
-
+  
   CU_IF_NULL(d) return;
   CU_IF_NULL(s) return;
-
-  // Note: smemcpy assumes no overlap, but this is still safe
+  
+  size_t n = CU_MIN(dest.length, src.length);
   while (n--) {
     *d++ = *s++;
   }
