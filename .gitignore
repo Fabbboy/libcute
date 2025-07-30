@@ -1,6 +1,6 @@
 build/
 build-*
-out/
+out/ 
 *.out
 compile_commands.json
 .vscode/
@@ -9,5 +9,5 @@ meson-1.8.2.tar.gz
 git-cliff-1.0.0/
 git-cliff-1.0.0-x86_64-unknown-linux-gnu.tar.gz
 .venv/
-you-can-find-meson-here-or-by-activating-the-venv.NOTICE
-.cache/
+you-can-find-meson-here-or-by-activating-the-venv.NOTICE 
+.cache/ 

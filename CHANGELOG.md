@@ -184,7 +184,7 @@ All notable changes to this project will be documented in this file. See [conven
 ### Vector
 
 - refine api and tests - ([2ccb068](https://git.schaub-dev.xyz/cppuniverse/libcute/commit/2ccb06814598b8ecab7adfda64812fd9a379dfdf)) - Fabrice
-- add `cu_Vector_slice` and `cu_Vector_subslice` - internal
+ 
 - add capacity shrink helper and remove ternaries - Codex
 - auto shrink vector capacity when underutilized - Codex
 - use macros for vector grow and shrink thresholds - Codex
