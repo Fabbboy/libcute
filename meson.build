@@ -40,6 +40,8 @@ sources = [
 ]
 
 freestanding = get_option('freestanding')
+examples = get_option('examples')
+
 c_args = []
 if freestanding.enabled()
   c_args += ['-DCU_FREESTANDING']
@@ -61,7 +63,7 @@ if get_option('tests').enabled()
   subdir('tests')
 endif
 
-if not freestanding.enabled()
+if not freestanding.enabled() and examples.enabled()
   subdir('examples')
 endif
 

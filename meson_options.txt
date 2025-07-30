@@ -5,3 +5,4 @@ option(
     value: 'disabled',
     description: 'Disable C allocator and page allocator',
 )
+option('examples', type: 'feature', value: 'disabled', description: 'Build examples')

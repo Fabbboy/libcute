@@ -11,13 +11,13 @@ sources_http = [
 executable(
   '6502emu',
   sources_6502,
-  dependencies: cute_dep,
+  dependencies: libcute_dep,y§
   include_directories: includes,
 )
 
 executable(
   'httpserver',
   sources_http,
-  dependencies: cute_dep,
+  dependencies: libcute_dep,
   include_directories: includes,
 )
