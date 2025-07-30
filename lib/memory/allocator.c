@@ -60,7 +60,6 @@ static cu_IoSlice_Result cu_CAllocator_Resize(
   }
 
   size_t size = layout.elem_size;
-  size_t alignment = layout.alignment;
 
   cu_IoSlice_Result new_mem = cu_CAllocator_Alloc(self, layout);
   if (!cu_IoSlice_Result_is_ok(&new_mem)) {

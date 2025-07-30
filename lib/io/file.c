@@ -51,7 +51,7 @@ static int cu_File_Options_to_posix_flags(const cu_File_Options *options) {
 
 #if CU_PLAT_WINDOWS
 static DWORD cu_File_Options_to_win32(
-    const cu_File_OpenOptions *options) {
+    const cu_File_Options *options) {
   DWORD access = 0;
 
   if (options->read) {
@@ -66,7 +66,7 @@ static DWORD cu_File_Options_to_win32(
 }
 
 static DWORD cu_File_OpenOptions_to_win32_creation(
-    const cu_File_OpenOptions *options) {
+    const cu_File_Options *options) {
   if (options->create && options->truncate) {
     return CREATE_ALWAYS;
   } else if (options->create) {
@@ -92,7 +92,8 @@ cu_File_Result cu_File_open(
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
   cu_Slice lpath_slice = cu_Slice_create(lpath, CU_FILE_MAX_PATH_LENGTH);
   cu_Memory_smemcpy(lpath_slice, path);
-
+  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
+  
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
   cu_Memory_memset(&stat, 0, sizeof(stat));
@@ -107,7 +108,6 @@ cu_File_Result cu_File_open(
   }
 
   stat = cu_File_Stat_from_handle(handle);
-  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
   if (!cu_String_Result_is_ok(&pres)) {
     close(handle);
     cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,

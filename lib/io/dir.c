@@ -10,12 +10,9 @@
 #if CU_PLAT_POSIX
 #include <errno.h>
 #include <fcntl.h>
-#include <fcntl.h> // for O_RDONLY, O_DIRECTORY, openat, AT_FDCWD
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/types.h> // technically optional, but traditional
 #include <unistd.h>
-#include <unistd.h> // for close()
 #else
 #include <windows.h>
 #endif
@@ -24,11 +21,11 @@
 
 CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 
-cu_Dir_Result cu_Dir_open(
-    cu_Slice path, bool create, cu_Allocator allocator) {
+cu_Dir_Result cu_Dir_open(cu_Slice path, bool create, cu_Allocator allocator) {
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
   cu_Slice lpath_slice = cu_Slice_create(lpath, CU_FILE_MAX_PATH_LENGTH);
   cu_Memory_smemcpy(lpath_slice, path);
+  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
 
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
@@ -54,11 +51,10 @@ cu_Dir_Result cu_Dir_open(
   }
 
   stat = cu_File_Stat_from_handle(handle);
-  cu_String_Result pres = cu_String_from_cstr(allocator, lpath);
   if (!cu_String_Result_is_ok(&pres)) {
     close(handle);
-    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-        .errnum = Size_Optional_none()};
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Dir_Result_error(err);
   }
   stat.path = pres.value;
@@ -87,8 +83,8 @@ cu_Dir_Result cu_Dir_open(
   pres = cu_String_from_cstr(allocator, lpath);
   if (!cu_String_Result_is_ok(&pres)) {
     CloseHandle(handle);
-    cu_Io_Error err = {.kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY,
-        .errnum = Size_Optional_none()};
+    cu_Io_Error err = {
+        .kind = CU_IO_ERROR_KIND_OUT_OF_MEMORY, .errnum = Size_Optional_none()};
     return cu_Dir_Result_error(err);
   }
   stat.path = pres.value;
