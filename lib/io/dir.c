@@ -28,7 +28,8 @@ CU_RESULT_IMPL(cu_Dir, cu_Dir, cu_Io_Error)
 cu_Dir_Result cu_Dir_open(
     cu_Slice path, bool create, cu_Allocator allocator) {
   char lpath[CU_FILE_MAX_PATH_LENGTH] = {0};
-  cu_Path_copy(lpath, path, CU_FILE_MAX_PATH_LENGTH);
+  cu_Slice lpath_slice = cu_Slice_create(lpath, CU_FILE_MAX_PATH_LENGTH);
+  cu_Memory_smemcpy(lpath_slice, path);
 
   cu_Handle handle = CU_INVALID_HANDLE;
   cu_File_Stat stat;
