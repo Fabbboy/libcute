@@ -63,7 +63,8 @@ static cu_Io_Error_Optional cu_FdFile_write_impl(cu_FdFile *f, cu_Slice data) {
   return cu_Io_Error_Optional_none();
 }
 
-static cu_Io_Error_Optional cu_FdFile_seek_impl(cu_FdFile *f, cu_File_SeekTo to) {
+static cu_Io_Error_Optional cu_FdFile_seek_impl(
+    cu_FdFile *f, cu_File_SeekTo to) {
   CU_IF_NULL(f) {
     return cu_Io_Error_Optional_some(
         (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
@@ -95,7 +96,8 @@ static cu_Io_Error_Optional cu_FdFile_seek_impl(cu_FdFile *f, cu_File_SeekTo to)
         (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
             .errnum = Size_Optional_none()});
   }
-  if (SetFilePointer(f->handle, offset, NULL, method) == INVALID_SET_FILE_POINTER) {
+  if (SetFilePointer(f->handle, offset, NULL, method) ==
+      INVALID_SET_FILE_POINTER) {
     DWORD err = GetLastError();
     if (err != NO_ERROR) {
       return cu_Io_Error_Optional_some(cu_Io_Error_from_win32(err));
@@ -125,6 +127,20 @@ static cu_Io_Error_Optional cu_FdFile_seek_impl(cu_FdFile *f, cu_File_SeekTo to)
   return cu_Io_Error_Optional_none();
 }
 
+static cu_IoSize_Result cu_FdFile_tell_impl(cu_FdFile *f) {
+  CU_IF_NULL(f) {
+    return cu_IoSize_Result_error(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+  if (f->handle == CU_INVALID_HANDLE) {
+    return cu_IoSize_Result_error(
+        (cu_Io_Error){.kind = CU_IO_ERROR_KIND_INVALID_INPUT,
+            .errnum = Size_Optional_none()});
+  }
+  return cu_Fd_tell(f->handle);
+}
+
 static void cu_FdFile_close_impl(cu_FdFile *f) {
   CU_IF_NULL(f) return;
   if (!f->owned || f->handle == CU_INVALID_HANDLE)
@@ -150,10 +166,16 @@ static cu_Io_Error_Optional cu_stream_flush(void *self) {
   return cu_Io_Error_Optional_none();
 }
 
-static void cu_stream_close(void *self) { cu_FdFile_close_impl((cu_FdFile *)self); }
+static void cu_stream_close(void *self) {
+  cu_FdFile_close_impl((cu_FdFile *)self);
+}
 
 static cu_Io_Error_Optional cu_stream_seek(void *self, cu_File_SeekTo to) {
   return cu_FdFile_seek_impl((cu_FdFile *)self, to);
+}
+
+static cu_IoSize_Result cu_stream_tell(void *self) {
+  return cu_FdFile_tell_impl((cu_FdFile *)self);
 }
 
 cu_Stream cu_FdFile_stream(cu_FdFile *f) {
@@ -164,6 +186,7 @@ cu_Stream cu_FdFile_stream(cu_FdFile *f) {
   s.flushFn = cu_stream_flush;
   s.closeFn = cu_stream_close;
   s.seekFn = cu_stream_seek;
+  s.tellFn = cu_stream_tell;
   return s;
 }
 
@@ -178,6 +201,8 @@ cu_Io_Error_Optional cu_FdFile_write(cu_FdFile *f, cu_Slice data) {
 cu_Io_Error_Optional cu_FdFile_seek(cu_FdFile *f, cu_File_SeekTo to) {
   return cu_FdFile_seek_impl(f, to);
 }
+
+cu_IoSize_Result cu_FdFile_tell(cu_FdFile *f) { return cu_FdFile_tell_impl(f); }
 
 void cu_FdFile_close(cu_FdFile *f) { cu_FdFile_close_impl(f); }
 

@@ -26,6 +26,7 @@ void cu_FdFile_close(cu_FdFile *f);
 cu_Io_Error_Optional cu_FdFile_read(cu_FdFile *f, cu_Slice buf);
 cu_Io_Error_Optional cu_FdFile_write(cu_FdFile *f, cu_Slice data);
 cu_Io_Error_Optional cu_FdFile_seek(cu_FdFile *f, cu_File_SeekTo to);
+cu_IoSize_Result cu_FdFile_tell(cu_FdFile *f);
 cu_Stream cu_FdFile_stream(cu_FdFile *f);
 
 cu_FdFile cu_FdFile_stdin(void);

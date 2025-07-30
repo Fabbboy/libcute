@@ -176,6 +176,8 @@ All notable changes to this project will be documented in this file. See [conven
 - automatically flush buffers on seek and close - internal
 - rename `cu_FStream_as_stream` to `cu_FStream_stream` - internal
 - add `cu_MemStream` for in-memory streams - internal
+- add `cu_FdFile` with stream wrappers for raw descriptors - Codex
+- add `cu_FdFile_tell` for descriptor streams - Codex
 
 ### String
 
