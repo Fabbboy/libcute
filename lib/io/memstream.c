@@ -63,7 +63,7 @@ static cu_Io_Error_Optional cu_MemStream_write(void *self, cu_Slice data) {
   return cu_Io_Error_Optional_none();
 }
 
-static cu_Io_Error_Optional cu_MemStream_flush_impl(cu_MemStream *ms) {
+static cu_Io_Error_Optional cu_MemStream_flush_impl(void *ms) {
   (void)ms;
   return cu_Io_Error_Optional_none();
 }
